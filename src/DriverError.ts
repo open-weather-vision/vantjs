@@ -9,4 +9,5 @@ export default class DriverError extends Error {
 export enum ErrorType {
     FAILED_TO_WRITE = "(failed-to-write)",
     INVALID_RESPONSE = "(invalid-response)",
+    CONNECTION = "(connection-error)",
 }

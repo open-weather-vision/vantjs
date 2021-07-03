@@ -1,23 +1,23 @@
+import inspect from "./util/inspect";
 import VantageInterface from "./VantageInterface";
 
 
+const device = new VantageInterface("COM3");
 
-async function doStuff() {
-    const device = new VantageInterface("COM3");
+device.once("awakening", async () => {
+    console.log("Connected to device!");
 
-    await device.wakeUp();
-    console.log("Connected!");
-
-    if (await device.isAvailable()) {
+    if (await device.checkConnection()) {
         console.log("Test worked!")
     } else {
         console.log("Test failed!")
     }
 
+
     const result = await device.getFirmwareVersion();
     console.log(result);
 
-    await device.getHighsAndLows();
-}
+    const highsAndLows = await device.getHighsAndLows();
+    inspect(highsAndLows);
 
-doStuff();
+})

@@ -1,6 +1,7 @@
 import SerialPort from "serialport";
 import DriverError, { ErrorType } from "./DriverError";
 import { EventEmitter } from "stream";
+import BinaryParser, { Type } from "./util/BinaryParser";
 
 
 
@@ -89,361 +90,275 @@ export default class VantageInterface extends EventEmitter {
         })
     }
 
+    public close(): void {
+        this.port.close();
+    }
+
     public async getHighsAndLows(): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             this.port.write("HILOWS\n", (err) => {
+                if (err) reject(new DriverError("Failed to get highs and lows", ErrorType.FAILED_TO_WRITE));
                 this.port.once("data", (data: Buffer) => {
-                    return;
-                    const parsedData: any = {
+                    const parser = new BinaryParser({
                         pressure: {
-                            day: {},
-                            month: {},
-                            year: {},
+                            day: {
+                                low: { type: Type.UINT16, position: 0, nullables: "pressure", transform: "pressure", dependsOn: "lowTime" },
+                                high: { type: Type.UINT16, position: 2, nullables: "pressure", transform: "pressure", dependsOn: "highTime" },
+                                lowTime: { type: Type.UINT16, position: 12, nullables: "time", transform: "time", dependsOn: "low" },
+                                highTime: { type: Type.UINT16, position: 14, nullables: "time", transform: "time", dependsOn: "high" },
+                            },
+                            month: {
+                                low: { type: Type.UINT16, position: 4, nullables: "pressure", transform: "pressure" },
+                                high: { type: Type.UINT16, position: 6, nullables: "pressure", transform: "pressure" },
+                            },
+                            year: {
+                                low: { type: Type.UINT16, position: 8, nullables: "pressure", transform: "pressure" },
+                                high: { type: Type.UINT16, position: 10, nullables: "pressure", transform: "pressure" },
+                            }
                         },
-                        wind: {},
+                        wind: {
+                            day: { type: Type.UINT8, position: 16, dependsOn: "dayTime" },
+                            dayTime: { type: Type.UINT16, position: 17, nullables: "time", transform: "time", dependsOn: "day" },
+                            month: { type: Type.UINT8, position: 19 },
+                            year: { type: Type.UINT8, position: 20 }
+                        },
                         tempIn: {
-                            day: {},
-                            month: {},
-                            year: {},
-                        },
-                        tempOut: {
-                            day: {},
-                            month: {},
-                            year: {},
+                            day: {
+                                low: { type: Type.INT16, position: 23, nullables: "tempLow", transform: "temperature", dependsOn: "lowTime" },
+                                high: { type: Type.INT16, position: 21, nullables: "tempHigh", transform: "temperature", dependsOn: "highTime" },
+                                lowTime: { type: Type.UINT16, position: 27, nullables: "time", transform: "time", dependsOn: "low" },
+                                highTime: { type: Type.UINT16, position: 25, nullables: "time", transform: "time", dependsOn: "high" },
+                            },
+                            month: {
+                                low: { type: Type.INT16, position: 29, nullables: "tempLow", transform: "temperature" },
+                                high: { type: Type.INT16, position: 31, nullables: "tempHigh", transform: "temperature" },
+                            },
+                            year: {
+                                low: { type: Type.INT16, position: 33, nullables: "tempLow", transform: "temperature" },
+                                high: { type: Type.INT16, position: 35, nullables: "tempHigh", transform: "temperature" },
+                            }
                         },
                         humIn: {
-                            day: {},
-                            month: {},
-                            year: {},
-
+                            day: {
+                                low: { type: Type.UINT8, position: 38, nullables: "humidity", dependsOn: "lowTime" },
+                                high: { type: Type.UINT8, position: 37, nullables: "humidity", dependsOn: "highTime" },
+                                lowTime: { type: Type.UINT16, position: 41, nullables: "time", transform: "time", dependsOn: "low" },
+                                highTime: { type: Type.UINT16, position: 39, nullables: "time", transform: "time", dependsOn: "high" },
+                            },
+                            month: {
+                                low: { type: Type.UINT8, position: 44, nullables: "humidity" },
+                                high: { type: Type.UINT8, position: 43, nullables: "humidity" },
+                            },
+                            year: {
+                                low: { type: Type.UINT8, position: 46, nullables: "humidity" },
+                                high: { type: Type.UINT8, position: 45, nullables: "humidity" },
+                            }
                         },
-                        humOut: {},
+                        tempOut: {
+                            day: {
+                                low: { type: Type.INT16, position: 47, nullables: "tempLow", transform: "temperature", dependsOn: "lowTime" },
+                                high: { type: Type.INT16, position: 49, nullables: "tempHigh", transform: "temperature", dependsOn: "highTime" },
+                                lowTime: { type: Type.UINT16, position: 51, nullables: "time", transform: "time", dependsOn: "low" },
+                                highTime: { type: Type.UINT16, position: 53, nullables: "time", transform: "time", dependsOn: "high" },
+                            },
+                            month: {
+                                low: { type: Type.INT16, position: 57, nullables: "tempLow", transform: "temperature" },
+                                high: { type: Type.INT16, position: 55, nullables: "tempHigh", transform: "temperature" },
+                            },
+                            year: {
+                                low: { type: Type.INT16, position: 61, nullables: "tempLow", transform: "temperature" },
+                                high: { type: Type.INT16, position: 59, nullables: "tempHigh", transform: "temperature" },
+                            }
+                        },
                         dew: {
-                            day: {},
-                            month: {},
-                            year: {},
+                            day: {
+                                low: { type: Type.INT16, position: 63, nullables: "tempLow", dependsOn: "lowTime" },
+                                high: { type: Type.INT16, position: 65, nullables: "tempHigh", dependsOn: "highTime" },
+                                lowTime: { type: Type.UINT16, position: 67, nullables: "time", transform: "time", dependsOn: "low" },
+                                highTime: { type: Type.UINT16, position: 69, nullables: "time", transform: "time", dependsOn: "high" },
+                            },
+                            month: {
+                                low: { type: Type.INT16, position: 73, nullables: "tempLow" },
+                                high: { type: Type.INT16, position: 71, nullables: "tempHigh" },
+                            },
+                            year: {
+                                low: { type: Type.INT16, position: 77, nullables: "tempLow" },
+                                high: { type: Type.INT16, position: 75, nullables: "tempHigh" },
+                            }
                         },
-                        chill: {},
-                        heat: {},
-                        THSW: {},
-                        solarRad: {},
-                        UV: {},
-                        rainRate: {},
-                        rainSum: {},
-                        temps: [],
-                        hums: [],
-                        soilTemps: [],
-                        leafTemps: [],
-                        leafWetnesses: [],
-                        soilMoistures: [],
-                    };
-                    // PRESSURE in Hg
-                    this.parsePressure(data, parsedData);
+                        chill: {
+                            day: { type: Type.INT16, position: 79, nullables: "chill", dependsOn: "dayTime" },
+                            dayTime: { type: Type.UINT16, position: 81, nullables: "time", transform: "time", dependsOn: "day" },
+                            month: { type: Type.INT16, position: 83, nullables: "chill" },
+                            year: { type: Type.INT16, position: 85, nullables: "chill" }
+                        },
+                        heat: {
+                            day: { type: Type.INT16, position: 87, nullables: "heat", dependsOn: "dayTime" },
+                            dayTime: { type: Type.UINT16, position: 89, nullables: "time", transform: "time", dependsOn: "day" },
+                            month: { type: Type.INT16, position: 91, nullables: "heat" },
+                            year: { type: Type.INT16, position: 93, nullables: "heat" }
+                        },
+                        thsw: {
+                            day: { type: Type.INT16, position: 95, nullables: "thsw", dependsOn: "dayTime" },
+                            dayTime: { type: Type.UINT16, position: 97, nullables: "time", transform: "time", dependsOn: "day" },
+                            month: { type: Type.INT16, position: 99, nullables: "thsw" },
+                            year: { type: Type.INT16, position: 101, nullables: "thsw" }
+                        },
+                        solarRadiation: {
+                            month: { type: Type.UINT16, position: 107, nullables: "solar" },
+                            year: { type: Type.UINT16, position: 109, nullables: "solar" },
+                            day: { type: Type.UINT16, position: 103, nullables: "solar", dependsOn: "dayTime" },
+                            dayTime: { type: Type.UINT16, position: 105, nullables: "time", transform: "time", dependsOn: "day" },
+                        },
+                        uv: {
+                            month: { type: Type.UINT8, position: 114, transform: "uv" },
+                            year: { type: Type.UINT8, position: 115, transform: "uv" },
+                            day: { type: Type.UINT8, position: 111, dependsOn: "dayTime", transform: "uv" },
+                            dayTime: { type: Type.UINT16, position: 112, nullables: "time", transform: "time", dependsOn: "day" },
+                        },
+                        rainRate: {
+                            month: { type: Type.UINT16, position: 120 },
+                            day: { type: Type.UINT16, position: 116, dependsOn: "dayTime" },
+                            dayTime: { type: Type.UINT16, position: 118, nullables: "time", transform: "time", dependsOn: "day" },
+                        },
+                        rainSum: {
+                            month: { type: Type.UINT16, position: 122 },
+                            year: { type: Type.UINT16, position: 124 },
+                        },
+                        extraTemp: [{
+                            day: {
+                                low: { type: Type.UINT8, position: 126, nullables: "extraTemp", transform: "extraTemp", dependsOn: "lowTime" },
+                                high: { type: Type.UINT8, position: 141, nullables: "extraTemp", transform: "extraTemp", dependsOn: "highTime" },
+                                lowTime: { type: Type.UINT16, position: 156, nullables: "time", transform: "time", dependsOn: "low" },
+                                highTime: { type: Type.UINT16, position: 186, nullables: "time", transform: "time", dependsOn: "high" },
+                            },
+                            month: {
+                                low: { type: Type.UINT8, position: 231, nullables: "extraTemp", transform: "extraTemp" },
+                                high: { type: Type.UINT8, position: 216, nullables: "extraTemp", transform: "extraTemp" },
+                            },
+                            year: {
+                                low: { type: Type.UINT8, position: 261, nullables: "extraTemp", transform: "extraTemp" },
+                                high: { type: Type.UINT8, position: 246, nullables: "extraTemp", transform: "extraTemp" },
+                            }
+                        }, 7],
+                        soilTemp: [{
+                            day: {
+                                low: { type: Type.UINT8, position: 133, nullables: "soilTemp", transform: "soilTemp", dependsOn: "lowTime" },
+                                high: { type: Type.UINT8, position: 148, nullables: "soilTemp", transform: "soilTemp", dependsOn: "highTime" },
+                                lowTime: { type: Type.UINT16, position: 163, nullables: "time", transform: "time", dependsOn: "low" },
+                                highTime: { type: Type.UINT16, position: 193, nullables: "time", transform: "time", dependsOn: "high" },
+                            },
+                            month: {
+                                low: { type: Type.UINT8, position: 238, nullables: "soilTemp", transform: "soilTemp" },
+                                high: { type: Type.UINT8, position: 223, nullables: "soilTemp", transform: "soilTemp" },
+                            },
+                            year: {
+                                low: { type: Type.UINT8, position: 268, nullables: "soilTemp", transform: "soilTemp" },
+                                high: { type: Type.UINT8, position: 253, nullables: "soilTemp", transform: "soilTemp" },
+                            }
+                        }, 4],
+                        leafTemp: [{
+                            day: {
+                                low: { type: Type.UINT8, position: 137, nullables: "leafTemp", transform: "leafTemp", dependsOn: "lowTime" },
+                                high: { type: Type.UINT8, position: 152, nullables: "leafTemp", transform: "leafTemp", dependsOn: "highTime" },
+                                lowTime: { type: Type.UINT16, position: 167, nullables: "time", transform: "time", dependsOn: "low" },
+                                highTime: { type: Type.UINT16, position: 197, nullables: "time", transform: "time", dependsOn: "high" },
+                            },
+                            month: {
+                                low: { type: Type.UINT8, position: 242, nullables: "leafTemp", transform: "leafTemp" },
+                                high: { type: Type.UINT8, position: 227, nullables: "leafTemp", transform: "leafTemp" },
+                            },
+                            year: {
+                                low: { type: Type.UINT8, position: 272, nullables: "leafTemp", transform: "leafTemp" },
+                                high: { type: Type.UINT8, position: 257, nullables: "leafTemp", transform: "leafTemp" },
+                            }
+                        }, 4],
+                        extraHums: [{
+                            day: {
+                                low: { type: Type.UINT8, position: 276, nullables: "humidity", dependsOn: "lowTime" },
+                                high: { type: Type.UINT8, position: 284, nullables: "humidity", dependsOn: "highTime" },
+                                lowTime: { type: Type.UINT16, position: 292, nullables: "time", transform: "time", dependsOn: "low" },
+                                highTime: { type: Type.UINT16, position: 308, nullables: "time", transform: "time", dependsOn: "high" },
+                            },
+                            month: {
+                                low: { type: Type.UINT8, position: 332, nullables: "humidity" },
+                                high: { type: Type.UINT8, position: 324, nullables: "humidity" },
+                            },
+                            year: {
+                                low: { type: Type.UINT8, position: 348, nullables: "humidity" },
+                                high: { type: Type.UINT8, position: 340, nullables: "humidity" },
+                            }
+                        }, 8],
+                        soilMoistures: [{
+                            day: {
+                                low: { type: Type.UINT8, position: 368, nullables: "soilMoisture", dependsOn: "lowTime" },
+                                high: { type: Type.UINT8, position: 356, nullables: "soilMoisture", dependsOn: "highTime" },
+                                lowTime: { type: Type.UINT16, position: 372, nullables: "time", transform: "time", dependsOn: "low" },
+                                highTime: { type: Type.UINT16, position: 360, nullables: "time", transform: "time", dependsOn: "high" },
+                            },
+                            month: {
+                                low: { type: Type.UINT8, position: 380, nullables: "soilMoisture" },
+                                high: { type: Type.UINT8, position: 384, nullables: "soilMoisture" },
+                            },
+                            year: {
+                                low: { type: Type.UINT8, position: 388, nullables: "soilMoisture" },
+                                high: { type: Type.UINT8, position: 392, nullables: "soilMoisture" },
+                            }
+                        }, 4],
+                        leafWetnesses: [{
+                            day: {
+                                low: { type: Type.UINT8, position: 408, nullables: "leafWetness", dependsOn: "lowTime" },
+                                high: { type: Type.UINT8, position: 396, nullables: "leafWetness", dependsOn: "highTime" },
+                                lowTime: { type: Type.UINT16, position: 412, nullables: "time", transform: "time", dependsOn: "low" },
+                                highTime: { type: Type.UINT16, position: 400, nullables: "time", transform: "time", dependsOn: "high" },
+                            },
+                            month: {
+                                low: { type: Type.UINT8, position: 420, nullables: "leafWetness" },
+                                high: { type: Type.UINT8, position: 424, nullables: "leafWetness" },
+                            },
+                            year: {
+                                low: { type: Type.UINT8, position: 428, nullables: "leafWetness" },
+                                high: { type: Type.UINT8, position: 432, nullables: "leafWetness" },
+                            }
+                        }, 4],
+                    }, 1);
+                    parser.setTransformer("pressure", (value) => value / 1000);
+                    parser.setTransformer("temperature", (value) => value / 10);
+                    parser.setTransformer("time", (value) => {
+                        const stringValue = value.toString();
+                        switch (stringValue.length) {
+                            case 1: return `00:0${stringValue}`;
+                            case 2: return `00:${stringValue}`;
+                            case 3: return `0${stringValue.charAt(0)}:${stringValue.substring(1)}`;
+                            case 4: return `${stringValue.substring(0, 2)}:${stringValue.substring(2)}`;
+                        }
+                        return value;
+                    });
+                    parser.setTransformer("uv", (value) => value / 10);
+                    parser.setTransformer("extraTemp", (value) => value - 90);
+                    parser.setTransformer("soilTemp", (value) => value - 90);
+                    parser.setTransformer("leafTemp", (value) => value - 90);
+                    parser.setNullables("pressure", [0]);
+                    parser.setNullables("humidity", [0, 255]);
+                    parser.setNullables("time", [65535]);
+                    parser.setNullables("tempLow", [32767]);
+                    parser.setNullables("tempHigh", [-32768]);
+                    parser.setNullables("heat", [-32768]);
+                    parser.setNullables("thsw", [-32768]);
+                    parser.setNullables("chill", [32768]);
+                    parser.setNullables("solar", [32768]);
+                    parser.setNullables("extraTemp", [255]);
+                    parser.setNullables("soilTemp", [255]);
+                    parser.setNullables("leafTemp", [255]);
+                    parser.setNullables("leafWetness", [255]);
+                    parser.setNullables("soilMoisture", [255]);
 
-
-                    // WIND in mph
-                    this.parseWind(data, parsedData);
-
-
-                    // INSIDE TEMPERATURE in °F
-                    this.parseInsideTemperature(data, parsedData);
-
-                    // INSIDE HUMIDITY in %
-                    this.parseInsideHumidity(data, parsedData);
-
-                    // OUTSIDE TEMPERATURE in °F
-                    parsedData.tempOut.day.low = data.readInt16LE(48) / 10;
-                    parsedData.tempOut.day.lowTime = data.readInt16LE(52);
-                    parsedData.tempOut.day.high = data.readInt16LE(50) / 10;
-                    parsedData.tempOut.day.highTime = data.readInt16LE(54);
-                    parsedData.tempOut.month.high = data.readInt16LE(56) / 10;
-                    parsedData.tempOut.month.low = data.readInt16LE(58) / 10;
-                    parsedData.tempOut.year.high = data.readInt16LE(60) / 10;
-                    parsedData.tempOut.year.low = data.readInt16LE(62) / 10;
-
-
-                    // DEW POINT in °F
-                    parsedData.dew.day.low = data.readInt16LE(64);
-                    parsedData.dew.day.lowTime = data.readInt16LE(68);
-                    parsedData.dew.day.high = data.readInt16LE(66);
-                    parsedData.dew.day.highTime = data.readInt16LE(70);
-                    parsedData.dew.month.high = data.readInt16LE(72);
-                    parsedData.dew.month.low = data.readInt16LE(74);
-                    parsedData.dew.year.high = data.readInt16LE(76);
-                    parsedData.dew.year.low = data.readInt16LE(78);
-
-
-                    // WIND CHILL in °F
-                    parsedData.chill.day = data.readInt16LE(80);
-                    parsedData.chill.dayTime = data.readInt16LE(82);
-                    parsedData.chill.month = data.readInt16LE(84);
-                    parsedData.chill.year = data.readInt16LE(86);
-
-
-                    // HEAT INDEX in °F
-                    parsedData.heat.day = data.readInt16LE(88);
-                    parsedData.heat.dayTime = data.readInt16LE(90);
-                    parsedData.heat.month = data.readInt16LE(92);
-                    parsedData.heat.year = data.readInt16LE(94);
-
-
-                    // THSW INDEX in °F
-                    parsedData.THSW.day = data.readInt16LE(96);
-                    if (parsedData.THSW.day < 0) parsedData.THSW.day = null;
-                    parsedData.THSW.dayTime = data.readInt16LE(97);
-                    if (parsedData.THSW.dayTime < 0) parsedData.THSW.dayTime = null;
-                    parsedData.THSW.month = data.readInt16LE(100);
-                    if (parsedData.THSW.month < 0) parsedData.THSW.month = null;
-                    parsedData.THSW.year = data.readInt16LE(102);
-                    if (parsedData.THSW.year < 0) parsedData.THSW.year = null;
-
-
-                    // SOLAR RADIATION in W/m²
-
-                    const solarDayTime = data.readUInt16LE(106);
-                    parsedData.solarRad.dayTime = solarDayTime === 65535 ? null : solarDayTime;
-                    if (parsedData.solarRad.dayTime !== null) parsedData.solarRad.day = data.readUInt8(104);
-                    else parsedData.solarRad.day = null;
-                    parsedData.solarRad.month = data.readUInt16LE(108);
-                    parsedData.solarRad.year = data.readUInt16LE(110);
-
-
-                    // UV Index
-                    const uvDayTime = data.readUInt16LE(113);
-                    parsedData.UV.dayTime = uvDayTime === 65535 ? null : uvDayTime;
-                    if (parsedData.UV.dayTime !== null) parsedData.UV.day = data.readUInt8(112);
-                    else parsedData.UV.day = null;
-                    parsedData.UV.month = data.readUInt8(115);
-                    parsedData.UV.year = data.readUInt8(116);
-
-
-                    // RAIN RATE in cups/hr
-                    parsedData.rainRate.day = data.readUInt16LE(117);
-                    parsedData.rainRate.dayTime = data.readUInt16LE(119);
-                    parsedData.rainRate.month = data.readUInt16LE(121);
-
-
-                    // RAIN SUM in cups
-                    parsedData.rainSum.month = data.readUInt16LE(123);
-                    parsedData.rainSum.year = data.readUInt16LE(125);
-
-
-                    // EXTRA/SOIL/LEAF TEMPERATURES in °F
-                    for (let i = 2; i < 9; i++) parsedData.temps[i] = { day: {}, month: {}, year: {} };
-                    parsedData.temps[0] = parsedData.tempIn;
-                    parsedData.temps[1] = parsedData.tempOut;
-                    for (let i = 0; i < 4; i++) parsedData.soilTemps[i] = { day: {}, month: {}, year: {} };
-                    for (let i = 0; i < 4; i++) parsedData.leafTemps[i] = { day: {}, month: {}, year: {} };
-                    // Daily low
-                    this.parseExtraLeafSoilTempsProperty(data, parsedData, 127, 1, "day", "low");
-                    // Daily low time
-                    this.parseExtraLeafSoilTempsProperty(data, parsedData, 157, 2, "day", "lowTime");
-                    // Daily high
-                    this.parseExtraLeafSoilTempsProperty(data, parsedData, 142, 1, "day", "high");
-                    // Daily high time
-                    this.parseExtraLeafSoilTempsProperty(data, parsedData, 187, 2, "day", "highTime");
-                    // Monthly high
-                    this.parseExtraLeafSoilTempsProperty(data, parsedData, 217, 1, "month", "high");
-                    // Monthly low
-                    this.parseExtraLeafSoilTempsProperty(data, parsedData, 232, 1, "month", "low");
-                    // Yearly high
-                    this.parseExtraLeafSoilTempsProperty(data, parsedData, 247, 1, "year", "high");
-                    // Yearly low
-                    this.parseExtraLeafSoilTempsProperty(data, parsedData, 262, 1, "year", "low");
-
-
-                    // OUTSIDE/EXTRA HUMIDITIES IN %
-                    for (let i = 1; i < 9; i++) parsedData.hums[i] = { day: {}, month: {}, year: {} };
-                    parsedData.hums[0] = parsedData.humIn;
-                    // Daily low
-                    this.parseOutsideExtraHumsProperty(data, parsedData, 277, 1, "day", "low");
-                    // Daily low time
-                    this.parseOutsideExtraHumsProperty(data, parsedData, 293, 2, "day", "lowTime");
-                    // Daily high
-                    this.parseOutsideExtraHumsProperty(data, parsedData, 285, 1, "day", "high");
-                    // Daily high time
-                    this.parseOutsideExtraHumsProperty(data, parsedData, 309, 2, "day", "highTime");
-                    // Monthly low
-                    this.parseOutsideExtraHumsProperty(data, parsedData, 325, 1, "month", "high");
-                    // Monthly high
-                    this.parseOutsideExtraHumsProperty(data, parsedData, 333, 1, "month", "low");
-                    // Yearly low
-                    this.parseOutsideExtraHumsProperty(data, parsedData, 341, 1, "year", "high");
-                    // Yearly high
-                    this.parseOutsideExtraHumsProperty(data, parsedData, 349, 1, "year", "low");
-                    parsedData.humOut = parsedData.hums[1];
-
-
-                    // SOIL MOISTURE in cb
-                    for (let i = 0; i < 4; i++) parsedData.soilMoistures[i] = { day: {}, month: {}, year: {} };
-                    // Daily low
-                    this.parseSoilMoistureProperty(data, parsedData, 357, 1, "day", "high");
-                    // Daily high
-                    this.parseSoilMoistureProperty(data, parsedData, 361, 2, "day", "highTime");
-                    // Daily low time
-                    this.parseSoilMoistureProperty(data, parsedData, 369, 1, "day", "low");
-                    // Daily high time
-                    this.parseSoilMoistureProperty(data, parsedData, 373, 2, "day", "lowTime");
-                    // Monthly low
-                    this.parseSoilMoistureProperty(data, parsedData, 381, 1, "month", "low");
-                    // Monthly high
-                    this.parseSoilMoistureProperty(data, parsedData, 385, 1, "month", "high");
-                    // Yearly low
-                    this.parseSoilMoistureProperty(data, parsedData, 389, 1, "year", "high");
-                    // Yearly high
-                    this.parseSoilMoistureProperty(data, parsedData, 393, 1, "year", "low");
-
-
-                    // LEAF WETNESS (0-15)
-                    for (let i = 0; i < 4; i++) parsedData.leafWetnesses[i] = { day: {}, month: {}, year: {} };
-                    // Daily low
-                    this.parseLeafWetnessProperty(data, parsedData, 397, 1, "day", "high");
-                    // Daily high
-                    this.parseLeafWetnessProperty(data, parsedData, 401, 2, "day", "highTime");
-                    // Daily low time
-                    this.parseLeafWetnessProperty(data, parsedData, 409, 1, "day", "low");
-                    // Daily high time
-                    this.parseLeafWetnessProperty(data, parsedData, 413, 2, "day", "lowTime");
-                    // Monthly low
-                    this.parseLeafWetnessProperty(data, parsedData, 421, 1, "month", "low");
-                    // Monthly high
-                    this.parseLeafWetnessProperty(data, parsedData, 425, 1, "month", "high");
-                    // Yearly low
-                    this.parseLeafWetnessProperty(data, parsedData, 429, 1, "year", "high");
-                    // Yearly high
-                    this.parseLeafWetnessProperty(data, parsedData, 433, 1, "year", "low");
-
-                    // CRC
-                    parsedData.CRC = data.readUInt16LE(437);
+                    const parsedData = parser.parse(data);
+                    parsedData.humOut = parsedData.extraHums.shift();
                     resolve(parsedData);
-                })
-            })
-        })
-    }
-
-    private parsePressure(data: Buffer, parsedData: any) {
-        parsedData.pressure.day.low = data.readInt16LE(1) / 1000 || null;
-        if (!parsedData.pressure.day.low) parsedData.pressure.day.lowTime = null;
-        else parsedData.pressure.day.lowTime = data.readUInt16LE(13);
-        parsedData.pressure.day.high = data.readInt16LE(3) / 1000 || null;
-        if (!parsedData.pressure.day.high) parsedData.pressure.day.highTime = null;
-        else parsedData.pressure.day.highTime = data.readUInt16LE(15);
-        parsedData.pressure.month.low = data.readInt16LE(5) / 1000 || null;
-        parsedData.pressure.month.high = data.readInt16LE(7) / 1000 || null;
-        parsedData.pressure.year.low = data.readInt16LE(9) / 1000 || null;
-        parsedData.pressure.year.high = data.readInt16LE(11) / 1000 || null;
-    }
-
-    private parseWind(data: Buffer, parsedData: any) {
-        parsedData.wind.day = data.readUIntLE(17, 1);
-        parsedData.wind.dayTime = data.readUInt16LE(18);
-        parsedData.wind.month = data.readUIntLE(20, 1);
-        parsedData.wind.year = data.readUIntLE(21, 1);
-    }
-
-    private parseInsideTemperature(data: Buffer, parsedData: any) {
-        const dayLow = data.readInt16LE(24);
-        parsedData.tempIn.day.low = dayLow === 32767 ? null : dayLow / 10;
-        if (parsedData.tempIn.day.low !== null) parsedData.tempIn.day.lowTime = data.readInt16LE(28);
-        else parsedData.tempIn.day.lowTime = null;
-
-        const dayHigh = data.readInt16LE(22);
-        parsedData.tempIn.day.high = dayHigh === -32768 ? null : dayHigh / 10;
-        if (parsedData.tempIn.day.high !== null) parsedData.tempIn.day.highTime = data.readInt16LE(26);
-        else parsedData.tempIn.day.highTime = null;
-
-        const monthHigh = data.readInt16LE(30);
-        parsedData.tempIn.month.high = monthHigh === -32768 ? null : monthHigh / 10;
-
-        const monthLow = data.readInt16LE(32);
-        parsedData.tempIn.month.low = monthLow === 32767 ? null : monthLow / 10;
-
-        const yearHigh = data.readInt16LE(34);
-        parsedData.tempIn.year.high = yearHigh === -32768 ? null : monthHigh / 10;
-
-        const yearLow = data.readInt16LE(36);
-        parsedData.tempIn.year.low = yearLow === 32767 ? null : yearLow / 10;
-    }
-
-    private parseInsideHumidity(data: Buffer, parsedData: any) {
-        parsedData.humIn.day.low = data.readUInt8(39) || null;
-        if (!parsedData.humIn.day.low) parsedData.humIn.day.lowTime = null;
-        else parsedData.humIn.day.lowTime = data.readInt16LE(42);
-        parsedData.humIn.day.high = data.readUInt8(38) || null;
-        if (!parsedData.humIn.day.high) parsedData.humIn.day.highTime = null;
-        else parsedData.humIn.day.highTime = data.readInt16LE(40);
-        parsedData.humIn.month.high = data.readUInt8(44) || null;
-        parsedData.humIn.month.low = data.readUInt8(45) || null;
-        parsedData.humIn.year.high = data.readUInt8(46) || null;
-        parsedData.humIn.year.low = data.readUInt8(47) || null;
-    }
-
-    private parseExtraLeafSoilTempsProperty(data: Buffer, parsedData: any, offset: number, byteCount: 2 | 1, fieldCategory: "day" | "month" | "year", fieldName: "low" | "high" | "lowTime" | "highTime") {
-        for (let index = 0; index < 15; offset += byteCount, index++) {
-            if (index <= 6) {
-                const tempIndex = index + 2;
-                if (byteCount === 1) parsedData.temps[tempIndex][fieldCategory][fieldName] = data.readInt8(offset);
-                else parsedData.temps[tempIndex][fieldCategory][fieldName] = data.readInt16LE(offset);
-                if (parsedData.temps[tempIndex][fieldCategory][fieldName] <= -1) parsedData.temps[tempIndex][fieldCategory][fieldName] = null;
-            } else if (index <= 10) {
-                const soilIndex = index - 7;
-                if (byteCount === 1) parsedData.soilTemps[soilIndex][fieldCategory][fieldName] = data.readInt8(offset);
-                else parsedData.soilTemps[soilIndex][fieldCategory][fieldName] = data.readInt16LE(offset);
-                if (parsedData.soilTemps[soilIndex][fieldCategory][fieldName] <= -1) parsedData.soilTemps[soilIndex][fieldCategory][fieldName] = null;
-            } else {
-                const leafIndex = index - 11;
-                if (byteCount === 1) parsedData.leafTemps[leafIndex][fieldCategory][fieldName] = data.readInt8(offset);
-                else parsedData.leafTemps[leafIndex][fieldCategory][fieldName] = data.readInt16LE(offset);
-                if (parsedData.leafTemps[leafIndex][fieldCategory][fieldName] <= -1) parsedData.leafTemps[leafIndex][fieldCategory][fieldName] = null;
-            }
-        }
-    }
-
-    private parseOutsideExtraHumsProperty(data: Buffer, parsedData: any, offset: number, byteCount: 2 | 1, fieldCategory: "day" | "month" | "year", fieldName: "low" | "high" | "lowTime" | "highTime") {
-        for (let index = 1; index < 9; offset += byteCount, index++) {
-            if (byteCount === 1) parsedData.hums[index][fieldCategory][fieldName] = data.readUInt8(offset);
-            else parsedData.hums[index][fieldCategory][fieldName] = data.readUInt16LE(offset);
-
-            // Parse dash values to null
-            let shouldBeNull: boolean;
-            if (fieldName === "highTime" || fieldName === "lowTime") {
-                shouldBeNull = parsedData.hums[index][fieldCategory][fieldName] === 65535 || parsedData.hums[index][fieldCategory][fieldName.replace("Time", "")] === null;
-            } else {
-                shouldBeNull = parsedData.hums[index][fieldCategory][fieldName] === 255;
-            }
-            if (shouldBeNull) parsedData.hums[index][fieldCategory][fieldName] = null;
-        }
-    }
-
-    private parseSoilMoistureProperty(data: Buffer, parsedData: any, offset: number, byteCount: 2 | 1, fieldCategory: "day" | "month" | "year", fieldName: "low" | "high" | "lowTime" | "highTime") {
-        for (let index = 0; index < 4; offset += byteCount, index++) {
-            if (byteCount === 1) parsedData.soilMoistures[index][fieldCategory][fieldName] = data.readUInt8(offset);
-            else parsedData.soilMoistures[index][fieldCategory][fieldName] = data.readUInt16LE(offset);
-
-            // Parse dash values to null
-            let shouldBeNull: boolean;
-            if (fieldName === "highTime" || fieldName === "lowTime") {
-                shouldBeNull = parsedData.soilMoistures[index][fieldCategory][fieldName] === 65535 || parsedData.soilMoistures[index][fieldCategory][fieldName.replace("Time", "")] === null;
-            } else {
-                shouldBeNull = parsedData.soilMoistures[index][fieldCategory][fieldName] === 255;
-            }
-            if (shouldBeNull) parsedData.soilMoistures[index][fieldCategory][fieldName] = null;
-        }
-    }
-
-    private parseLeafWetnessProperty(data: Buffer, parsedData: any, offset: number, byteCount: 2 | 1, fieldCategory: "day" | "month" | "year", fieldName: "low" | "high" | "lowTime" | "highTime") {
-        for (let index = 0; index < 4; offset += byteCount, index++) {
-            if (byteCount === 1) parsedData.leafWetnesses[index][fieldCategory][fieldName] = data.readUInt8(offset);
-            else parsedData.leafWetnesses[index][fieldCategory][fieldName] = data.readUInt16LE(offset);
-            // Parse dash values to null
-            let shouldBeNull: boolean;
-            if (fieldName === "highTime" || fieldName === "lowTime") {
-                shouldBeNull = parsedData.leafWetnesses[index][fieldCategory][fieldName] === 65535 || parsedData.leafWetnesses[index][fieldCategory][fieldName.replace("Time", "")] === null;
-            } else {
-                shouldBeNull = parsedData.leafWetnesses[index][fieldCategory][fieldName] === 255;
-            }
-            if (shouldBeNull) parsedData.leafWetnesses[index][fieldCategory][fieldName] = null;
-        }
+                });
+            });
+        });
     }
 
 }

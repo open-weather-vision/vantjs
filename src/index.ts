@@ -20,4 +20,5 @@ device.once("awakening", async () => {
     const highsAndLows = await device.getHighsAndLows();
     inspect(highsAndLows);
 
+    device.close();
 })

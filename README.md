@@ -11,7 +11,7 @@ npm install vantjs
 # Usage
 
 ```typescript
-import VantageInterface from "./VantageInterface";
+import VantageInterface from "vantjs";
 
 // The interface automatically connects to the console in the background and tries to wake it up.
 const device = new VantageInterface("COM3");

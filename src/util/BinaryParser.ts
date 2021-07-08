@@ -1,3 +1,4 @@
+import numberToBinaryString from "./numberToBinaryString";
 
 export enum Type {
     UINT8 = 1,
@@ -14,32 +15,44 @@ export enum Type {
     INT32_LE = 9,
     INT32_BE = 10,
     INT32 = INT32_LE,
+    BIT = 11,
 }
 
-type PropertyConfig = {
+export enum ArrayType {
+    PROPERTY_BASED = 1,
+    ENTRY_BASED = 2,
+}
+
+
+
+export type PropertyConfig = {
     type: Type,
     position: number,
     nullables?: number[] | string,
     transform?: ((val: number) => any) | string,
     dependsOn?: string,
-}
+} | {
+    copyof: string,
+    nullables?: number[] | string,
+    transform?: ((val: number) => any) | string,
+    dependsOn?: string,
+};
 
-interface ParsingStructure {
-    [propertyName: string]: ParsingStructure | [ParsingStructure, number] | PropertyConfig
+export interface ParsingStructure {
+    [propertyName: string]: ParsingStructure | [ParsingStructure | PropertyConfig, number, ArrayType.PROPERTY_BASED] | [ParsingStructure | PropertyConfig, number, ArrayType.ENTRY_BASED, number] | PropertyConfig
 }
-interface ParsedObject {
+export interface ParsedObject {
     [propertyName: string]: any | ParsedObject;
 }
 
 export default class BinaryParser {
     private struct: ParsingStructure;
-    private offset: number;
+    private offset = 0;
     private transformers: Array<[string, (val: number) => any]> = [];
     private nullables: Array<[string, number[]]> = [];
 
-    constructor(struct: ParsingStructure, offset = 0) {
+    constructor(struct: ParsingStructure) {
         this.struct = struct;
-        this.offset = offset;
     }
 
     public setTransformer(name: string, transformer: (val: number) => any): void {
@@ -53,7 +66,7 @@ export default class BinaryParser {
         }
     }
 
-    public setNullables(name: string, nullables: number[]) {
+    public setNullables(name: string, nullables: number[]): void {
         this.nullables.push([name, nullables]);
     }
 
@@ -64,12 +77,15 @@ export default class BinaryParser {
         }
     }
 
-    public parse(buffer: Buffer): ParsedObject {
+    public parse(buffer: Buffer, offset = 0): ParsedObject {
+        this.offset = offset;
         return this.parseRecursivly(buffer, this.struct);
     }
 
     public byteLength(type: Type): number {
         switch (type) {
+            case Type.BIT:
+                return 1 / 8;
             case Type.INT8:
             case Type.UINT8:
                 return 1;
@@ -86,7 +102,7 @@ export default class BinaryParser {
         }
     }
 
-    private parseRecursivly(buffer: Buffer, struct: ParsingStructure, arrayIndex = 0): ParsedObject {
+    private parseRecursivly(buffer: Buffer, struct: ParsingStructure, arrayIndex = 0, entryGap = 0): ParsedObject {
         let result: ParsedObject = {};
 
         const propertyKeys = Object.keys(struct);
@@ -97,54 +113,59 @@ export default class BinaryParser {
 
             if (this.isPropertyConfig(propertyValue)) {
                 const propertyConfig = propertyValue as PropertyConfig;
+                if ("copyof" in propertyConfig) {
+                    if (!propertyKeys.includes(propertyConfig.copyof)) throw new Error("Invalid parse structure. Property is copy of an unknown property.");
 
-                // OLD FASHION
-                /*if (propertyConfig.dependsOn) {
-                    // if the dependency has not been parsed until now...
-                    if (result[propertyConfig.dependsOn] === undefined) {
-                        // if the dependency cannot be found in the current layer, throw an exception
-                        if (!propertyKeys.includes(propertyConfig.dependsOn)) throw new Error("Invalid parse structure. Property is dependend on unknown property.")
-                        // if the dependency was found in the current layer, move the dependend property to the end of the property list
+                    if (result[propertyConfig.copyof] === undefined) {
                         propertyKeys.push(propertyKey);
                         continue;
-                        // if the dependency has already been parsed
-                    } else {
-                        // if the dependency is null, set the property to null to
-                        if (result[propertyConfig.dependsOn] === null) resolvedValue = null;
                     }
-                }*/
-                if (resolvedValue === undefined) {
+                    resolvedValue = result[propertyConfig.copyof];
+                } else {
                     let position = propertyConfig.position;
-                    if (arrayIndex) position += this.byteLength(propertyConfig.type) * arrayIndex;
+                    if (arrayIndex && entryGap) {
+                        position += entryGap * arrayIndex;
+                    }
+                    else if (arrayIndex) position += this.byteLength(propertyConfig.type) * arrayIndex;
                     resolvedValue = this.read(buffer, propertyConfig.type, position);
-                    if (propertyConfig.nullables && resolvedValue !== null) {
-                        if (typeof propertyConfig.nullables === "string") {
-                            const nullables = this.getNullables(propertyConfig.nullables);
-                            if (nullables) resolvedValue = this.nullNullables(resolvedValue, nullables);
-                            else throw new Error(`Invalid nullables name '${propertyConfig.nullables}!`);
-                        }
-                        else resolvedValue = this.nullNullables(resolvedValue, propertyConfig.nullables);
-                    }
-                    if (propertyConfig.transform && resolvedValue !== null) {
-                        if (typeof propertyConfig.transform === "string") {
-                            const transformer = this.getTransformer(propertyConfig.transform);
-                            if (transformer) resolvedValue = transformer(resolvedValue);
-                            else throw new Error(`Invalid transformer name '${propertyConfig.transform}!`);
-                        }
-                        else resolvedValue = propertyConfig.transform(resolvedValue);
-                    }
-                    if (propertyConfig.dependsOn && resolvedValue !== null) {
-                        resolvedValue = { value: resolvedValue, dependsOn: propertyConfig.dependsOn };
-                    }
                 }
+                if (propertyConfig.nullables && resolvedValue !== null) {
+                    if (typeof propertyConfig.nullables === "string") {
+                        const nullables = this.getNullables(propertyConfig.nullables);
+                        if (nullables) resolvedValue = this.nullNullables(resolvedValue, nullables);
+                        else throw new Error(`Invalid nullables name '${propertyConfig.nullables}!`);
+                    }
+                    else resolvedValue = this.nullNullables(resolvedValue, propertyConfig.nullables);
+                }
+                if (propertyConfig.transform && resolvedValue !== null) {
+                    if (typeof propertyConfig.transform === "string") {
+                        const transformer = this.getTransformer(propertyConfig.transform);
+                        if (transformer) resolvedValue = transformer(resolvedValue);
+                        else throw new Error(`Invalid transformer name '${propertyConfig.transform}!`);
+                    }
+                    else resolvedValue = propertyConfig.transform(resolvedValue);
+                }
+                if (propertyConfig.dependsOn && resolvedValue !== null) {
+                    resolvedValue = { value: resolvedValue, dependsOn: propertyConfig.dependsOn };
+                }
+
             } else if (propertyValue instanceof Array) {
-                const length = propertyValue[1];
                 const structure = propertyValue[0];
+                const length = propertyValue[1];
+                const type = propertyValue[2];
+                const entryGap = propertyValue[3] ?? 0;
 
                 resolvedValue = [];
-                for (let a = 0; a < length; a++) {
-                    const parsedEntry = this.parseRecursivly(buffer, structure, a);
-                    resolvedValue.push(parsedEntry);
+                if (this.isPropertyConfig(structure)) {
+                    for (let a = 0; a < length; a++) {
+                        const parsedEntry = this.parseRecursivly(buffer, { value: structure }, a, entryGap);
+                        resolvedValue.push(parsedEntry.value);
+                    }
+                } else {
+                    for (let a = 0; a < length; a++) {
+                        const parsedEntry = this.parseRecursivly(buffer, structure as ParsingStructure, a, entryGap);
+                        resolvedValue.push(parsedEntry);
+                    }
                 }
             } else {
                 const nestedStruct = propertyValue as ParsingStructure;
@@ -153,7 +174,7 @@ export default class BinaryParser {
 
             result[propertyKey] = resolvedValue;
         }
-        result = this.resolveDependencies(result);
+        result = this.resolveDependencies(result) as ParsedObject;
         return result;
     }
 
@@ -165,7 +186,8 @@ export default class BinaryParser {
         return value;
     }
 
-    private resolveDependencies(data: ParsedObject): ParsedObject {
+    private resolveDependencies(data: ParsedObject): ParsedObject | null {
+        if (data === null) return null;
         const keys = Object.keys(data);
         for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
@@ -229,13 +251,18 @@ export default class BinaryParser {
             case Type.UINT32_LE:
                 // console.log(`Reading UINT32_LE at ${position}`)
                 result = buffer.readUInt32LE(position); break;
+            case Type.BIT:
+                const bitPosition = Math.round((position % 1) * 8);
+                const bytePosition = Math.trunc(position);
+                const byteString = numberToBinaryString(buffer[bytePosition], 8);
+                result = Number(byteString[bitPosition]);
         }
         if (result === undefined) result = null;
         return result;
     }
 
     private isPropertyConfig(object: any): boolean {
-        return object.type && true;
+        return object.type || object.copyof;
     }
 }
 

@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "javascript/typescript interface to Davis VantagePro, Davis VantagePro 2 and Davis Vantage Vue",
     "main": "index.js",
+    "type": "commonjs",
     "scripts": {
         "watch": "npx tsc --watch",
         "start": "cd ./dist && node",
@@ -30,15 +31,25 @@
     "dependencies": {
         "@types/binary-parser": "^1.5.0",
         "binary-parser": "^1.9.1",
-        "serialport": "^9.2.0"
+        "crc": "^3.4.0",
+        "crc-full": "^1.1.0",
+        "serialport": "^9.2.0",
+        "sprintf-js": "^1.0.3"
     },
     "devDependencies": {
         "@types/node": "^15.14.0",
         "@types/serialport": "^8.0.1",
+        "@types/sprintf-js": "^1.1.2",
         "@typescript-eslint/eslint-plugin": "^4.28.1",
         "@typescript-eslint/parser": "^4.28.1",
         "eslint": "^7.29.0",
         "ts-node": "^10.0.0",
         "typescript": "^4.3.5"
+    },
+    "eslintConfig": {
+        "rules": {
+            "no-case-declarations": 0,
+            "@typescript-eslint/no-case-declarations": 0
+        }
     }
 }

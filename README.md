@@ -1,5 +1,5 @@
 # vantjs
-vantjs is a javascript/typescript interface to the Davis VantagePro, Davis VantagePro 2 and the Davis Vantage Vue. 
+vantjs is a javascript/typescript interface to the Davis Vantage Pro, Pro 2 and Vue. 
 ‼ Development still in progress. ‼
 
 # Installation (not working yet)

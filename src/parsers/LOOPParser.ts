@@ -165,31 +165,48 @@ export default class LOOPParser extends BinaryParser {
                     low: { type: Type.BIT, position: 82 + 6 / 8, transform: "alarm" },
                     high: { type: Type.BIT, position: 82 + 7 / 8, transform: "alarm" },
                 }, 4, ArrayType.ENTRY_BASED, 1],
-                transmitterBatteryStatus: { type: Type.UINT8, position: 86 },
-                consoleBatteryVoltage: { type: Type.UINT16, position: 87, transform: (val) => ((val * 300) / 512) / 100 },
-                forecast: {
-                    iconNumber: { type: Type.INT8, position: 89 },
-                    iconText: {
-                        copyof: "iconNumber", transform: (val) => {
-                            switch (val) {
-                                case 8: return "Mostly Clear";
-                                case 6: return "Partly Cloudy";
-                                case 2: return "Mostly Cloudy";
-                                case 3: return "Mostly Cloudy, Rain within 12 hours";
-                                case 18: return "Mostly Cloudy, Snow within 12 hours";
-                                case 19: return "Mostly Cloudy, Rain or Snow within 12 hours";
-                                case 7: return "Partly Cloudy, Rain within 12 hours";
-                                case 22: return "Partly Cloudy, Snow within 12 hours";
-                                case 23: return "Partly Cloudy, Rain or Snow within 12 hours";
-                                default: return null;
-                            }
+
+            },
+            transmitterBatteryStatus: { type: Type.UINT8, position: 86 },
+            consoleBatteryVoltage: { type: Type.UINT16, position: 87, transform: (val) => ((val * 300) / 512) / 100 },
+            forecast: {
+                iconNumber: {
+                    type: Type.INT8, position: 89, transform: (val) => {
+                        switch (val) {
+                            case 8:
+                            case 6:
+                            case 2:
+                            case 3:
+                            case 18:
+                            case 19:
+                            case 7:
+                            case 22:
+                            case 23:
+                                return val;
+                            default: return null;
                         }
-                    },
-                    rule: { type: Type.UINT8, position: 90 },
+                    }
                 },
-                sunrise: { type: Type.UINT16, position: 91, nullables: "time", transform: "time" },
-                sunset: { type: Type.UINT16, position: 93, nullables: "time", transform: "time" },
-            }
+                iconText: {
+                    copyof: "iconNumber", transform: (val) => {
+                        switch (val) {
+                            case 8: return "Mostly Clear";
+                            case 6: return "Partly Cloudy";
+                            case 2: return "Mostly Cloudy";
+                            case 3: return "Mostly Cloudy, Rain within 12 hours";
+                            case 18: return "Mostly Cloudy, Snow within 12 hours";
+                            case 19: return "Mostly Cloudy, Rain or Snow within 12 hours";
+                            case 7: return "Partly Cloudy, Rain within 12 hours";
+                            case 22: return "Partly Cloudy, Snow within 12 hours";
+                            case 23: return "Partly Cloudy, Rain or Snow within 12 hours";
+                            default: return null;
+                        }
+                    }
+                },
+                rule: { type: Type.UINT8, position: 90, dependsOn: "iconNumber" },
+            },
+            sunrise: { type: Type.UINT16, position: 91, nullables: "time", transform: "time" },
+            sunset: { type: Type.UINT16, position: 93, nullables: "time", transform: "time" },
         });
         this.setTransformer("alarm", (val) => val === 1)
         this.setTransformer("pressure", (val) => {

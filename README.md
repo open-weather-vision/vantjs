@@ -31,7 +31,7 @@ device.once("awakening", async () => {
     const firmwareVersion = await device.getFirmwareVersion();
     console.log(firmwareVersion);
 
-    // Getting the current highs and lows values
+    // Getting the current high and low values
     const highsAndLows = await device.getHighsAndLows();
     console.log(highsAndLows);
 

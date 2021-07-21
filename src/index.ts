@@ -24,7 +24,7 @@ device.once("awakening", async () => {
     // inspect(highsAndLows);
 
     // Getting the currently measured weather data
-    const realtimeData = await device.getRealtimeData(RealtimePackage.LOOP);
+    const realtimeData = await device.getRealtimeData(RealtimePackage.LOOP2);
     inspect(realtimeData);
 
     // Closing the connection to the console

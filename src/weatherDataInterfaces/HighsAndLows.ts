@@ -1,4 +1,4 @@
-export default interface HighsAndLows {
+export type HighsAndLows = {
     pressure: {
         day: {
             low: number | null,

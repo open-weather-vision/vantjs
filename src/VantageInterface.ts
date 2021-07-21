@@ -3,9 +3,10 @@ import DriverError, { ErrorType } from "./DriverError";
 import { EventEmitter } from "stream";
 import { CRC } from "crc-full";
 import HighsAndLowsParser from "./parsers/HighsAndLowsParser";
-import HighsAndLows from "./weatherDataInterfaces/HighsAndLows";
+import { HighsAndLows } from "./weatherDataInterfaces/HighsAndLows";
 import LOOPParser from "./parsers/LOOPParser";
 import LOOP2Parser from "./parsers/LOOP2Parser";
+import { RealtimeData } from "./weatherDataInterfaces/RealtimeData";
 
 export default class VantageInterface extends EventEmitter {
     private readonly port: SerialPort;
@@ -173,7 +174,7 @@ export default class VantageInterface extends EventEmitter {
         });
     }
 
-    public async getRealtimeData(packageType?: RealtimePackage): Promise<any> {
+    public async getRealtimeData(packageType?: RealtimePackage): Promise<RealtimeData> {
         return new Promise<any>((resolve, reject) => {
             let stringToWrite;
             if (packageType) {

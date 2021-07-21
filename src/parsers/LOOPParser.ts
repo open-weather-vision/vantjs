@@ -3,6 +3,9 @@ import { RealtimePackage } from "../VantageInterface";
 import nullables from "./assets/nullables";
 import transformers from "./assets/transformers";
 
+/**
+ * Parser for a LOOP binary data package (without the acknowledgement byte and the crc bytes).
+ */
 export default class LOOPParser extends BinaryParser {
     constructor() {
         super({
@@ -82,7 +85,7 @@ export default class LOOPParser extends BinaryParser {
             rain: {
                 rate: { type: Type.UINT16, position: 41 },
                 storm: { type: Type.UINT16, position: 46 },
-                // TODO
+                // TODO: Parse storm start date
                 stormStartDate: { type: Type.INT16, position: 48, nullables: [-1] },
                 day: { type: Type.UINT16, position: 50 },
                 month: { type: Type.UINT16, position: 52 },

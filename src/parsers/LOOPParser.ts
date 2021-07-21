@@ -1,4 +1,7 @@
 import BinaryParser, { ArrayType, Type } from "../util/BinaryParser";
+import { RealtimePackage } from "../VantageInterface";
+import nullables from "./assets/nullables";
+import transformers from "./assets/transformers";
 
 export default class LOOPParser extends BinaryParser {
     constructor() {
@@ -78,9 +81,9 @@ export default class LOOPParser extends BinaryParser {
             },
             rain: {
                 rate: { type: Type.UINT16, position: 41 },
-                storm: { type: Type.UINT16, position: 46, transform: (val) => val * 100 },
+                storm: { type: Type.UINT16, position: 46 },
                 // TODO
-                stormStartDate: {},
+                stormStartDate: { type: Type.INT16, position: 48, nullables: [-1] },
                 day: { type: Type.UINT16, position: 50 },
                 month: { type: Type.UINT16, position: 52 },
                 year: { type: Type.UINT16, position: 54 },
@@ -207,51 +210,12 @@ export default class LOOPParser extends BinaryParser {
             },
             sunrise: { type: Type.UINT16, position: 91, nullables: "time", transform: "time" },
             sunset: { type: Type.UINT16, position: 93, nullables: "time", transform: "time" },
-        });
-        this.setTransformer("alarm", (val) => val === 1)
-        this.setTransformer("pressure", (val) => {
-            if (val < 20_000 || val > 32_500)
-                return null;
-            else return val / 1000;
-        });
-        this.setTransformer("temperature", (value) => value / 10);
-        this.setTransformer("time", (value) => {
-            const stringValue = value.toString();
-            switch (stringValue.length) {
-                case 1: return `00:0${stringValue}`;
-                case 2: return `00:${stringValue}`;
-                case 3: return `0${stringValue.charAt(0)}:${stringValue.substring(1)}`;
-                case 4: return `${stringValue.substring(0, 2)}:${stringValue.substring(2)}`;
-            }
-            return value;
-        });
-        this.setTransformer("uv", (value) => value / 10);
-        this.setTransformer("extraTemp", (value) => value - 90);
-        this.setTransformer("soilTemp", (value) => value - 90);
-        this.setTransformer("leafTemp", (value) => value - 90);
-        this.setNullables("uv", [255]);
-        this.setNullables("pressure", [0]);
-        this.setNullables("humidity", [0, 255]);
-        this.setNullables("time", [65535]);
-        this.setNullables("temperature", [32767]);
-        this.setNullables("heat", [-32768]);
-        this.setNullables("thsw", [-32768]);
-        this.setNullables("chill", [32768]);
-        this.setNullables("solar", [32767, 32768]);
-        this.setNullables("extraTemp", [255]);
-        this.setNullables("soilTemp", [255]);
-        this.setNullables("leafTemp", [255]);
-        this.setNullables("leafWetness", [255]);
-        this.setNullables("soilMoisture", [255]);
+        }, nullables, transformers);
     }
 
     public parse(buffer: Buffer): any {
         const result = super.parse(buffer);
-        result.packageType = "LOOP";
-        // result.alarms.extraTemps = [result.alarms.extraTemp1, result.alarms.extraTemp2, result.alarms.extraTemp3, result.alarms.extraTemp4, result.alarms.extraTemp5, result.alarms.extraTemp6, result.alarms.extraTemp7];
-        // result.alarms.extraHums = [result.alarms.extraHum1, result.alarms.extraHum2, result.alarms.extraHum3, result.alarms.extraHum4, result.alarms.extraHum5, result.alarms.extraHum6, result.alarms.extraHum7];
-        // for (let i = 1; i <= 7; i++) delete result.alarms[`extraTemp${i}`];
-        // for (let i = 1; i <= 7; i++) delete result.alarms[`extraHum${i}`];
+        result.packageType = RealtimePackage.LOOP;
         return result as any;
     }
 }

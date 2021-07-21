@@ -23,8 +23,6 @@ export enum ArrayType {
     ENTRY_BASED = 2,
 }
 
-
-
 export type PropertyConfig = {
     type: Type,
     position: number,
@@ -45,36 +43,27 @@ export interface ParsedObject {
     [propertyName: string]: any | ParsedObject;
 }
 
+export interface TransformerCollection { [property: string]: (val: number) => any }
+export interface NullablesCollection { [property: string]: number[] }
+
 export default class BinaryParser {
     private struct: ParsingStructure;
     private offset = 0;
-    private transformers: Array<[string, (val: number) => any]> = [];
-    private nullables: Array<[string, number[]]> = [];
+    private transformers: TransformerCollection = {}
+    private nullables: NullablesCollection = {}
 
-    constructor(struct: ParsingStructure) {
+    constructor(struct: ParsingStructure, nullables?: NullablesCollection, transformers?: TransformerCollection) {
         this.struct = struct;
+        if (transformers) this.transformers = transformers;
+        if (nullables) this.nullables = nullables;
     }
 
     public setTransformer(name: string, transformer: (val: number) => any): void {
-        this.transformers.push([name, transformer]);
-    }
-
-    private getTransformer(name: string) {
-        for (let i = 0; i < this.transformers.length; i++) {
-            const tName = this.transformers[i][0];
-            if (tName === name) return this.transformers[i][1];
-        }
+        this.transformers[name] = transformer;
     }
 
     public setNullables(name: string, nullables: number[]): void {
-        this.nullables.push([name, nullables]);
-    }
-
-    private getNullables(name: string) {
-        for (let i = 0; i < this.nullables.length; i++) {
-            const nName = this.nullables[i][0];
-            if (nName === name) return this.nullables[i][1];
-        }
+        this.nullables[name] = nullables;
     }
 
     public parse(buffer: Buffer, offset = 0): ParsedObject {
@@ -131,7 +120,7 @@ export default class BinaryParser {
                 }
                 if (propertyConfig.nullables && resolvedValue !== null) {
                     if (typeof propertyConfig.nullables === "string") {
-                        const nullables = this.getNullables(propertyConfig.nullables);
+                        const nullables = this.nullables[propertyConfig.nullables];
                         if (nullables) resolvedValue = this.nullNullables(resolvedValue, nullables);
                         else throw new Error(`Invalid nullables name '${propertyConfig.nullables}!`);
                     }
@@ -139,7 +128,7 @@ export default class BinaryParser {
                 }
                 if (propertyConfig.transform && resolvedValue !== null) {
                     if (typeof propertyConfig.transform === "string") {
-                        const transformer = this.getTransformer(propertyConfig.transform);
+                        const transformer = this.transformers[propertyConfig.transform];
                         if (transformer) resolvedValue = transformer(resolvedValue);
                         else throw new Error(`Invalid transformer name '${propertyConfig.transform}!`);
                     }
@@ -152,7 +141,6 @@ export default class BinaryParser {
             } else if (propertyValue instanceof Array) {
                 const structure = propertyValue[0];
                 const length = propertyValue[1];
-                const type = propertyValue[2];
                 const entryGap = propertyValue[3] ?? 0;
 
                 resolvedValue = [];

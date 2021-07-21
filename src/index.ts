@@ -1,5 +1,5 @@
 import inspect from "./util/inspect";
-import VantageInterface from "./VantageInterface";
+import VantageInterface, { RealtimePackage } from "./VantageInterface";
 
 // The interface automatically connects to the console in the background and tries to wake it up.
 const device = new VantageInterface("COM3");
@@ -17,15 +17,15 @@ device.once("awakening", async () => {
 
     // Getting the console's firmware version
     const firmwareVersion = await device.getFirmwareVersion();
-    console.log(firmwareVersion);
+    inspect(firmwareVersion);
 
     // Getting the current highs and lows values
-    const highsAndLows = await device.getHighsAndLows();
-    console.log(highsAndLows);
+    // const highsAndLows = await device.getHighsAndLows();
+    // inspect(highsAndLows);
 
     // Getting the currently measured weather data
-    const realtimeData = await device.getRealtimeData();
-    console.log(realtimeData);
+    const realtimeData = await device.getRealtimeData(RealtimePackage.LOOP);
+    inspect(realtimeData);
 
     // Closing the connection to the console
     device.close();

@@ -173,27 +173,53 @@ export default class VantageInterface extends EventEmitter {
         });
     }
 
-    public async getRealtimeData(): Promise<any> {
+    public async getRealtimeData(packageType?: RealtimePackage): Promise<any> {
         return new Promise<any>((resolve, reject) => {
-            this.port.write("LOOP 1\n", (err) => {
+            let stringToWrite;
+            if (packageType) {
+                stringToWrite = "LPS ";
+                if (packageType === RealtimePackage.LOOP) stringToWrite += "1 1";
+                else if (packageType === RealtimePackage.LOOP2) stringToWrite += "2 1";
+                else stringToWrite += "3 2";
+                stringToWrite += "\n";
+            } else {
+                stringToWrite = "LOOP 1\n";
+            }
+            this.port.write(stringToWrite, (err) => {
                 if (err) reject(new DriverError("Failed to get realtime data", ErrorType.FAILED_TO_WRITE));
                 this.port.once("data", (data: Buffer) => {
-                    const splittedData = this.splitCRCAckDataPackage(data);
-
-                    // Check data (crc check)
-                    if (!this.validateCRC(splittedData.weatherData, splittedData.crc)) {
-                        reject(new DriverError("Received malformed highs and lows", ErrorType.CRC))
-                    }
-
-                    const packageType = splittedData.weatherData.readUInt8(4);
+                    const packageType = data.readUInt8(5);
                     if (packageType === 0) {
+                        const splittedData = this.splitCRCAckDataPackage(data);
+
+                        // Check data (crc check)
+                        if (!this.validateCRC(splittedData.weatherData, splittedData.crc)) {
+                            reject(new DriverError("Received malformed realtime data", ErrorType.CRC))
+                        }
+
                         resolve(new LOOPParser().parse(splittedData.weatherData));
                     } else {
-                        //resolve(new LOOP2Parser().parse(splittedData.weatherData));
+                        // LOOP 2 data is 
+                        const firstPartOfLOOP2 = data;
+                        this.port.once("data", (data: Buffer) => {
+                            const dataFull = Buffer.concat([firstPartOfLOOP2, data]);
+                            const splittedData = this.splitCRCAckDataPackage(dataFull);
+
+                            // Check data (crc check)
+                            if (!this.validateCRC(splittedData.weatherData, splittedData.crc)) {
+                                reject(new DriverError("Received malformed realtime data", ErrorType.CRC))
+                            }
+
+                            resolve(new LOOP2Parser().parse(splittedData.weatherData));
+                        });
                     }
                 });
             });
+
         });
     }
+}
 
+export enum RealtimePackage {
+    LOOP = "LOOP", LOOP2 = "LOOP2"
 }

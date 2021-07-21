@@ -1,5 +1,7 @@
 import BinaryParser, { ArrayType, Type } from "../util/BinaryParser";
 import HighsAndLows from "../weatherDataInterfaces/HighsAndLows";
+import nullables from "./assets/nullables";
+import transformers from "./assets/transformers";
 
 
 /**
@@ -229,41 +231,7 @@ export default class HighsAndLowsParser extends BinaryParser {
                     high: { type: Type.UINT8, position: 432, nullables: "leafWetness" },
                 }
             }, 4, ArrayType.PROPERTY_BASED]
-        });
-        this.setTransformer("pressure", (val) => {
-            if (val < 20_000 || val > 32_500)
-                return null;
-            else return val / 1000;
-        });
-        this.setTransformer("temperature", (value) => value / 10);
-        this.setTransformer("time", (value) => {
-            const stringValue = value.toString();
-            switch (stringValue.length) {
-                case 1: return `00:0${stringValue}`;
-                case 2: return `00:${stringValue}`;
-                case 3: return `0${stringValue.charAt(0)}:${stringValue.substring(1)}`;
-                case 4: return `${stringValue.substring(0, 2)}:${stringValue.substring(2)}`;
-            }
-            return value;
-        });
-        this.setTransformer("uv", (value) => value / 10);
-        this.setTransformer("extraTemp", (value) => value - 90);
-        this.setTransformer("soilTemp", (value) => value - 90);
-        this.setTransformer("leafTemp", (value) => value - 90);
-        this.setNullables("pressure", [0]);
-        this.setNullables("humidity", [0, 255]);
-        this.setNullables("time", [65535]);
-        this.setNullables("tempLow", [32767]);
-        this.setNullables("tempHigh", [-32768]);
-        this.setNullables("heat", [-32768]);
-        this.setNullables("thsw", [-32768]);
-        this.setNullables("chill", [32768]);
-        this.setNullables("solar", [32768]);
-        this.setNullables("extraTemp", [255]);
-        this.setNullables("soilTemp", [255]);
-        this.setNullables("leafTemp", [255]);
-        this.setNullables("leafWetness", [255]);
-        this.setNullables("soilMoisture", [255]);
+        }, nullables, transformers);
     }
 
     public parse(buffer: Buffer): HighsAndLows {

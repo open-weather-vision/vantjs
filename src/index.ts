@@ -1,5 +1,6 @@
 import inspect from "./util/inspect";
-import VantageInterface, { RealtimePackage } from "./VantageInterface";
+import VantageInterface from "./VantageInterface";
+import { RealtimePackage } from "./weatherDataInterfaces/RealtimeData";
 
 // The interface automatically connects to the console in the background and tries to wake it up.
 const device = new VantageInterface("COM3");

@@ -1,5 +1,5 @@
 export type RealtimeData = {
-    pressure: { current: number | null, trend: { value: number | null, text: string | null } },
+    pressure: { current: number | null, trend: { value: -60 | -20 | 0 | 20 | 60 | null, text: "Falling Rapidly" | "Steady" | "Rising Rapidly" | "Rising Slowly" | "Falling Slowly" | null } },
     temperature: {
         in: number | null,
         out: number | null,
@@ -99,7 +99,7 @@ export type RealtimeData = {
     },
     transmitterBatteryStatus: number | null,
     consoleBatteryVoltage: number | null,
-    forecast: { iconNumber: number | null, iconText: string | null, rule: number | null },
+    forecast: { iconNumber: 8 | 6 | 2 | 3 | 18 | 19 | 7 | 22 | 23 | null, iconText: "Mostly Clear" | "Partly Cloudy" | "Mostly Cloudy" | "Mostly Cloudy, Rain within 12 hours" | "Mostly Cloudy, Snow within 12 hours" | "Mostly Cloudy, Rain or Snow within 12 hours" | "Partly Cloudy, Rain within 12 hours" | "Partly Cloudy, Rain or Snow within 12 hours" | "Partly Cloudy, Snow within 12 hours" | null, rule: number | null },
     sunrise: string | null,
     sunset: string | null,
     packageType: "LOOP"
@@ -108,8 +108,8 @@ export type RealtimeData = {
         current: number | null,
         currentRaw: number | null,
         currentAbsolute: number | null,
-        trend: { value: number | null, text: string | null },
-        reductionMethod: { value: number | null, text: string | null },
+        trend: { value: -60 | -20 | 0 | 20 | 60 | null, text: "Falling Rapidly" | "Steady" | "Rising Rapidly" | "Rising Slowly" | "Falling Slowly" | null },
+        reductionMethod: { value: 0 | 1 | 2 | null, text: "user offset" | "altimeter setting" | "NOAA bar reduction" | null },
         userOffset: number | null,
         calibrationOffset: number | null
     },
@@ -140,4 +140,9 @@ export type RealtimeData = {
     uv: number | null,
     solarRadiation: number | null,
     packageType: 'LOOP2'
+}
+
+
+export enum RealtimePackage {
+    LOOP = "LOOP", LOOP2 = "LOOP2"
 }

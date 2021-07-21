@@ -6,7 +6,7 @@ import HighsAndLowsParser from "./parsers/HighsAndLowsParser";
 import { HighsAndLows } from "./weatherDataInterfaces/HighsAndLows";
 import LOOPParser from "./parsers/LOOPParser";
 import LOOP2Parser from "./parsers/LOOP2Parser";
-import { RealtimeData } from "./weatherDataInterfaces/RealtimeData";
+import { RealtimeData, RealtimePackage } from "./weatherDataInterfaces/RealtimeData";
 
 export default class VantageInterface extends EventEmitter {
     private readonly port: SerialPort;
@@ -219,8 +219,4 @@ export default class VantageInterface extends EventEmitter {
 
         });
     }
-}
-
-export enum RealtimePackage {
-    LOOP = "LOOP", LOOP2 = "LOOP2"
 }

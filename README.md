@@ -1,10 +1,10 @@
 # vantjs
 vantjs is a javascript/typescript interface to the Davis Vantage Pro, Pro 2 and Vue. <br>
-❌ Development still in progress. Many features are not finished and not stable<br>
+❌ Development still in progress. Many features are not finished and not stable.<br>
 ⏩ Version 0.1.0 is released very soon offering basic functionality to interact with your Vantage Pro, Pro 2 and Vue.
 
 # Installation (not working yet)
-
+This is going to work as version 0.1 is released.
 ```
 npm install vantjs
 ```

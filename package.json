@@ -1,6 +1,6 @@
 {
     "name": "vantjs",
-    "version": "1.0.0",
+    "version": "0.0.0",
     "description": "javascript/typescript interface to Davis VantagePro, Davis VantagePro 2 and Davis Vantage Vue",
     "main": "index.js",
     "type": "commonjs",

@@ -26,8 +26,7 @@ export type RealtimeData = {
     rain: {
         rate: number | null,
         storm: number | null,
-        // TODO: Change type to string | null when parsing is completed
-        stormStartDate: number | null,
+        stormStartDate: Date | null,
         day: number | null,
         month: number | null,
         year: number | null
@@ -129,8 +128,7 @@ export type RealtimeData = {
     rain: {
         rate: number | null,
         storm: number | null,
-        // TODO: Change type to string | null after parsing completed
-        stormStartDate: number | null,
+        stormStartDate: Date | null,
         day: number | null,
         last15min: number | null,
         lastHour: number | null,

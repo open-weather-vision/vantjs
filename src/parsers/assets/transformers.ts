@@ -1,7 +1,7 @@
 import { TransformerCollection } from "../../util/BinaryParser";
 
 const transformers: TransformerCollection = {
-    alarm: (val) => val === 1,
+    alarm: (value) => value === 1,
     temperature: (value) => value / 10,
     time: (value) => {
         const stringValue = value.toString();
@@ -17,11 +17,14 @@ const transformers: TransformerCollection = {
     extraTemp: (value) => value - 90,
     soilTemp: (value) => value - 90,
     leafTemp: (value) => value - 90,
-    pressure: (val) => {
-        if (val < 20_000 || val > 32_500)
+    pressure: (value) => {
+        if (value < 20_000 || value > 32_500)
             return null;
-        else return val / 1000;
-    }
+        else return value / 1000;
+    },
+    stormStartDate: (value) => {
+        return new Date(`${(0x0f80 & value) >> 7}.${(0xf000 & value) >> 12}.${(0x007f & value) + 2000}`);
+    },
 };
 
 export default transformers;

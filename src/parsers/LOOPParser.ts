@@ -1,5 +1,5 @@
 import BinaryParser, { ArrayType, Type } from "../util/BinaryParser";
-import { RealtimePackage } from "../VantageInterface";
+import { RealtimePackage } from "../weatherDataInterfaces/RealtimeData";
 import nullables from "./assets/nullables";
 import transformers from "./assets/transformers";
 
@@ -85,8 +85,7 @@ export default class LOOPParser extends BinaryParser {
             rain: {
                 rate: { type: Type.UINT16, position: 41 },
                 storm: { type: Type.UINT16, position: 46 },
-                // TODO: Parse storm start date
-                stormStartDate: { type: Type.INT16, position: 48, nullables: [-1] },
+                stormStartDate: { type: Type.INT16, position: 48, nullables: [-1, 0xffff], transform: "stormStartDate" },
                 day: { type: Type.UINT16, position: 50 },
                 month: { type: Type.UINT16, position: 52 },
                 year: { type: Type.UINT16, position: 54 },

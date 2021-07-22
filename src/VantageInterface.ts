@@ -8,15 +8,41 @@ import LOOPParser from "./parsers/LOOPParser";
 import LOOP2Parser from "./parsers/LOOP2Parser";
 import { RealtimeData, RealtimePackage } from "./weatherDataInterfaces/RealtimeData";
 
+
+export interface VantageInterfaceOptions {
+    rainCupType?: RainCup,
+}
 export default class VantageInterface extends EventEmitter {
     private readonly port: SerialPort;
     private readonly crc16 = CRC.default("CRC16_CCIT_ZERO") as CRC;
+    private rainCupType: RainCup = RainCup.IN;
 
-    constructor(deviceUrl: string) {
+    /**
+     * Creates an interface to your vantage weather station. Wakes up the station.
+     * Listen to the awakening event once to start interacting with the station after
+     * connection.
+     * @example
+     * const myInterface = new VantageInterface("COM3");
+     * myInterface.once("awakening", async() => {
+     *  const realtimeData = await myInterface.getRealtimeData();
+     *  myInterface.close();
+     * });
+     * @param deviceUrl the serial url to your device
+     * @param options additional options (e.g. rain cup size)
+     */
+    constructor(deviceUrl: string, options?: VantageInterfaceOptions) {
         super();
+        // Set options
+        if (options?.rainCupType) this.rainCupType = options.rainCupType;
+
+        // Init port
         this.port = new SerialPort(deviceUrl, { baudRate: 19200 });
+
+        // Setup event listeners / emitters
         this.port.on("error", (err) => this.emit("error", err));
         this.port.on("open", () => this.emit("connection"));
+
+        // Wake station up
         this.wakeUp();
     }
 
@@ -219,4 +245,8 @@ export default class VantageInterface extends EventEmitter {
 
         });
     }
+}
+
+export enum RainCup {
+    MM_SMALL = "0.1mm", MM_BIG = "0.2mm", IN = "0.01"
 }

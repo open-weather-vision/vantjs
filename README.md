@@ -44,3 +44,7 @@ device.once("awakening", async () => {
     device.close();
 })
 ```
+
+# Contributing
+
+_Coming soon!_

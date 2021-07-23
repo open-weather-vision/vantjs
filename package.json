@@ -1,8 +1,9 @@
 {
     "name": "vantjs",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "description": "javascript/typescript interface to Davis VantagePro, Davis VantagePro 2 and Davis Vantage Vue",
-    "main": "index.js",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "type": "commonjs",
     "scripts": {
         "watch": "npx tsc --watch",
@@ -29,9 +30,6 @@
     },
     "homepage": "https://github.com/harrydehix/vantjs#readme",
     "dependencies": {
-        "@types/binary-parser": "^1.5.0",
-        "binary-parser": "^1.9.1",
-        "crc": "^3.4.0",
         "crc-full": "^1.1.0",
         "serialport": "^9.2.0",
         "sprintf-js": "^1.0.3"

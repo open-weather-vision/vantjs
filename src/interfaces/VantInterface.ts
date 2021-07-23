@@ -44,8 +44,7 @@ export default class VantInterface extends EventEmitter {
         this.port = new SerialPort(deviceUrl, { baudRate: 19200 });
 
         // Setup event listeners / emitters
-        this.port.on("error", (err) => this.emit("error", err));
-        this.port.on("open", () => this.emit("connection"));
+        this.port.on("error", (err) => this.emit("serial-error", err));
 
         // Wake station up
         this.wakeUp();
@@ -123,7 +122,7 @@ export default class VantInterface extends EventEmitter {
     }
 
     /**
-     * Validates the connection to the console by running the TEST command.
+     * Validates the connection to the console by running the TEST command. No error is thrown on failure, instead `false` is resolved.
      * @returns whether the connection is valid
      */
     public async validateConnection(): Promise<boolean> {

@@ -1,5 +1,5 @@
 # vantjs
-vantjs is a javascript/typescript interface to the Davis Vantage Pro, Pro 2 and Vue. <br>
+vantjs is a crossplatform javascript/typescript interface to the Davis Vantage Pro, Pro 2 and Vue. Works on any Linux, Windows or OSX device! <br>
 ❌ Development still in progress. Many features are not finished and not stable.<br>
 ⏩ Version 0.1.0 has just been released offering basic functionality to interact with your Vantage Pro, Pro 2 and Vue.
 

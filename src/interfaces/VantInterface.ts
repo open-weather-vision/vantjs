@@ -56,7 +56,7 @@ export default class VantInterface extends EventEmitter {
      * @param buffer 
      * @returns 
      */
-    private splitCRCAckDataPackage(buffer: Buffer) {
+    protected splitCRCAckDataPackage(buffer: Buffer) {
         const bufferCopy = Buffer.alloc(buffer.length - 3);
         buffer.copy(bufferCopy, 0, 1, buffer.length - 2);
         return {
@@ -66,12 +66,19 @@ export default class VantInterface extends EventEmitter {
         }
     }
 
+    protected validateACK(buffer: Buffer) {
+        const ack = buffer.readUInt8(0);
+        if (ack == 0x06 || ack == 0x15) return;
+        else if (ack == 0x21) throw new DriverError("Something went wrong", ErrorType.NOT_ACK);
+        else if (ack == 0x18) throw new DriverError("An error occurred during transmission", ErrorType.CRC);
+    }
+
     /**
      * Computes the crc value for the given buffer. Based on the CRC16_CCIT_ZERO standard.
      * @param dataBuffer 
      * @returns the computed crc value (2 byte, 16 bit)
      */
-    private computeCRC(dataBuffer: Buffer): number {
+    protected computeCRC(dataBuffer: Buffer): number {
         return this.crc16.compute(dataBuffer);
     }
 
@@ -81,9 +88,10 @@ export default class VantInterface extends EventEmitter {
      * @param exspectedCRC 
      * @returns whether the buffer is valid
      */
-    private validateCRC(dataBuffer: Buffer, exspectedCRC: number): boolean {
+    protected validateCRC(dataBuffer: Buffer, exspectedCRC: number) {
         const crc = this.computeCRC(dataBuffer);
-        return exspectedCRC === crc;
+        if (exspectedCRC === crc) return;
+        else throw new DriverError("Received malformed data", ErrorType.CRC);
     }
 
     /**
@@ -94,7 +102,7 @@ export default class VantInterface extends EventEmitter {
         let succeeded = false;
         let tries = 0;
         do {
-            succeeded = await new Promise<boolean>((resolve, reject) => {
+            succeeded = await new Promise<boolean>((resolve) => {
                 this.port.write("\n", (err) => {
                     if (err) {
                         return resolve(false);
@@ -119,7 +127,7 @@ export default class VantInterface extends EventEmitter {
      * @returns whether the connection is valid
      */
     public async validateConnection(): Promise<boolean> {
-        return new Promise<boolean>((resolve, reject) => {
+        return new Promise<boolean>((resolve) => {
             this.port.write("TEST\n", (err) => {
                 if (err) resolve(false);
                 this.port.once("data", (data: Buffer) => {
@@ -168,12 +176,13 @@ export default class VantInterface extends EventEmitter {
             this.port.write("HILOWS\n", (err) => {
                 if (err) reject(new DriverError("Failed to get highs and lows", ErrorType.FAILED_TO_WRITE));
                 this.port.once("data", (data: Buffer) => {
+                    // Check ack
+                    this.validateACK(data);
+
                     const splittedData = this.splitCRCAckDataPackage(data);
 
                     // Check data (crc check)
-                    if (!this.validateCRC(splittedData.weatherData, splittedData.crc)) {
-                        reject(new DriverError("Received malformed highs and lows", ErrorType.CRC))
-                    }
+                    this.validateCRC(splittedData.weatherData, splittedData.crc);
 
                     // Parse data
                     const parsedWeatherData = new HighsAndLowsParser().parse(splittedData.weatherData);
@@ -205,27 +214,26 @@ export default class VantInterface extends EventEmitter {
             this.port.write(stringToWrite, (err) => {
                 if (err) reject(new DriverError("Failed to get realtime data", ErrorType.FAILED_TO_WRITE));
                 this.port.once("data", (data: Buffer) => {
+                    // Check ack
+                    this.validateACK(data);
+
                     const packageType = data.readUInt8(5);
                     if (packageType === 0) {
                         const splittedData = this.splitCRCAckDataPackage(data);
 
                         // Check data (crc check)
-                        if (!this.validateCRC(splittedData.weatherData, splittedData.crc)) {
-                            reject(new DriverError("Received malformed realtime data", ErrorType.CRC))
-                        }
+                        this.validateCRC(splittedData.weatherData, splittedData.crc);
 
                         resolve(new LOOPParser().parse(splittedData.weatherData));
                     } else {
-                        // LOOP 2 data is 
+                        // LOOP 2 data is splitted (only tested on vantage pro 2)
                         const firstPartOfLOOP2 = data;
                         this.port.once("data", (data: Buffer) => {
                             const dataFull = Buffer.concat([firstPartOfLOOP2, data]);
                             const splittedData = this.splitCRCAckDataPackage(dataFull);
 
                             // Check data (crc check)
-                            if (!this.validateCRC(splittedData.weatherData, splittedData.crc)) {
-                                reject(new DriverError("Received malformed realtime data", ErrorType.CRC))
-                            }
+                            this.validateCRC(splittedData.weatherData, splittedData.crc);
 
                             resolve(new LOOP2Parser().parse(splittedData.weatherData));
                         });

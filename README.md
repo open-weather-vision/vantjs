@@ -12,7 +12,7 @@ npm install vantjs
 
 #### Typescript
 
-The VantInterface class provides the basic features that all Vantage stations offer.
+The `VantInterface` class provides the basic features that all Vantage stations offer.
 ```typescript
 import { VantInterface } from "vantjs";
 
@@ -49,7 +49,7 @@ device.once("awakening", async () => {
 The `VantVueInterface`, `VantProInterface` and the `VantPro2Interface` offer station-dependent additional features.
 
 ### Javascript
-The VantInterface class provides the basic features that all Vantage stations offer.
+The `VantInterface` class provides the basic features that all Vantage stations offer.
 ```javascript
 const { VantInterface } = require("vantjs");
 

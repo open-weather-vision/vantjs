@@ -123,7 +123,7 @@ export default class VantInterface extends EventEmitter {
     }
 
     /**
-     * Validates the connection to the console.
+     * Validates the connection to the console by running the TEST command.
      * @returns whether the connection is valid
      */
     public async validateConnection(): Promise<boolean> {

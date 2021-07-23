@@ -1,12 +1,12 @@
 import BinaryParser, { ArrayType, Type } from "../util/BinaryParser";
-import { RealtimePackage } from "../structures/RealtimeData";
+import { RealtimeData, RealtimePackage } from "../structures/RealtimeData";
 import nullables from "./reusables/nullables";
 import transformers from "./reusables/transformers";
 
 /**
  * Parser for a LOOP binary data package (without the acknowledgement byte and the crc bytes).
  */
-export default class LOOPParser extends BinaryParser {
+export default class LOOPParser extends BinaryParser<RealtimeData> {
     constructor() {
         super({
             pressure: {
@@ -99,7 +99,7 @@ export default class LOOPParser extends BinaryParser {
             leafWetnesses: [{ type: Type.UINT8, position: 66, nullables: [255] }, 4, ArrayType.PROPERTY_BASED],
             uv: { type: Type.UINT8, position: 43, nullables: "uv" },
             solarRadiation: { type: Type.UINT16, position: 44, nullables: "solar" },
-            nextArchiveRecord: { type: Type.UINT16, position: 5, transform: "hex" },
+            nextArchiveRecord: { type: Type.UINT16, position: 5 },
             alarms: {
                 pressure: {
                     falling: { type: Type.BIT, position: 70, transform: "alarm" },
@@ -215,9 +215,9 @@ export default class LOOPParser extends BinaryParser {
         }, nullables, transformers);
     }
 
-    public parse(buffer: Buffer): any {
-        const result = super.parse(buffer);
+    public parse(buffer: Buffer) {
+        const result = super.parse(buffer) as Partial<RealtimeData>;
         result.packageType = RealtimePackage.LOOP;
-        return result as any;
+        return result as RealtimeData;
     }
 }

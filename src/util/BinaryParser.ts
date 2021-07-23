@@ -46,7 +46,7 @@ export interface ParsedObject {
 export interface TransformerCollection { [property: string]: (val: number) => any }
 export interface NullablesCollection { [property: string]: number[] }
 
-export default class BinaryParser {
+export default class BinaryParser<T extends ParsedObject> {
     private struct: ParsingStructure;
     private offset = 0;
     private transformers: TransformerCollection = {}
@@ -66,7 +66,7 @@ export default class BinaryParser {
         this.nullables[name] = nullables;
     }
 
-    public parse(buffer: Buffer, offset = 0): ParsedObject {
+    public parse(buffer: Buffer, offset = 0): T {
         this.offset = offset;
         return this.parseRecursivly(buffer, this.struct);
     }
@@ -91,7 +91,7 @@ export default class BinaryParser {
         }
     }
 
-    private parseRecursivly(buffer: Buffer, struct: ParsingStructure, arrayIndex = 0, entryGap = 0): ParsedObject {
+    private parseRecursivly(buffer: Buffer, struct: ParsingStructure, arrayIndex = 0, entryGap = 0): T {
         let result: ParsedObject = {};
 
         const propertyKeys = Object.keys(struct);
@@ -162,8 +162,8 @@ export default class BinaryParser {
 
             result[propertyKey] = resolvedValue;
         }
-        result = this.resolveDependencies(result) as ParsedObject;
-        return result;
+        result = this.resolveDependencies(result)!;
+        return result as T;
     }
 
     private nullNullables(value: number, nullables: number[]) {

@@ -7,7 +7,7 @@ import transformers from "./reusables/transformers";
 /**
  * Parser for a highs and lows binary data package (without the acknowledgement byte and the crc bytes).
  */
-export default class HighsAndLowsParser extends BinaryParser {
+export default class HighsAndLowsParser extends BinaryParser<HighsAndLows> {
     constructor() {
         super({
             pressure: {
@@ -234,10 +234,10 @@ export default class HighsAndLowsParser extends BinaryParser {
         }, nullables, transformers);
     }
 
-    public parse(buffer: Buffer): HighsAndLows {
-        const result = super.parse(buffer) as HighsAndLows;
+    public parse(buffer: Buffer) {
+        const result = super.parse(buffer) as Partial<HighsAndLows>;
         // extract outside humidity from extraHums array
-        result.humOut = result.extraHums.shift()!;
-        return result;
+        if (result.extraHums) result.humOut = result.extraHums.shift()!;
+        return result as HighsAndLows;
     }
 }

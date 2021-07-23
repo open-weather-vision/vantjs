@@ -13,6 +13,7 @@ const transformers: TransformerCollection = {
         }
         return value;
     },
+    hex: (val) => `0x${val.toString(16)}`,
     uv: (value) => value / 10,
     extraTemp: (value) => value - 90,
     soilTemp: (value) => value - 90,

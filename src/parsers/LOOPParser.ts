@@ -1,7 +1,7 @@
 import BinaryParser, { ArrayType, Type } from "../util/BinaryParser";
 import { RealtimePackage } from "../structures/RealtimeData";
-import nullables from "./assets/nullables";
-import transformers from "./assets/transformers";
+import nullables from "./reusables/nullables";
+import transformers from "./reusables/transformers";
 
 /**
  * Parser for a LOOP binary data package (without the acknowledgement byte and the crc bytes).
@@ -99,7 +99,7 @@ export default class LOOPParser extends BinaryParser {
             leafWetnesses: [{ type: Type.UINT8, position: 66, nullables: [255] }, 4, ArrayType.PROPERTY_BASED],
             uv: { type: Type.UINT8, position: 43, nullables: "uv" },
             solarRadiation: { type: Type.UINT16, position: 44, nullables: "solar" },
-            nextArchiveRecord: { type: Type.UINT16, position: 5, transform: (val) => `0x${val.toString(16)}` },
+            nextArchiveRecord: { type: Type.UINT16, position: 5, transform: "hex" },
             alarms: {
                 pressure: {
                     falling: { type: Type.BIT, position: 70, transform: "alarm" },

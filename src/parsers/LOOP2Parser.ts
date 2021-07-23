@@ -1,7 +1,7 @@
 import BinaryParser, { Type } from "../util/BinaryParser";
 import { RealtimePackage } from "../structures/RealtimeData";
-import nullables from "./assets/nullables";
-import transformers from "./assets/transformers";
+import nullables from "./reusables/nullables";
+import transformers from "./reusables/transformers";
 
 /**
  * Parser for a LOOP2 binary data package (without the acknowledgement byte and the crc bytes).
@@ -108,7 +108,18 @@ export default class LOOP2Parser extends BinaryParser {
             },
             uv: { type: Type.UINT8, position: 43, nullables: "uv" },
             solarRadiation: { type: Type.UINT16, position: 44, nullables: "solar" },
-            // TODO: Parse graph data
+            graphPointers: {
+                next10mWindSpeed: { type: Type.UINT8, position: 73 },
+                next15mWindSpeed: { type: Type.UINT8, position: 74 },
+                nextHourWindSpeed: { type: Type.UINT8, position: 75 },
+                nextDailyWindSpeed: { type: Type.UINT8, position: 76 },
+                nextMinuteRain: { type: Type.UINT8, position: 77 },
+                nextMonthlyRain: { type: Type.UINT8, position: 80 },
+                nextYearlyRain: { type: Type.UINT8, position: 81 },
+                nextSeasonalRain: { type: Type.UINT8, position: 82 },
+                nextRainStorm: { type: Type.UINT8, position: 78 },
+                currentMinuteIndex: { type: Type.UINT8, position: 79 },
+            }
         }, nullables, transformers);
     }
 

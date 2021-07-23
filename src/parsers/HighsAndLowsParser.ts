@@ -1,7 +1,7 @@
 import BinaryParser, { ArrayType, Type } from "../util/BinaryParser";
 import { HighsAndLows } from "../structures/HighsAndLows";
-import nullables from "./assets/nullables";
-import transformers from "./assets/transformers";
+import nullables from "./reusables/nullables";
+import transformers from "./reusables/transformers";
 
 
 /**

@@ -12,10 +12,10 @@ npm install vantjs
 # Usage
 
 ```typescript
-import VantageInterface from "vantjs";
+import { VantInterface } from "vantjs";
 
 // The interface automatically connects to the console in the background and tries to wake it up.
-const device = new VantageInterface("COM3");
+const device = new VantInterface("COM3");
 
 // Once the console has been woken up, you can interact with it.
 device.once("awakening", async () => {
@@ -28,8 +28,8 @@ device.once("awakening", async () => {
         throw new Error("Connection to console failed.");
     }
 
-    // Getting the console's firmware version
-    const firmwareVersion = await device.getFirmwareVersion();
+    // Getting the console's firmware date code
+    const firmwareVersion = await device.getFirmwareDateCode();
     console.log(firmwareVersion);
 
     // Getting the current high and low values

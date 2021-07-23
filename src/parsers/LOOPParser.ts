@@ -1,5 +1,5 @@
 import BinaryParser, { ArrayType, Type } from "../util/BinaryParser";
-import { RealtimePackage } from "../weatherDataInterfaces/RealtimeData";
+import { RealtimePackage } from "../structures/RealtimeData";
 import nullables from "./assets/nullables";
 import transformers from "./assets/transformers";
 

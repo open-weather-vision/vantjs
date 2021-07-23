@@ -1,28 +1,33 @@
 import SerialPort from "serialport";
-import DriverError, { ErrorType } from "./DriverError";
+import DriverError, { ErrorType } from "../DriverError";
 import { EventEmitter } from "stream";
 import { CRC } from "crc-full";
-import HighsAndLowsParser from "./parsers/HighsAndLowsParser";
-import { HighsAndLows } from "./weatherDataInterfaces/HighsAndLows";
-import LOOPParser from "./parsers/LOOPParser";
-import LOOP2Parser from "./parsers/LOOP2Parser";
-import { RealtimeData, RealtimePackage } from "./weatherDataInterfaces/RealtimeData";
+import HighsAndLowsParser from "../parsers/HighsAndLowsParser";
+import { HighsAndLows } from "../structures/HighsAndLows";
+import LOOPParser from "../parsers/LOOPParser";
+import LOOP2Parser from "../parsers/LOOP2Parser";
+import { RealtimeData, RealtimePackage } from "../structures/RealtimeData";
+
+import VantPro2Interface from "./VantPro2Interface";
+import VantProInterface from "./VantProInterface";
+import VantVueInterface from "./VantVueInterface";
 
 
-export interface VantageInterfaceOptions {
+export interface VantInterfaceOptions {
     rainCupType?: RainCup,
 }
-export default class VantageInterface extends EventEmitter {
-    private readonly port: SerialPort;
-    private readonly crc16 = CRC.default("CRC16_CCIT_ZERO") as CRC;
-    private rainCupType: RainCup = RainCup.IN;
+export default class VantInterface extends EventEmitter {
+    protected readonly port: SerialPort;
+    protected readonly crc16 = CRC.default("CRC16_CCIT_ZERO") as CRC;
+    protected rainCupType: RainCup = RainCup.IN;
 
     /**
-     * Creates an interface to your vantage weather station. Wakes up the station.
-     * Listen to the awakening event once to start interacting with the station after
-     * connection.
+     * Creates an interface to your vantage weather station (Vue, Pro, Pro 2). After connecting the station wakes up automatically.
+     * Listen to the awakening event once to start interacting with the station after connection. 
+     * Weather station dependend functionality (e.g. firmware version code for Vantage Pro 2 / Vue) is not supported.
+     * Use {@link VantPro2Interface}, {@link VantProInterface} and {@link VantVueInterface} for station dependend features.
      * @example
-     * const myInterface = new VantageInterface("COM3");
+     * const myInterface = new VantInterface("COM3");
      * myInterface.once("awakening", async() => {
      *  const realtimeData = await myInterface.getRealtimeData();
      *  myInterface.close();
@@ -30,7 +35,7 @@ export default class VantageInterface extends EventEmitter {
      * @param deviceUrl the serial url to your device
      * @param options additional options (e.g. rain cup size)
      */
-    constructor(deviceUrl: string, options?: VantageInterfaceOptions) {
+    constructor(deviceUrl: string, options?: VantInterfaceOptions) {
         super();
         // Set options
         if (options?.rainCupType) this.rainCupType = options.rainCupType;
@@ -148,27 +153,6 @@ export default class VantageInterface extends EventEmitter {
     }
 
     /**
-     * Gets the console's firmware version. Only works on Vantage Pro 2 or Vantage Vue.
-     * @returns the console's firmware version
-     */
-    public async getFirmwareVersion(): Promise<string> {
-        return new Promise<string>((resolve, reject) => {
-            this.port.write("NVER\n", (err) => {
-                if (err) reject(new DriverError("Failed to get firmware version", ErrorType.FAILED_TO_WRITE));
-                this.port.once("data", (data: Buffer) => {
-                    const response = data.toString("utf-8");
-                    try {
-                        const firmwareVersion = response.split("OK")[1].trim();
-                        resolve(`v${firmwareVersion}`);
-                    } catch (err) {
-                        reject(new DriverError("Failed to get firmware version", ErrorType.INVALID_RESPONSE));
-                    }
-                });
-            });
-        })
-    }
-
-    /**
      * Closes the connection to the console.
      */
     public close(): void {
@@ -200,6 +184,12 @@ export default class VantageInterface extends EventEmitter {
         });
     }
 
+    /**
+     * Gets the currently measured weather data. There are two types of realtime data available called `LOOP` and `LOOP2`.
+     * Default is mostly LOOP. LOOP provides information about the alarm settings, LOOP2 holds additional graph data.
+     * @param packageType the type of realtime data to get (`RealtimePackage.LOOP` or `RealtimePackage.LOOP2`)
+     * @returns the currently measured weather data
+     */
     public async getRealtimeData(packageType?: RealtimePackage): Promise<RealtimeData> {
         return new Promise<any>((resolve, reject) => {
             let stringToWrite;

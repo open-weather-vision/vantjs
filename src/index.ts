@@ -1,9 +1,9 @@
 import inspect from "./util/inspect";
-import VantageInterface from "./VantageInterface";
-import { RealtimePackage } from "./weatherDataInterfaces/RealtimeData";
+import VantPro2Interface from "./interfaces/VantPro2Interface";
+import { RealtimePackage } from "./structures/RealtimeData";
 
 // The interface automatically connects to the console in the background and tries to wake it up.
-const device = new VantageInterface("COM3");
+const device = new VantPro2Interface("COM3");
 
 // Once the console has been woken up, you can interact with it.
 device.once("awakening", async () => {
@@ -21,8 +21,8 @@ device.once("awakening", async () => {
     inspect(firmwareVersion);
 
     // Getting the current highs and lows values
-    // const highsAndLows = await device.getHighsAndLows();
-    // inspect(highsAndLows);
+    const highsAndLows = await device.getHighsAndLows();
+    inspect(highsAndLows);
 
     // Getting the currently measured weather data
     const realtimeData = await device.getRealtimeData(RealtimePackage.LOOP2);

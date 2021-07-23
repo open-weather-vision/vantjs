@@ -1,5 +1,5 @@
 import BinaryParser, { ArrayType, Type } from "../util/BinaryParser";
-import { HighsAndLows } from "../weatherDataInterfaces/HighsAndLows";
+import { HighsAndLows } from "../structures/HighsAndLows";
 import nullables from "./assets/nullables";
 import transformers from "./assets/transformers";
 

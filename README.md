@@ -1,8 +1,9 @@
 # vantjs
-vantjs is a platform-independent javascript/typescript interface to the Davis Vantage Pro, Pro 2 and Vue. Works on any Linux, Windows or OSX device! <br>
-❌ Development still in progress. Many features are not finished and not stable.<br>
-⏩ Version 0.1.0 has just been released offering basic functionality to interact with your Vantage Pro, Pro 2 and Vue.
-
+![npm](https://img.shields.io/npm/v/vantjs) ![GitHub milestones](https://img.shields.io/github/milestones/all/harrydehix/vantjs) ![GitHub last commit](https://img.shields.io/github/last-commit/harrydehix/vantjs)<br>
+vantjs is a platform-independent javascript and typescript interface to the Davis Vantage Pro, Pro 2 and Vue. It works on any linux, windows or osx device!
+#### Development news
+❌ _Development still in progress. Some features are not finished and not stable._ <br>
+⏩ _Version 0.1.0 has just been released offering basic functionality to interact with your Vantage Pro, Pro 2 and Vue._
 # Installation
 ```
 npm install vantjs

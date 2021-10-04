@@ -11,8 +11,6 @@ npm install vantjs
 
 # Usage
 
-#### Typescript
-
 The `VantInterface` class provides the basic features that all Vantage stations offer.
 ```typescript
 import { VantInterface, inspect } from "vantjs";
@@ -46,51 +44,9 @@ device.ready(async () => {
     const realtimeDataShort = await device.getSimpleRealtimeRecord();
     inspect(realtimeDataShort);
 
-    // Get the currently measured weather data (in detail)
-    console.log("\n\nRealtime Data: ");
-    const realtimeData = await device.getRichRealtimeRecord();
-    inspect(realtimeData);
-
     // Close the connection to the console
     device.close();
 });
-```
-The `VantVueInterface`, `VantProInterface` and the `VantPro2Interface` offer station-dependent additional features.
-
-### Javascript
-The `VantInterface` class provides the basic features that all Vantage stations offer.
-```javascript
-const { VantInterface } = require("vantjs");
-
-// The interface automatically connects to the console in the background and tries to wake it up.
-const device = new VantInterface("COM3");
-
-// Once the console has been woken up, you can interact with it.
-device.once("awakening", async () => {
-    console.log("Connected to device!");
-
-    // You always should validate the connection
-    if (await device.validateConnection()) {
-        console.log("Test worked!")
-    } else {
-        throw new Error("Connection to console failed.");
-    }
-
-    // Getting the console's firmware date code
-    const firmwareVersion = await device.getFirmwareDateCode();
-    console.log(firmwareVersion);
-
-    // Getting the current high and low values
-    const highsAndLows = await device.getHighsAndLows();
-    console.log(highsAndLows);
-
-    // Getting the currently measured weather data
-    const realtimeData = await device.getRealtimeData();
-    console.log(realtimeData);
-
-    // You always should close the connection to the console once you are done
-    device.close();
-})
 ```
 The `VantVueInterface`, `VantProInterface` and the `VantPro2Interface` offer station-dependent additional features.
 

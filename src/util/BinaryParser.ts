@@ -1,3 +1,5 @@
+import MalformedDataError from "../errors/MalformedDataError";
+import ParserError from "../errors/ParserError";
 import numberToBinaryString from "./numberToBinaryString";
 
 export enum Type {
@@ -67,8 +69,12 @@ export default class BinaryParser<T extends ParsedObject> {
     }
 
     public parse(buffer: Buffer, offset = 0): T {
-        this.offset = offset;
-        return this.parseRecursivly(buffer, this.struct);
+        try {
+            this.offset = offset;
+            return this.parseRecursivly(buffer, this.struct);
+        } catch (err) {
+            throw new ParserError("Failed to parse data. If this error occurs please contact the developer on github.");
+        }
     }
 
     public byteLength(type: Type): number {

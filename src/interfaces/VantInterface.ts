@@ -1,16 +1,16 @@
 import SerialPort from "serialport";
-import DriverError, { ErrorType } from "../DriverError";
-import { EventEmitter } from "stream";
+import VantError, { ErrorType } from "../errors/VantError";
 import { CRC } from "crc-full";
 import HighsAndLowsParser from "../parsers/HighsAndLowsParser";
 import { HighsAndLows } from "../structures/HighsAndLows";
 import LOOPParser from "../parsers/LOOPParser";
 import LOOP2Parser from "../parsers/LOOP2Parser";
-import { RealtimeData, RealtimePackage } from "../structures/RealtimeData";
+import { LoopPackage, LOOP, LOOP2 } from "../structures/LOOP";
 
-import VantPro2Interface from "./VantPro2Interface";
-import VantProInterface from "./VantProInterface";
-import VantVueInterface from "./VantVueInterface";
+import { SimpleRealtimeRecord as SimpleRealtimeRecord } from "../structures/SimpleRealtimeRecord";
+import SerialConnectionError from "../errors/SerialConnectionError";
+import { EventEmitter } from "stream";
+import MalformedDataError from "../errors/MalformedDataError";
 
 
 export interface VantInterfaceOptions {
@@ -20,6 +20,7 @@ export default class VantInterface extends EventEmitter {
     protected readonly port: SerialPort;
     protected readonly crc16 = CRC.default("CRC16_CCIT_ZERO") as CRC;
     protected rainCupType: RainCup = RainCup.IN;
+    public isClosed = false;
 
     /**
      * Creates an interface to your vantage weather station (Vue, Pro, Pro 2). After connecting the station wakes up automatically.
@@ -42,12 +43,6 @@ export default class VantInterface extends EventEmitter {
 
         // Init port
         this.port = new SerialPort(deviceUrl, { baudRate: 19200 });
-
-        // Setup event listeners / emitters
-        this.port.on("error", (err) => this.emit("serial-error", err));
-
-        // Wake station up
-        this.wakeUp();
     }
 
     /**
@@ -65,15 +60,29 @@ export default class VantInterface extends EventEmitter {
         }
     }
 
-    protected validateACK(buffer: Buffer) {
-        const ack = buffer.readUInt8(0);
-        if (ack == 0x06 || ack == 0x15) return;
-        else if (ack == 0x21) throw new DriverError("Something went wrong", ErrorType.NOT_ACK);
-        else if (ack == 0x18) throw new DriverError("An error occurred during transmission", ErrorType.CRC);
+    public ready(tr: () => Promise<void>, ca?: (reason: any) => Promise<void>, fi?: () => Promise<void>): void {
+        if (!ca) ca = this._defaultErrorHandler;
+        this.wakeUp().then(tr).catch(ca).finally(fi);
+    }
+
+    private async _defaultErrorHandler(reason: any) {
+        console.error(reason);
     }
 
     /**
-     * Computes the crc value for the given buffer. Based on the CRC16_CCIT_ZERO standard.
+     * Validates an acknowledgement byte.
+     * @param buffer 
+     * @throws a DriverError if the byte is invalid
+     */
+    protected validateACK(buffer: Buffer) {
+        const ack = buffer.readUInt8(0);
+        if (ack == 0x06 || ack == 0x15) return;
+        // 0x18 (not-ack) 0x21
+        throw new MalformedDataError("An error occurred during data transmission. Received malformed data.");
+    }
+
+    /**
+     * Computes the crc value from the given buffer. Based on the CRC16_CCIT_ZERO standard.
      * @param dataBuffer 
      * @returns the computed crc value (2 byte, 16 bit)
      */
@@ -85,12 +94,12 @@ export default class VantInterface extends EventEmitter {
      * Validates a buffer by computing its crc value and comparing it to the exspected crc value.
      * @param dataBuffer 
      * @param exspectedCRC 
-     * @returns whether the buffer is valid
+     * @throws a DriverError if the crc value is invalid
      */
     protected validateCRC(dataBuffer: Buffer, exspectedCRC: number) {
         const crc = this.computeCRC(dataBuffer);
         if (exspectedCRC === crc) return;
-        else throw new DriverError("Received malformed data", ErrorType.CRC);
+        else throw new MalformedDataError("An error occurred during data transmission. Received malformed data.");
     }
 
     /**
@@ -98,6 +107,7 @@ export default class VantInterface extends EventEmitter {
      * falls asleep after two minutes of inactivity.
      */
     public async wakeUp(): Promise<void> {
+        if (this.isClosed) throw new SerialConnectionError("Connection to device has been closed already!");
         let succeeded = false;
         let tries = 0;
         do {
@@ -109,7 +119,7 @@ export default class VantInterface extends EventEmitter {
                     this.port.once("readable", () => {
                         const response = String.raw`${this.port.read()}`;
                         if (response === "\n\r") {
-                            this.emit("awakening");
+                            this.emit("ready");
                             return resolve(true);
                         }
                         else return resolve(false);
@@ -118,7 +128,7 @@ export default class VantInterface extends EventEmitter {
             });
             tries++;
         } while (!succeeded && tries <= 3);
-        if (!succeeded) throw new DriverError("Failed to wake up console!", ErrorType.CONNECTION);
+        if (!succeeded) throw new SerialConnectionError("Failed to wake up console!");
     }
 
     /**
@@ -126,6 +136,7 @@ export default class VantInterface extends EventEmitter {
      * @returns whether the connection is valid
      */
     public async validateConnection(): Promise<boolean> {
+        if (this.isClosed) throw new SerialConnectionError("Connection to device has been closed already!");
         return new Promise<boolean>((resolve) => {
             this.port.write("TEST\n", (err) => {
                 if (err) resolve(false);
@@ -143,16 +154,17 @@ export default class VantInterface extends EventEmitter {
      * @returns the console's firmware date code
      */
     public async getFirmwareDateCode(): Promise<string> {
+        if (this.isClosed) throw new SerialConnectionError("Connection to device has been closed already!");
         return new Promise<string>((resolve, reject) => {
             this.port.write("VER\n", (err) => {
-                if (err) reject(new DriverError("Failed to get firmware date code", ErrorType.FAILED_TO_WRITE));
+                if (err) reject(new SerialConnectionError("Failed to send command to weather station."));
                 this.port.once("data", (data: Buffer) => {
                     const response = data.toString("utf-8");
                     try {
                         const firmwareDateCode = response.split("OK")[1].trim();
                         resolve(firmwareDateCode);
                     } catch (err) {
-                        reject(new DriverError("Failed to get firmware date code", ErrorType.INVALID_RESPONSE));
+                        reject(new MalformedDataError("Received malformed data"));
                     }
                 });
             });
@@ -164,6 +176,8 @@ export default class VantInterface extends EventEmitter {
      */
     public close(): void {
         this.port.close();
+        this.isClosed = true;
+        this.emit("close");
     }
 
     /**
@@ -171,9 +185,10 @@ export default class VantInterface extends EventEmitter {
      * @returns the highs and lows
      */
     public async getHighsAndLows(): Promise<HighsAndLows> {
-        return new Promise<any>((resolve, reject) => {
+        if (this.isClosed) throw new SerialConnectionError("Connection to device has been closed already!");
+        return new Promise<HighsAndLows>((resolve, reject) => {
             this.port.write("HILOWS\n", (err) => {
-                if (err) reject(new DriverError("Failed to get highs and lows", ErrorType.FAILED_TO_WRITE));
+                if (err) reject(new SerialConnectionError("Failed to send command to weather station."));
                 this.port.once("data", (data: Buffer) => {
                     // Check ack
                     this.validateACK(data);
@@ -192,26 +207,11 @@ export default class VantInterface extends EventEmitter {
         });
     }
 
-    /**
-     * Gets the currently measured weather data. There are two types of realtime data available called `LOOP` and `LOOP2`.
-     * Default is mostly LOOP. LOOP provides information about the alarm settings, LOOP2 holds additional graph data.
-     * @param packageType the type of realtime data to get (`RealtimePackage.LOOP` or `RealtimePackage.LOOP2`)
-     * @returns the currently measured weather data
-     */
-    public async getRealtimeData(packageType?: RealtimePackage): Promise<RealtimeData> {
-        return new Promise<any>((resolve, reject) => {
-            let stringToWrite;
-            if (packageType) {
-                stringToWrite = "LPS ";
-                if (packageType === RealtimePackage.LOOP) stringToWrite += "1 1";
-                else if (packageType === RealtimePackage.LOOP2) stringToWrite += "2 1";
-                else stringToWrite += "3 2";
-                stringToWrite += "\n";
-            } else {
-                stringToWrite = "LOOP 1\n";
-            }
-            this.port.write(stringToWrite, (err) => {
-                if (err) reject(new DriverError("Failed to get realtime data", ErrorType.FAILED_TO_WRITE));
+    public async getDefaultLOOP(): Promise<LOOP | LOOP2> {
+        if (this.isClosed) throw new SerialConnectionError("Connection to device has been closed already!");
+        return new Promise<LoopPackage>((resolve, reject) => {
+            this.port.write("LOOP 1\n", (err) => {
+                if (err) reject(new SerialConnectionError("Failed to send command to weather station."));
                 this.port.once("data", (data: Buffer) => {
                     // Check ack
                     this.validateACK(data);
@@ -241,6 +241,50 @@ export default class VantInterface extends EventEmitter {
             });
 
         });
+    }
+
+    public async getSimpleRealtimeRecord(): Promise<SimpleRealtimeRecord> {
+        if (this.isClosed) throw new SerialConnectionError("Connection to device has been closed already!");
+        const loopPackage = await this.getDefaultLOOP();
+
+        let windAvg: number | null;
+        if (loopPackage.wind.avg instanceof Object) {
+            windAvg = loopPackage.wind.avg.twoMinutes;
+        } else {
+            windAvg = loopPackage.wind.avg;
+        }
+        return {
+            pressure: {
+                current: loopPackage.pressure.current,
+                trend: {
+                    value: loopPackage.pressure.trend.value,
+                    text: loopPackage.pressure.trend.text,
+                }
+            },
+            temperature: {
+                in: loopPackage.temperature.in,
+                out: loopPackage.temperature.out,
+            },
+            humidity: {
+                in: loopPackage.humidity.in,
+                out: loopPackage.humidity.out
+            },
+            wind: {
+                current: loopPackage.wind.current,
+                avg: windAvg,
+                direction: loopPackage.wind.direction
+            },
+            rain: {
+                rate: loopPackage.rain.rate,
+                storm: loopPackage.rain.storm,
+                stormStartDate: loopPackage.rain.stormStartDate,
+                day: loopPackage.rain.day,
+            },
+            et: { day: loopPackage.et.day },
+            uv: loopPackage.uv,
+            solarRadiation: loopPackage.solarRadiation,
+            time: new Date(),
+        };
     }
 }
 

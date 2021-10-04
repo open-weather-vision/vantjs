@@ -1,12 +1,12 @@
 import BinaryParser, { ArrayType, Type } from "../util/BinaryParser";
-import { RealtimeData, RealtimePackage } from "../structures/RealtimeData";
+import { LOOP, LoopPackageType } from "../structures/LOOP";
 import nullables from "./reusables/nullables";
 import transformers from "./reusables/transformers";
 
 /**
  * Parser for a LOOP binary data package (without the acknowledgement byte and the crc bytes).
  */
-export default class LOOPParser extends BinaryParser<RealtimeData> {
+export default class LOOPParser extends BinaryParser<LOOP> {
     constructor() {
         super({
             pressure: {
@@ -216,8 +216,8 @@ export default class LOOPParser extends BinaryParser<RealtimeData> {
     }
 
     public parse(buffer: Buffer) {
-        const result = super.parse(buffer) as Partial<RealtimeData>;
-        result.packageType = RealtimePackage.LOOP;
-        return result as RealtimeData;
+        const result = super.parse(buffer) as Partial<LOOP>;
+        result.packageType = LoopPackageType.LOOP;
+        return result as LOOP;
     }
 }

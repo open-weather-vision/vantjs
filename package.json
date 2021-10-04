@@ -31,10 +31,14 @@
     "homepage": "https://github.com/harrydehix/vantjs#readme",
     "dependencies": {
         "crc-full": "^1.1.0",
+        "lodash.clonedeep": "^4.5.0",
+        "lodash.merge": "^4.6.2",
         "serialport": "^9.2.0",
         "sprintf-js": "^1.0.3"
     },
     "devDependencies": {
+        "@types/lodash.clonedeep": "^4.5.6",
+        "@types/lodash.merge": "^4.6.6",
         "@types/node": "^15.14.0",
         "@types/serialport": "^8.0.1",
         "@types/sprintf-js": "^1.1.2",

@@ -15,37 +15,45 @@ npm install vantjs
 
 The `VantInterface` class provides the basic features that all Vantage stations offer.
 ```typescript
-import { VantInterface } from "vantjs";
+import { VantInterface, inspect } from "vantjs";
 
-// The interface automatically connects to the console in the background and tries to wake it up.
+// Create a new interface
 const device = new VantInterface("COM3");
 
-// Once the console has been woken up, you can interact with it.
-device.once("awakening", async () => {
+// Wake up the console and interact with it when it's ready
+device.ready(async () => {
     console.log("Connected to device!");
 
-    // You always should validate the connection
+    // Validate the console's connection
     if (await device.validateConnection()) {
         console.log("Test worked!")
     } else {
         throw new Error("Connection to console failed.");
     }
 
-    // Getting the console's firmware date code
-    const firmwareVersion = await device.getFirmwareDateCode();
-    console.log(firmwareVersion);
+    // Get the console's firmware version
+    console.log("\n\nFirmware version: ");
+    const firmwareVersion = await device.getFirmwareVersion();
+    inspect(firmwareVersion);
 
-    // Getting the current high and low values
+    // Get the latest highs and lows values
+    console.log("\n\nHighs and lows: ");
     const highsAndLows = await device.getHighsAndLows();
-    console.log(highsAndLows);
+    inspect(highsAndLows);
 
-    // Getting the currently measured weather data
-    const realtimeData = await device.getRealtimeData();
-    console.log(realtimeData);
+    // Get the currently measured weather data (in short)
+    console.log("\n\nRealtime Data: ");
+    const realtimeDataShort = await device.getSimpleRealtimeRecord();
+    inspect(realtimeDataShort);
 
-    // You always should close the connection to the console once you are done
+    // Get the currently measured weather data (in detail)
+    console.log("\n\nRealtime Data: ");
+    const realtimeData = await device.getRichRealtimeRecord();
+    inspect(realtimeData);
+
+    // Close the connection to the console
     device.close();
-})
+});
 ```
 The `VantVueInterface`, `VantProInterface` and the `VantPro2Interface` offer station-dependent additional features.
 

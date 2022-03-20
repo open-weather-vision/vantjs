@@ -2,7 +2,12 @@ import VantPro2Interface from "./interfaces/VantPro2Interface";
 import inspect from "./util/inspect";
 
 // Create a new interface
-const device = new VantPro2Interface("COM4");
+const device = new VantPro2Interface("COM3");
+
+// Handle errors
+device.on("error", (err: Error) => {
+    console.error(err);
+});
 
 // Wake up the console and interact with it when it's ready
 device.ready(async () => {

@@ -1,13 +1,13 @@
 {
     "name": "vantjs",
-    "version": "0.2.0",
-    "description": "javascript/typescript interface to Davis VantagePro, Davis VantagePro 2 and Davis Vantage Vue",
+    "version": "0.3.0",
+    "description": "platform independent javascript/typescript interface to Davis Vantage Pro, Pro 2 and Vue",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "type": "commonjs",
     "scripts": {
         "watch": "npx tsc --watch",
-        "start": "cd ./dist && node test",
+        "start": "cd ./dist && node ",
         "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "repository": {

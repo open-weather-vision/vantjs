@@ -20,7 +20,7 @@ export default class VantPro2Interface extends VantInterface {
      * @returns the console's firmware version
      */
     public async getFirmwareVersion(): Promise<string> {
-        if (!this.port.isOpen) throw new ClosedConnectionError();
+        this.checkState();
         return new Promise<string>((resolve, reject) => {
             this.port.write("NVER\n", (err) => {
                 if (err) reject(new FailedToSendCommandError());
@@ -42,7 +42,7 @@ export default class VantPro2Interface extends VantInterface {
      * @returns the Vantage Pro 2's LOOP package
      */
     public async getLOOP(): Promise<LOOP> {
-        if (!this.port.isOpen) throw new ClosedConnectionError();
+        this.checkState();
         return new Promise<LOOP>((resolve, reject) => {
             this.port.write("LPS 1 1\n", (err) => {
                 if (err) reject(new FailedToSendCommandError());
@@ -78,7 +78,7 @@ export default class VantPro2Interface extends VantInterface {
      * @returns the Vantage Pro 2's LOOP2 package
      */
     public async getLOOP2(): Promise<LOOP2> {
-        if (!this.port.isOpen) throw new ClosedConnectionError();
+        this.checkState();
         return new Promise<LOOP2>((resolve, reject) => {
             this.port.write("LPS 2 1\n", (err) => {
                 if (err) reject(new FailedToSendCommandError());
@@ -125,7 +125,7 @@ export default class VantPro2Interface extends VantInterface {
      * @returns detailed weather information
      */
     public async getRichRealtimeRecord(): Promise<RichRealtimeRecord> {
-        if (!this.port.isOpen) throw new ClosedConnectionError();
+        this.checkState();
         const RichRealtimeRecord: RichRealtimeRecord = {
             pressure: {
                 current: null,

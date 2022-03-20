@@ -8,7 +8,7 @@ import { LoopPackage, LOOP, LOOP2 } from "../structures/LOOP";
 
 import { SimpleRealtimeRecord as SimpleRealtimeRecord } from "../structures/SimpleRealtimeRecord";
 import SerialConnectionError from "../errors/SerialConnectionError";
-import { EventEmitter } from "stream";
+import EventEmitter from "events";
 import MalformedDataError from "../errors/MalformedDataError";
 import ClosedConnectionError from "../errors/ClosedConnectionError";
 import FailedToSendCommandError from "../errors/FailedToSendCommandError";
@@ -16,6 +16,8 @@ import FailedToSendCommandError from "../errors/FailedToSendCommandError";
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). The device must be connected serially.
  * To interact with the weather station create an instance of this class and use the {@link ready} function.
+ *
+ * To handle errors listen to error events using `device.on("error", (err: Error) => { ... });`
  *
  * This interface is limited to station independent features.
  * Use {@link VantPro2Interface}, {@link VantProInterface} and {@link VantVueInterface} for station dependent features.
@@ -44,9 +46,16 @@ export default class VantInterface extends EventEmitter {
      * });
      * @param devicePath the serial path to your device
      */
-    constructor(devicePath: string) {
+    constructor(devicePath: string, baudRate?: number) {
         super();
-        this.port = new SerialPort({ path: devicePath, baudRate: 19200 });
+        this.port = new SerialPort({
+            path: devicePath,
+            baudRate: baudRate === undefined ? 19200 : baudRate,
+        });
+
+        this.port.on("error", (err) => {
+            this.emit("error", err);
+        });
     }
 
     /**
@@ -65,15 +74,12 @@ export default class VantInterface extends EventEmitter {
     }
 
     /**
-     * Wakes up the weather station (this is necessary in order to send and receive data), then executes the first passed method asynchronously.
+     * Wakes up the weather station (this is necessary in order to send and receive data), then executes the passed method asynchronously.
      * This method is the right place to access weather data from the weather station.
      * Be aware that after 2 minutes of inactivity, the weather station will fall asleep and must be woken up again via {@link wakeUp}.
      *
-     * Optionally you can pass a second method, the error handler. It gets called if an uncatched error is thrown in the
-     * first passed method. The default error handler logs the error to the console.
-     *
-     * Optionally you can pass a third method that gets called finally. By default is closes the connection to the weather station
-     * (if it is not already closed).
+     * Optionally you can pass a boolean to disable/enable auto close. It is enabled by default. This closes the
+     * connection to the weather station after executing the passed function.
      *
      * @example
      * const device = new VantInterface("COM3");
@@ -84,38 +90,23 @@ export default class VantInterface extends EventEmitter {
      *
      *      const highsAndLows = await getHighsAndLows();
      *      console.log("The maximum temperature today was " + highsAndLows.tempOut.high + "°F");
-     *  },
-     *  // gets called if an error occurrs (optional)
-     *  async(err) => {
-     *          MyOwnLogger.log(err);
-     *  },
-     *  // gets called finally (optional)
-     *  async() => {
-     *      device.close();
-     *      console.log("Finished :)");
      *  }
      * );
-     * @param tr
-     * @param ca
-     * @param fi
+     * @param fn
+     * @param autoClose
      */
-    public ready(
-        tr: () => Promise<void>,
-        ca?: (error: any) => Promise<void>,
-        fi?: () => Promise<void>
-    ): void {
-        if (!ca) ca = this._defaultErrorHandler;
-        if (!fi) fi = this._defaultFinallyHandler;
-        this.wakeUp().then(tr).catch(ca).finally(fi);
+    public ready(fn: () => Promise<void>, autoClose?: boolean): void {
+        this.wakeUp()
+            .then(fn)
+            .catch(async (err: Error) => {
+                this.emit("error", err);
+            })
+            .finally(async () => {
+                if (autoClose) {
+                    this.close();
+                }
+            });
     }
-
-    private _defaultErrorHandler = async (error: any) => {
-        console.error(error);
-    };
-
-    private _defaultFinallyHandler = async () => {
-        this.close();
-    };
 
     /**
      * Validates an acknowledgement byte.
@@ -153,12 +144,15 @@ export default class VantInterface extends EventEmitter {
             );
     }
 
+    protected checkState() {
+        if (!this.port.isOpen) throw new ClosedConnectionError();
+    }
+
     /**
      * Wakes up the weather station's console. This is necessary in order to send and receive data. The console automatically
      * falls asleep after two minutes of inactivity.
      */
     public async wakeUp(): Promise<void> {
-        if (!this.port.isOpen) throw new ClosedConnectionError();
         let succeeded = false;
         let tries = 0;
         do {
@@ -187,7 +181,7 @@ export default class VantInterface extends EventEmitter {
      * @returns whether the connection is valid
      */
     public async validateConnection(): Promise<boolean> {
-        if (!this.port.isOpen) throw new ClosedConnectionError();
+        this.checkState();
         return new Promise<boolean>((resolve) => {
             this.port.write("TEST\n", (err) => {
                 if (err) resolve(false);
@@ -205,7 +199,7 @@ export default class VantInterface extends EventEmitter {
      * @returns the console's firmware date code
      */
     public async getFirmwareDateCode(): Promise<string> {
-        if (!this.port.isOpen) throw new ClosedConnectionError();
+        this.checkState();
         return new Promise<string>((resolve, reject) => {
             this.port.write("VER\n", (err) => {
                 if (err) reject(new FailedToSendCommandError());
@@ -230,7 +224,7 @@ export default class VantInterface extends EventEmitter {
     public close(): void {
         if (this.port.isOpen) {
             this.port.close();
-            this.emit("close");
+            this.emit("closed");
         }
     }
 
@@ -239,7 +233,7 @@ export default class VantInterface extends EventEmitter {
      * @returns the highs and lows
      */
     public async getHighsAndLows(): Promise<HighsAndLows> {
-        if (!this.port.isOpen) throw new ClosedConnectionError();
+        this.checkState();
         return new Promise<HighsAndLows>((resolve, reject) => {
             this.port.write("HILOWS\n", (err) => {
                 if (err) reject(new FailedToSendCommandError());
@@ -271,7 +265,7 @@ export default class VantInterface extends EventEmitter {
      * @returns the default LOOP package of the weather station
      */
     public async getDefaultLOOP(): Promise<LOOP | LOOP2> {
-        if (!this.port.isOpen) throw new ClosedConnectionError();
+        this.checkState();
         return new Promise<LoopPackage>((resolve, reject) => {
             this.port.write("LOOP 1\n", (err) => {
                 if (err) reject(new FailedToSendCommandError());
@@ -328,7 +322,7 @@ export default class VantInterface extends EventEmitter {
      * @returns some basic weather data
      */
     public async getSimpleRealtimeRecord(): Promise<SimpleRealtimeRecord> {
-        if (!this.port.isOpen) throw new ClosedConnectionError();
+        this.checkState();
         const loopPackage = await this.getDefaultLOOP();
 
         let windAvg: number | null;
@@ -369,5 +363,9 @@ export default class VantInterface extends EventEmitter {
             solarRadiation: loopPackage.solarRadiation,
             time: new Date(),
         };
+    }
+
+    public isPortOpen(): boolean {
+        return this.port.isOpen;
     }
 }

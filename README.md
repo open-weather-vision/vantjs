@@ -5,9 +5,14 @@ vantjs is a platform-independent javascript and typescript interface to the Davi
 
 #### Development news
 
-❌ _Development still in progress. Some features are not finished and not stable._ <br>
-⚠ _Development is currently paused as I'm not at home currently. However, development will certainly continue this year (2022)._ <br>
-⏩ _Version 0.1.0 has just been released offering basic functionality to interact with your Vantage Pro, Pro 2 and Vue._
+❌ _Development still in progress. Some features are not stable._ <br>
+⏩ _Version 0.2.0 has just been released offering a lot of functionality to interact with your Vantage Pro, Pro 2 and Vue._
+
+**Upcoming stuff**:
+
+-   so called _weather data containers_ offering a more abstract way to interact with your weather station hiding
+    all the complex details
+-   currently I'm working on creating helpful guides and a clean documentation making developing with vantjs fun and easy!
 
 # Installation
 

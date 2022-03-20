@@ -6,7 +6,7 @@ vantjs is a platform-independent javascript and typescript interface to the Davi
 #### Development news
 
 ❌ _Development still in progress. Some features are not stable._ <br>
-⏩ _Version 0.2.0 has just been released offering a lot of functionality to interact with your Vantage Pro, Pro 2 and Vue._
+⏩ _Version 0.3.0 has just been released offering a lot of functionality to interact with your Vantage Pro, Pro 2 and Vue._
 
 **Upcoming stuff**:
 
@@ -29,6 +29,11 @@ import { VantInterface, inspect } from "vantjs";
 
 // Create a new interface
 const device = new VantInterface("COM3");
+
+// Handle errors properly
+device.on("error", (err: Error) => {
+    console.error("An error occurred!");
+});
 
 // Wake up the console and interact with it when it's ready
 device.ready(async () => {

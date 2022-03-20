@@ -5,6 +5,3 @@ export default class VantError extends Error {
         Error.captureStackTrace(this, this.constructor);
     }
 }
-
-export enum ErrorType {
-}

@@ -1,5 +1,9 @@
 import VantInterface from "./VantInterface";
 
-export default class VantProInterface extends VantInterface {
+/**
+ * Interface to the _Vantage Pro_ weather station. Is built on top of the {@link VantInterface}.
+ *
+ * Is currently offering nothing special.
+ */
 
-}
+export default class VantProInterface extends VantInterface {}

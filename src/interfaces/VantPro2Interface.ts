@@ -1,40 +1,51 @@
 import merge from "lodash.merge";
-import VantError, { ErrorType } from "../errors/VantError";
-import SerialConnectionError from "../errors/SerialConnectionError";
+import VantError from "../errors/VantError";
+import MalformedDataError from "../errors/MalformedDataError";
 import LOOP2Parser from "../parsers/LOOP2Parser";
 import LOOPParser from "../parsers/LOOPParser";
 import { RichRealtimeRecord } from "../structures/RichRealtimeRecord";
 import { LOOP, LOOP2 } from "../structures/LOOP";
-import VantInterface from "./VantInterface"
+import VantInterface from "./VantInterface";
+import FailedToSendCommandError from "../errors/FailedToSendCommandError";
+import ClosedConnectionError from "../errors/ClosedConnectionError";
 
+/**
+ * Interface to the _Vantage Pro 2_ weather station. Is built on top of the {@link VantInterface}.
+ *
+ * Offers station dependent features like {@link getRichRealtimeRecord}, {@link getLOOP}, {@link getLOOP2} and {@link getFirmwareVersion}.
+ */
 export default class VantPro2Interface extends VantInterface {
     /**
-     * Gets the console's firmware version. Only works on Vantage Pro 2 or Vantage Vue.
+     * Gets the console's firmware version.
      * @returns the console's firmware version
      */
     public async getFirmwareVersion(): Promise<string> {
-        if (this.isClosed) throw new SerialConnectionError("Connection to device has been closed already!");
+        if (!this.port.isOpen) throw new ClosedConnectionError();
         return new Promise<string>((resolve, reject) => {
             this.port.write("NVER\n", (err) => {
-                if (err) reject(new VantError("Failed to get firmware version", ErrorType.FAILED_TO_WRITE));
+                if (err) reject(new FailedToSendCommandError());
                 this.port.once("data", (data: Buffer) => {
                     const response = data.toString("utf-8");
                     try {
                         const firmwareVersion = response.split("OK")[1].trim();
                         resolve(`v${firmwareVersion}`);
                     } catch (err) {
-                        reject(new VantError("Failed to get firmware version", ErrorType.INVALID_RESPONSE));
+                        reject(new MalformedDataError());
                     }
                 });
             });
-        })
+        });
     }
 
+    /**
+     * Gets the Vantage Pro 2's LOOP package.
+     * @returns the Vantage Pro 2's LOOP package
+     */
     public async getLOOP(): Promise<LOOP> {
-        if (this.isClosed) throw new SerialConnectionError("Connection to device has been closed already!");
+        if (!this.port.isOpen) throw new ClosedConnectionError();
         return new Promise<LOOP>((resolve, reject) => {
             this.port.write("LPS 1 1\n", (err) => {
-                if (err) reject(new VantError("Failed to get realtime data", ErrorType.FAILED_TO_WRITE));
+                if (err) reject(new FailedToSendCommandError());
                 this.port.once("data", (data: Buffer) => {
                     // Check ack
                     this.validateACK(data);
@@ -44,23 +55,33 @@ export default class VantPro2Interface extends VantInterface {
                         const splittedData = this.splitCRCAckDataPackage(data);
 
                         // Check data (crc check)
-                        this.validateCRC(splittedData.weatherData, splittedData.crc);
+                        this.validateCRC(
+                            splittedData.weatherData,
+                            splittedData.crc
+                        );
 
-                        resolve(new LOOPParser().parse(splittedData.weatherData));
+                        resolve(
+                            new LOOPParser().parse(splittedData.weatherData)
+                        );
                     } else {
-                        throw new VantError("This weather station doesn't support explicitly querying LOOP (version 1) packages. Try getLOOP2() or getDefaultLOOP().");
+                        throw new VantError(
+                            "This weather station doesn't support explicitly querying LOOP (version 1) packages. Try getLOOP2() or getDefaultLOOP()."
+                        );
                     }
                 });
             });
-
         });
     }
 
+    /**
+     * Gets the Vantage Pro 2's LOOP2 package.
+     * @returns the Vantage Pro 2's LOOP2 package
+     */
     public async getLOOP2(): Promise<LOOP2> {
-        if (this.isClosed) throw new SerialConnectionError("Connection to device has been closed already!");
+        if (!this.port.isOpen) throw new ClosedConnectionError();
         return new Promise<LOOP2>((resolve, reject) => {
             this.port.write("LPS 2 1\n", (err) => {
-                if (err) reject(new VantError("Failed to get realtime data", ErrorType.FAILED_TO_WRITE));
+                if (err) reject(new FailedToSendCommandError());
                 this.port.once("data", (data: Buffer) => {
                     // Check ack
                     this.validateACK(data);
@@ -70,25 +91,41 @@ export default class VantPro2Interface extends VantInterface {
                         // LOOP 2 data is splitted (only tested on vantage pro 2)
                         const firstPartOfLOOP2 = data;
                         this.port.once("data", (data: Buffer) => {
-                            const dataFull = Buffer.concat([firstPartOfLOOP2, data]);
-                            const splittedData = this.splitCRCAckDataPackage(dataFull);
+                            const dataFull = Buffer.concat([
+                                firstPartOfLOOP2,
+                                data,
+                            ]);
+                            const splittedData =
+                                this.splitCRCAckDataPackage(dataFull);
 
                             // Check data (crc check)
-                            this.validateCRC(splittedData.weatherData, splittedData.crc);
+                            this.validateCRC(
+                                splittedData.weatherData,
+                                splittedData.crc
+                            );
 
-                            resolve(new LOOP2Parser().parse(splittedData.weatherData));
+                            resolve(
+                                new LOOP2Parser().parse(
+                                    splittedData.weatherData
+                                )
+                            );
                         });
                     } else {
-                        throw new VantError("This weather station doesn't support LOOP2 packages. Try getLOOP() or getDefaultLOOP().");
+                        throw new VantError(
+                            "This weather station doesn't support LOOP2 packages. Try getLOOP() or getDefaultLOOP()."
+                        );
                     }
                 });
             });
-
         });
     }
 
+    /**
+     * Gets detailed weather information from all sensors.
+     * @returns detailed weather information
+     */
     public async getRichRealtimeRecord(): Promise<RichRealtimeRecord> {
-        if (this.isClosed) throw new SerialConnectionError("Connection to device has been closed already!");
+        if (!this.port.isOpen) throw new ClosedConnectionError();
         const RichRealtimeRecord: RichRealtimeRecord = {
             pressure: {
                 current: null,
@@ -96,11 +133,11 @@ export default class VantPro2Interface extends VantInterface {
                 currentAbsolute: null,
                 trend: {
                     value: null,
-                    text: null
+                    text: null,
                 },
                 reductionMethod: { value: null, text: null },
                 userOffset: null,
-                calibrationOffset: null
+                calibrationOffset: null,
             },
             altimeter: null,
             heat: null,
@@ -108,24 +145,14 @@ export default class VantPro2Interface extends VantInterface {
             temperature: {
                 in: null,
                 out: null,
-                extra: [
-                    null, null,
-                    null, null,
-                    null, null,
-                    null
-                ]
+                extra: [null, null, null, null, null, null, null],
             },
             leafTemps: [null, null, null, null],
             soilTemps: [null, null, null, null],
             humidity: {
                 in: null,
                 out: null,
-                extra: [
-                    null, null,
-                    null, null,
-                    null, null,
-                    null
-                ]
+                extra: [null, null, null, null, null, null, null],
             },
             wind: {
                 current: null,
@@ -133,7 +160,7 @@ export default class VantPro2Interface extends VantInterface {
                 direction: null,
                 heaviestGust10min: { direction: null, speed: null },
                 chill: null,
-                thsw: null
+                thsw: null,
             },
             rain: {
                 rate: null,
@@ -144,7 +171,7 @@ export default class VantPro2Interface extends VantInterface {
                 year: null,
                 last15min: null,
                 lastHour: null,
-                last24h: null
+                last24h: null,
             },
             et: { day: null, month: null, year: null },
             soilMoistures: [null, null, null, null],
@@ -158,25 +185,22 @@ export default class VantPro2Interface extends VantInterface {
             sunset: null,
             time: new Date(),
         };
-        let loopPackage: any;
-        let loop2Package: any;
-        try {
-            loopPackage = await this.getLOOP();
-            delete loopPackage["alarms"];
-            delete loopPackage["packageType"];
-            delete loopPackage["nextArchiveRecord"];
-            loopPackage.wind.avg = { tenMinutes: loopPackage.wind.avg, twoMinutes: null };
 
-            loop2Package = await this.getLOOP2();
-            delete loop2Package["packageType"];
-            delete loop2Package["graphPointers"];
+        const loopPackage = (await this.getLOOP()) as any;
+        delete loopPackage["alarms"];
+        delete loopPackage["packageType"];
+        delete loopPackage["nextArchiveRecord"];
+        loopPackage.wind.avg = {
+            tenMinutes: loopPackage.wind.avg,
+            twoMinutes: null,
+        };
 
-            merge(RichRealtimeRecord, loopPackage);
-            merge(RichRealtimeRecord, loop2Package);
-        } catch (err) {
-            // TODO: handle error
-            console.error(err);
-        }
+        const loop2Package = (await this.getLOOP2()) as any;
+        delete loop2Package["packageType"];
+        delete loop2Package["graphPointers"];
+
+        merge(RichRealtimeRecord, loopPackage);
+        merge(RichRealtimeRecord, loop2Package);
 
         return RichRealtimeRecord as RichRealtimeRecord;
     }

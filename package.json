@@ -1,13 +1,13 @@
 {
     "name": "vantjs",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "javascript/typescript interface to Davis VantagePro, Davis VantagePro 2 and Davis Vantage Vue",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "type": "commonjs",
     "scripts": {
         "watch": "npx tsc --watch",
-        "start": "cd ./dist && node",
+        "start": "cd ./dist && node test",
         "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "repository": {
@@ -30,23 +30,23 @@
     },
     "homepage": "https://github.com/harrydehix/vantjs#readme",
     "dependencies": {
+        "@types/serialport": "^8.0.2",
         "crc-full": "^1.1.0",
         "lodash.clonedeep": "^4.5.0",
         "lodash.merge": "^4.6.2",
-        "serialport": "^9.2.0",
+        "serialport": "^10.4.0",
         "sprintf-js": "^1.0.3"
     },
     "devDependencies": {
         "@types/lodash.clonedeep": "^4.5.6",
         "@types/lodash.merge": "^4.6.6",
-        "@types/node": "^15.14.0",
-        "@types/serialport": "^8.0.1",
+        "@types/node": "^15.14.9",
         "@types/sprintf-js": "^1.1.2",
         "@typescript-eslint/eslint-plugin": "^4.28.1",
         "@typescript-eslint/parser": "^4.28.1",
         "eslint": "^7.29.0",
         "ts-node": "^10.0.0",
-        "typescript": "^4.3.5"
+        "typescript": "^4.6.2"
     },
     "eslintConfig": {
         "rules": {

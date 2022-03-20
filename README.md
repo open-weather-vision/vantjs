@@ -1,10 +1,15 @@
 # vantjs
+
 ![npm](https://img.shields.io/npm/v/vantjs) ![GitHub milestones](https://img.shields.io/github/milestones/all/harrydehix/vantjs) ![GitHub last commit](https://img.shields.io/github/last-commit/harrydehix/vantjs)<br>
 vantjs is a platform-independent javascript and typescript interface to the Davis Vantage Pro, Pro 2 and Vue. It works on any linux, windows or osx device!
+
 #### Development news
+
 ❌ _Development still in progress. Some features are not finished and not stable._ <br>
 ⏩ _Version 0.1.0 has just been released offering basic functionality to interact with your Vantage Pro, Pro 2 and Vue._
+
 # Installation
+
 ```
 npm install vantjs
 ```
@@ -12,6 +17,7 @@ npm install vantjs
 # Usage
 
 The `VantInterface` class provides the basic features that all Vantage stations offer.
+
 ```typescript
 import { VantInterface, inspect } from "vantjs";
 
@@ -24,15 +30,15 @@ device.ready(async () => {
 
     // Validate the console's connection
     if (await device.validateConnection()) {
-        console.log("Test worked!")
+        console.log("Test worked!");
     } else {
         throw new Error("Connection to console failed.");
     }
 
-    // Get the console's firmware version
+    // Get the console's firmware date code
     console.log("\n\nFirmware version: ");
-    const firmwareVersion = await device.getFirmwareVersion();
-    inspect(firmwareVersion);
+    const firmwareDateCode = await device.getFirmwareDateCode();
+    inspect(firmwareDateCode);
 
     // Get the latest highs and lows values
     console.log("\n\nHighs and lows: ");
@@ -44,15 +50,12 @@ device.ready(async () => {
     const realtimeDataShort = await device.getSimpleRealtimeRecord();
     inspect(realtimeDataShort);
 
-    // Close the connection to the console
-    device.close();
+    // Connection to console gets closed automatically
 });
 ```
+
 The `VantVueInterface`, `VantProInterface` and the `VantPro2Interface` offer station-dependent additional features.
 
 # Documentation
-_Coming soon!_
-
-# Contributing
 
 _Coming soon!_

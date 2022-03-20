@@ -2,7 +2,7 @@ import VantPro2Interface from "./interfaces/VantPro2Interface";
 import inspect from "./util/inspect";
 
 // Create a new interface
-const device = new VantPro2Interface("COM3");
+const device = new VantPro2Interface("COM4");
 
 // Wake up the console and interact with it when it's ready
 device.ready(async () => {
@@ -10,9 +10,9 @@ device.ready(async () => {
 
     // Validate the console's connection
     if (await device.validateConnection()) {
-        console.log("Test worked!")
+        console.log("Test worked!");
     } else {
-        throw new Error("Connection to console failed.");
+        throw new Error("Connection to console failed");
     }
 
     // Getting the console's firmware version
@@ -34,7 +34,4 @@ device.ready(async () => {
     console.log("\n\nRealtime Data: ");
     const realtimeData = await device.getRichRealtimeRecord();
     inspect(realtimeData);
-
-    // Closing the connection to the console
-    device.close();
 });

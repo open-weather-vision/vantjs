@@ -59,7 +59,7 @@ The `VantVueInterface`, `VantProInterface` and the `VantPro2Interface` offer sta
 
 Weather data containers are another level of abstraction hiding all the complex details from you. They are still in development, more news are coming soon.
 
-```js
+```ts
 import { RichRealtimeDataContainer, DeviceModel } from "vantjs";
 
 async function main() {

@@ -8,7 +8,6 @@ import SerialConnectionError from "../errors/SerialConnectionError";
 import MalformedDataError from "../errors/MalformedDataError";
 import ClosedConnectionError from "../errors/ClosedConnectionError";
 import merge from "lodash.merge";
-import MissingDevicePathError from "../errors/MissingDevicePathError";
 
 import { TypedEmitter } from "tiny-typed-emitter";
 
@@ -18,9 +17,22 @@ interface VantInterfaceEvents {
     open: () => void;
 }
 
+export enum OnCreate {
+    DoNothing = 1,
+    Open = 2,
+    OpenAndWakeUp = 3,
+}
+
 export interface VantInterfaceSettings {
-    path: string | null;
+    path: string;
     baudRate: number;
+    onCreate: OnCreate;
+}
+
+export interface MinimumVantInterfaceSettings {
+    path: string;
+    baudRate?: number;
+    onCreate?: OnCreate;
 }
 
 /**
@@ -36,43 +48,60 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     public readonly port: SerialPort;
     protected readonly crc16 = CRC.default("CRC16_CCIT_ZERO") as CRC;
 
-    private _settings: VantInterfaceSettings = {
-        path: null,
+    private settings: VantInterfaceSettings = <VantInterfaceSettings>{
         baudRate: 19200,
+        onCreate: OnCreate.OpenAndWakeUp,
     };
 
-    public get settings() {
-        return this._settings;
-    }
-
     /**
-     * Creates an interface to your vantage weather station (Vue, Pro, Pro 2). The device should be connected
-     * serially. The passed device path specifies the path to communicate with the weather station. On Windows paths
-     * like `COM1`, `COM2`, ... are common, on OSX devices common paths are `/dev/tty0`, `/dev/tty2`, ...
-     *
-     * To interact with the weather station use the {@link ready} function.
+     * Creates an interface to your vantage weather station (Vue, Pro, Pro 2) using the passed settings. The device should be connected
+     * serially. The passed path specifies the path to communicate with the weather station. On Windows paths
+     * like `COM1`, `COM2`, ... are common, on osx/linux devices common paths are `/dev/tty0`, `/dev/tty2`, ...
      *
      * Weather station dependent functionality (e.g. firmware version code for Vantage Pro 2 / Vue) is not supported on this interface.
      * Use {@link VantPro2Interface}, {@link VantProInterface} and {@link VantVueInterface} for station dependent features.
      *
      * @example
-     * const device = new VantInterface("COM3");
-     * device.ready(async () => {
-     *    console.log("Connected successfully!");
+     * const device = await VantInterface.create({ path: "COM3" });
      *
-     *    const highsAndLows = await getHighsAndLows();
-     *    console.log("The maximum temperature today was " + highsAndLows.tempOut.high + "°F at " + highsAndLows.tempOut.highTime + ".");
-     * });
-     * @param devicePath the serial path to your device
+     * await device.open();
+     * await device.wakeUp();
+     *
+     * const highsAndLows = await device.getHighsAndLows();
+     * inspect(highsAndLows);
+     * @param settings the settings
      */
-    constructor(settings?: Partial<VantInterfaceSettings>) {
+    public static async create(settings: MinimumVantInterfaceSettings) {
+        const device = new VantInterface(settings);
+
+        await this.setupInterface(device, settings);
+
+        return device;
+    }
+
+    protected static async setupInterface(
+        device: VantInterface,
+        settings: MinimumVantInterfaceSettings
+    ) {
+        if (settings.onCreate) {
+            switch (settings.onCreate) {
+                case OnCreate.DoNothing:
+                    break;
+                case OnCreate.Open:
+                    await device.open();
+                    break;
+                case OnCreate.OpenAndWakeUp:
+                    await device.open();
+                    await device.wakeUp();
+                    break;
+            }
+        }
+    }
+
+    protected constructor(settings: MinimumVantInterfaceSettings) {
         super();
 
-        this._settings = merge(this.settings, settings);
-
-        if (!this.settings.path) {
-            throw new MissingDevicePathError();
-        }
+        this.settings = merge(this.settings, settings);
 
         this.port = new SerialPort({
             path: this.settings.path,

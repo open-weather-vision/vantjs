@@ -1,68 +1,59 @@
-import { TypedEmitter } from "tiny-typed-emitter";
-import cloneDeep from "lodash.clonedeep";
 import merge from "lodash.merge";
-import { VantPro2Interface, VantVueInterface } from "..";
-import createNullRichRealtimeRecord from "../structures/createNullRichRealtimeRecord";
-import { RichRealtimeRecord } from "../structures/RichRealtimeRecord";
-import { HighsAndLows } from "../structures/HighsAndLows";
+import VantPro2Interface from "../interfaces/VantPro2Interface";
+import VantVueInterface from "../interfaces/VantVueInterface";
 import createNullHighsAndLows from "../structures/createNullHighsAndLows";
+import createNullRichRealtimeRecord from "../structures/createNullRichRealtimeRecord";
+import { HighsAndLows } from "../structures/HighsAndLows";
 import { DeviceModel } from "./DeviceModel";
-
-export type BigRealtimeDataContainerSettings = {
-    device: {
-        path: string;
-        baudRate: number;
-        model: DeviceModel.VantageVue | DeviceModel.VantagePro2;
-    };
-    updateInterval: number;
-};
-
-interface BigRealtimeDataContainerEvents {
-    open: () => void;
-    close: () => void;
-    update: (err?: any) => void;
-}
+import WeatherDataContainer, {
+    MinimumWeatherDataContainerSettings,
+} from "./WeatherDataContainer";
+import { RichRealtimeRecord } from "../structures/RichRealtimeRecord";
 
 export default class BigRealtimeDataContainer
-    extends TypedEmitter<BigRealtimeDataContainerEvents>
+    extends WeatherDataContainer<
+        VantPro2Interface | VantVueInterface,
+        DeviceModel.VantagePro2 | DeviceModel.VantageVue
+    >
     implements RichRealtimeRecord
 {
-    public settings: BigRealtimeDataContainerSettings = {
-        device: {
-            path: "COM1",
-            baudRate: 19200,
-            model: DeviceModel.VantagePro2,
-        },
-        updateInterval: 60,
-    };
-
     public highsAndLows: HighsAndLows = createNullHighsAndLows();
 
     public pressure = {
-        current: null,
-        currentRaw: null,
-        currentAbsolute: null,
+        current: null as number | null,
+        currentRaw: null as number | null,
+        currentAbsolute: null as number | null,
         trend: {
-            value: null,
-            text: null,
+            value: null as -60 | -20 | 0 | 20 | 60 | null,
+            text: null as
+                | "Falling Rapidly"
+                | "Steady"
+                | "Rising Rapidly"
+                | "Rising Slowly"
+                | "Falling Slowly"
+                | null,
         },
         reductionMethod: {
-            value: null,
-            text: null,
+            value: null as 0 | 1 | 2 | null,
+            text: null as
+                | "user offset"
+                | "altimeter setting"
+                | "NOAA bar reduction"
+                | null,
         },
-        userOffset: null,
-        calibrationOffset: null,
+        userOffset: null as number | null,
+        calibrationOffset: null as number | null,
     };
 
-    public altimeter = null;
+    public altimeter: number | null = null;
 
-    public heat = null;
+    public heat: number | null = null;
 
-    public dewpoint = null;
+    public dewpoint: number | null = null;
 
     public temperature = {
-        in: null,
-        out: null,
+        in: null as number | null,
+        out: null as number | null,
         extra: [null, null, null, null, null, null, null] as [
             number | null,
             number | null,
@@ -89,8 +80,8 @@ export default class BigRealtimeDataContainer
     ];
 
     public humidity = {
-        in: null,
-        out: null,
+        in: null as number | null,
+        out: null as number | null,
         extra: [null, null, null, null, null, null, null] as [
             number | null,
             number | null,
@@ -103,30 +94,36 @@ export default class BigRealtimeDataContainer
     };
 
     public wind = {
-        current: null,
-        avg: { tenMinutes: null, twoMinutes: null },
-        direction: null,
-        heaviestGust10min: { direction: null, speed: null },
-        chill: null,
-        thsw: null,
+        current: null as number | null,
+        avg: {
+            tenMinutes: null as number | null,
+            twoMinutes: null as number | null,
+        },
+        direction: null as number | null,
+        heaviestGust10min: {
+            direction: null as number | null,
+            speed: null as number | null,
+        },
+        chill: null as number | null,
+        thsw: null as number | null,
     };
 
     public rain = {
-        rate: null,
-        storm: null,
-        stormStartDate: null,
-        day: null,
-        month: null,
-        year: null,
-        last15min: null,
-        lastHour: null,
-        last24h: null,
+        rate: null as number | null,
+        storm: null as number | null,
+        stormStartDate: null as Date | null,
+        day: null as number | null,
+        month: null as number | null,
+        year: null as number | null,
+        last15min: null as number | null,
+        lastHour: null as number | null,
+        last24h: null as number | null,
     };
 
     public et = {
-        day: null,
-        month: null,
-        year: null,
+        day: null as number | null,
+        month: null as number | null,
+        year: null as number | null,
     };
 
     public soilMoistures = [null, null, null, null] as [
@@ -143,139 +140,69 @@ export default class BigRealtimeDataContainer
         number | null
     ];
 
-    public uv = null;
+    public uv: number | null = null;
 
-    public solarRadiation = null;
+    public solarRadiation: number | null = null;
 
-    public transmitterBatteryStatus = null;
+    public transmitterBatteryStatus: number | null = null;
 
-    public consoleBatteryVoltage = null;
+    public consoleBatteryVoltage: number | null = null;
 
     public forecast = {
-        iconNumber: null,
-        iconText: null,
-        rule: null,
+        iconNumber: null as 8 | 6 | 2 | 3 | 18 | 19 | 7 | 22 | 23 | null,
+        iconText: null as
+            | "Mostly Clear"
+            | "Partly Cloudy"
+            | "Mostly Cloudy"
+            | "Mostly Cloudy, Rain within 12 hours"
+            | "Mostly Cloudy, Snow within 12 hours"
+            | "Mostly Cloudy, Rain or Snow within 12 hours"
+            | "Partly Cloudy, Rain within 12 hours"
+            | "Partly Cloudy, Rain or Snow within 12 hours"
+            | "Partly Cloudy, Snow within 12 hours"
+            | null,
+        rule: null as number | null,
     };
 
-    public sunrise = null;
+    public sunrise: string | null = null;
 
-    public sunset = null;
+    public sunset: string | null = null;
 
-    public time = new Date();
+    public time: Date = new Date();
 
-    private currentDevice: VantPro2Interface | VantVueInterface | null = null;
-    private currentSettings: BigRealtimeDataContainerSettings | null = null;
-    private currentUpdateInterval: NodeJS.Timeout | null = null;
-    private currentReconnectTimeout: NodeJS.Timeout | null = null;
-
-    constructor(settings: Partial<BigRealtimeDataContainerSettings>) {
-        super();
-        this.settings = merge(this.settings, settings);
+    public static async create(
+        settings: MinimumWeatherDataContainerSettings<
+            DeviceModel.VantagePro2 | DeviceModel.VantageVue
+        >
+    ) {
+        return await this.initialize(new BigRealtimeDataContainer(), settings);
     }
 
-    public close = () => {
-        return new Promise<void>((resolve) => {
-            if (this.currentUpdateInterval) {
-                clearInterval(this.currentUpdateInterval);
-            }
-            this.currentUpdateInterval = null;
+    private constructor() {
+        super();
+    }
 
-            if (this.currentReconnectTimeout) {
-                clearTimeout(this.currentReconnectTimeout);
-            }
-            this.currentReconnectTimeout = null;
-
-            if (this.currentDevice) {
-                this.currentDevice.close().then(() => {
-                    this.currentDevice = null;
-                    this.emit("close");
-                    resolve();
-                });
-            } else {
-                this.currentDevice = null;
-                resolve();
-            }
-        });
+    protected onConnectionError = async () => {
+        merge(this, createNullRichRealtimeRecord());
+        this.highsAndLows = createNullHighsAndLows();
     };
 
-    public open = () => {
-        return new Promise<void>((resolve) => {
-            this.close().then(() => {
-                const currentSettings = cloneDeep(this.settings);
-                this.setupInterface(cloneDeep(currentSettings));
-
-                const currentDevice = this.currentDevice as
-                    | VantPro2Interface
-                    | VantVueInterface;
-
-                this.setupUpdateCycle(currentDevice, currentSettings);
-
-                currentDevice.once("open", () => {
-                    this.emit("open");
-                    resolve();
-                });
-            });
-        });
-    };
-
-    public firstUpdate = () => {
-        return new Promise<void>((resolve) => {
-            this.close().then(() => {
-                const currentSettings = cloneDeep(this.settings);
-                this.setupInterface(cloneDeep(currentSettings));
-
-                const currentDevice = this.currentDevice as
-                    | VantPro2Interface
-                    | VantVueInterface;
-
-                this.setupUpdateCycle(currentDevice, currentSettings);
-
-                this.once("update", () => {
-                    resolve();
-                });
-            });
-        });
-    };
-
-    private setupInterface = (
-        currentSettings: BigRealtimeDataContainerSettings
+    protected onUpdate = async (
+        device: VantPro2Interface | VantVueInterface
     ) => {
-        const { path, model, baudRate } = currentSettings.device;
-
-        switch (model) {
-            case DeviceModel.VantagePro2:
-                this.currentDevice = new VantPro2Interface({ path, baudRate });
-                break;
-            case DeviceModel.VantageVue:
-                this.currentDevice = new VantVueInterface({
-                    path,
-                    baudRate,
-                });
-                break;
+        try {
+            const richRealtimeRecord = await device.getRichRealtimeRecord();
+            merge(this, richRealtimeRecord);
+        } catch (err) {
+            merge(this, createNullRichRealtimeRecord());
+            throw err;
         }
-    };
 
-    private setupUpdateCycle = (
-        device: VantPro2Interface | VantVueInterface,
-        currentSettings: BigRealtimeDataContainerSettings
-    ) => {
-        const update = async () => {
-            try {
-                await device.open();
-                await device.wakeUp();
-                const richRealtimeRecord = await device.getRichRealtimeRecord();
-                merge(this, richRealtimeRecord);
-                this.highsAndLows = await device.getHighsAndLows();
-                this.emit("update");
-            } catch (err) {
-                merge(this, createNullRichRealtimeRecord());
-                this.emit("update", err);
-            }
-        };
-
-        this.currentUpdateInterval = setInterval(
-            update,
-            currentSettings.updateInterval * 1000
-        );
+        try {
+            this.highsAndLows = await device.getHighsAndLows();
+        } catch (err) {
+            this.highsAndLows = createNullHighsAndLows();
+            throw err;
+        }
     };
 }

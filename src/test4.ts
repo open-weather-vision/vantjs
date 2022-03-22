@@ -1,19 +1,28 @@
-import { EventEmitter } from "events";
+import "source-map-support/register";
+import { DeviceModel } from "./dataContainers/DeviceModel";
+import { OnCreate } from "./dataContainers/WeatherDataContainer";
+import SmallRealtimeDataContainer from "./dataContainers/SmallRealtimeDataContainer";
 
-class TestEventEmitter extends EventEmitter {
-    constructor() {
-        super();
-        setInterval(() => {
-            this.emit("lol");
-        }, 5000);
-    }
-}
-
-const test = new TestEventEmitter();
-
-for (let i = 0; i < 12; i++) {
-    test.once("lol", () => {
-        console.log("got called!: " + test.listenerCount("lol"));
+async function main() {
+    const weatherData = await SmallRealtimeDataContainer.create({
+        device: {
+            path: "COM4",
+            model: DeviceModel.VantagePro2,
+        },
+        updateInterval: 3,
+        onCreate: OnCreate.WaitForFirstValidUpdate,
     });
-    console.log(test.listenerCount("lol"));
+
+    while (true) {
+        await weatherData.waitForUpdate();
+        console.log(
+            weatherData.time.toLocaleString() +
+                ": " +
+                weatherData.temperature.in
+        );
+    }
+
+    await weatherData.close();
 }
+
+main();

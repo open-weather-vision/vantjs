@@ -3,7 +3,10 @@ import MalformedDataError from "../errors/MalformedDataError";
 import LOOP2Parser from "../parsers/LOOP2Parser";
 import LOOPParser from "../parsers/LOOPParser";
 import { RichRealtimeRecord } from "../structures/RichRealtimeRecord";
-import VantInterface from "./VantInterface";
+import VantInterface, {
+    MinimumVantInterfaceSettings,
+    OnCreate,
+} from "./VantInterface";
 import UnsupportedDeviceModelError from "../errors/UnsupportedDeviceModelError";
 
 /**
@@ -12,6 +15,29 @@ import UnsupportedDeviceModelError from "../errors/UnsupportedDeviceModelError";
  * Offers station dependent features like {@link getRichRealtimeRecord}, {@link getLOOP}, {@link getLOOP2} and {@link getFirmwareVersion}.
  */
 export default class VantPro2Interface extends VantInterface {
+    /**
+     * Creates an interface to your vantage pro 2 weather station using the passed settings. The device should be connected
+     * serially. The passed path specifies the path to communicate with the weather station. On Windows paths
+     * like `COM1`, `COM2`, ... are common, on osx/linux devices common paths are `/dev/tty0`, `/dev/tty2`, ...
+     *
+     * @example
+     * const device = await VantPro2Interface.create({ path: "COM3" });
+     *
+     * await device.open();
+     * await device.wakeUp();
+     *
+     * const highsAndLows = await device.getHighsAndLows();
+     * inspect(highsAndLows);
+     * @param settings the settings
+     */
+    public static async create(settings: MinimumVantInterfaceSettings) {
+        const device = new VantPro2Interface(settings);
+
+        await this.setupInterface(device, settings);
+
+        return device;
+    }
+
     /**
      * Gets the console's firmware version.
      * @returns the console's firmware version

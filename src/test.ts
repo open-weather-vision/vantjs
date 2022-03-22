@@ -3,7 +3,7 @@ import inspect from "./util/inspect";
 
 async function main() {
     try {
-        const device = new VantPro2Interface({ path: "COM4" });
+        const device = await VantPro2Interface.create({ path: "COM4" });
 
         device.on("open", () => {
             console.log("Opening-Event!");

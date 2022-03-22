@@ -1,20 +1,22 @@
-import BigRealtimeDataContainer from "./dataContainers/BigRealtimeDataContainer";
-import { DeviceModel } from "./dataContainers/DeviceModel";
 import "source-map-support/register";
+import { DeviceModel } from "./dataContainers/DeviceModel";
+import BigRealtimeDataContainer from "./dataContainers/BigRealtimeDataContainer";
+import { OnCreate } from "./dataContainers/WeatherDataContainer";
 
 async function main() {
-    const weatherData: BigRealtimeDataContainer = new BigRealtimeDataContainer({
+    const weatherData = await BigRealtimeDataContainer.create({
         device: {
             path: "COM4",
             model: DeviceModel.VantagePro2,
-            baudRate: 19200,
         },
-        updateInterval: 4,
+        updateInterval: 3,
+        onCreate: OnCreate.WaitForFirstValidUpdate,
     });
 
-    await weatherData.firstUpdate();
-
-    console.log(weatherData.temperature.in + " °F");
+    while (true) {
+        await weatherData.waitForUpdate();
+        console.log(weatherData.temperature.in + " °F");
+    }
 
     await weatherData.close();
 }

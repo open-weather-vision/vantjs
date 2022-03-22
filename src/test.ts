@@ -67,7 +67,7 @@ async function main() {
         const richRealtimeRecord = await device.getRichRealtimeRecord();
         inspect(richRealtimeRecord);
 
-        //await device.close();
+        await device.close();
     } catch (err) {
         console.error("Catched error: " + err);
     }

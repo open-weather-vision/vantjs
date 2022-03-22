@@ -250,16 +250,19 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * Closes the connection to the weather station (if it's open).
      */
     public close = () => {
-        return new Promise<void>((reject, resolve) => {
+        return new Promise<void>((resolve, reject) => {
             if (this.port.closing) {
                 this.port.once("close", () => {
                     resolve();
                 });
             } else if (this.port.isOpen) {
-                this.port.once("close", () => {
-                    resolve();
+                this.port.close((err) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
                 });
-                this.port.close();
             } else {
                 resolve();
             }

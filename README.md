@@ -30,13 +30,7 @@ The `VantInterface` class provides the basic features that all Vantage stations 
 import { VantInterface, inspect } from "vantjs";
 
 async function main() {
-    const device = new VantInterface({ path: "COM4", baudRate: 19200 });
-
-    // Opening the connection to the device
-    await device.open();
-
-    // Waking up the device
-    await device.wakeUp();
+    const device = await VantInterface.create({ path: "COM4" });
 
     // Gettings highs and lows
     const highsAndLows = await device.getHighsAndLows();
@@ -60,25 +54,30 @@ The `VantVueInterface`, `VantProInterface` and the `VantPro2Interface` offer sta
 Weather data containers are another level of abstraction hiding all the complex details from you. They are still in development, more news are coming soon.
 
 ```ts
-import { RichRealtimeDataContainer, DeviceModel } from "vantjs";
+import { BigRealtimeDataContainer, DeviceModel } from "vantjs";
 
 async function main() {
-    const weather = new RichRealtimeDataContainer({
+    const weather = await BigRealtimeDataContainer.create({
         device: {
             path: "COM4",
             model: DeviceModel.VantagePro2,
-            baudRate: 19200,
         },
-        // the interval the weather data container is updated
-        updateInterval: 4,
+        // the interval (in seconds) the realtime data container is updated
+        updateInterval: 10,
     });
 
-    // waiting for the first update to happen
-    await weather.firstUpdate();
-
-    // accessing the desired weather data
-    console.log(weather.temperature.in + "°F");
-    console.log(weather.temperature.out + "°F");
+    for (let i = 0; i < 100; i++) {
+        const err = await weather.waitForUpdate();
+        if (err) {
+            console.error("Device not connected!");
+        } else {
+            console.log(
+                `${weather.time.toLocaleString()}: ${
+                    weather.temperature.out
+                } °F`
+            );
+        }
+    }
 
     // closing the connection
     await weather.close();

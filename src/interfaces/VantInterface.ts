@@ -1,17 +1,27 @@
 import { SerialPort } from "serialport";
 import { CRC } from "crc-full";
 import HighsAndLowsParser from "../parsers/HighsAndLowsParser";
-import { HighsAndLows } from "../structures/HighsAndLows";
 import LOOPParser from "../parsers/LOOPParser";
 import LOOP2Parser from "../parsers/LOOP2Parser";
-import { LoopPackage, LOOP, LOOP2 } from "../structures/LOOP";
 
-import { SimpleRealtimeRecord as SimpleRealtimeRecord } from "../structures/SimpleRealtimeRecord";
 import SerialConnectionError from "../errors/SerialConnectionError";
-import EventEmitter from "events";
 import MalformedDataError from "../errors/MalformedDataError";
 import ClosedConnectionError from "../errors/ClosedConnectionError";
-import FailedToSendCommandError from "../errors/FailedToSendCommandError";
+import merge from "lodash.merge";
+import MissingDevicePathError from "../errors/MissingDevicePathError";
+
+import { TypedEmitter } from "tiny-typed-emitter";
+
+interface VantInterfaceEvents {
+    close: () => void;
+    awakening: () => void;
+    open: () => void;
+}
+
+export interface VantInterfaceSettings {
+    path: string | null;
+    baudRate: number;
+}
 
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). The device must be connected serially.
@@ -22,9 +32,18 @@ import FailedToSendCommandError from "../errors/FailedToSendCommandError";
  * This interface is limited to station independent features.
  * Use {@link VantPro2Interface}, {@link VantProInterface} and {@link VantVueInterface} for station dependent features.
  */
-export default class VantInterface extends EventEmitter {
-    protected readonly port: SerialPort;
+export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
+    public readonly port: SerialPort;
     protected readonly crc16 = CRC.default("CRC16_CCIT_ZERO") as CRC;
+
+    private _settings: VantInterfaceSettings = {
+        path: null,
+        baudRate: 19200,
+    };
+
+    public get settings() {
+        return this._settings;
+    }
 
     /**
      * Creates an interface to your vantage weather station (Vue, Pro, Pro 2). The device should be connected
@@ -46,15 +65,27 @@ export default class VantInterface extends EventEmitter {
      * });
      * @param devicePath the serial path to your device
      */
-    constructor(devicePath: string, baudRate?: number) {
+    constructor(settings?: Partial<VantInterfaceSettings>) {
         super();
+
+        this._settings = merge(this.settings, settings);
+
+        if (!this.settings.path) {
+            throw new MissingDevicePathError();
+        }
+
         this.port = new SerialPort({
-            path: devicePath,
-            baudRate: baudRate === undefined ? 19200 : baudRate,
+            path: this.settings.path,
+            baudRate: this.settings.baudRate,
+            autoOpen: false,
         });
 
-        this.port.on("error", (err) => {
-            this.emit("error", err);
+        this.port.on("close", () => {
+            this.emit("close");
+        });
+
+        this.port.on("open", () => {
+            this.emit("open");
         });
     }
 
@@ -63,7 +94,7 @@ export default class VantInterface extends EventEmitter {
      * @param buffer
      * @returns
      */
-    protected splitCRCAckDataPackage(buffer: Buffer) {
+    protected splitCRCAckDataPackage = (buffer: Buffer) => {
         const bufferCopy = Buffer.alloc(buffer.length - 3);
         buffer.copy(bufferCopy, 0, 1, buffer.length - 2);
         return {
@@ -71,63 +102,63 @@ export default class VantInterface extends EventEmitter {
             weatherData: bufferCopy,
             crc: buffer.readUInt16BE(buffer.length - 2),
         };
-    }
+    };
 
-    /**
-     * Wakes up the weather station (this is necessary in order to send and receive data), then executes the passed method asynchronously.
-     * This method is the right place to access weather data from the weather station.
-     * Be aware that after 2 minutes of inactivity, the weather station will fall asleep and must be woken up again via {@link wakeUp}.
-     *
-     * Optionally you can pass a boolean to disable/enable auto close. It is enabled by default. This closes the
-     * connection to the weather station after executing the passed function.
-     *
-     * @example
-     * const device = new VantInterface("COM3");
-     * device.ready(
-     *  // gets called when the weather station is ready
-     *  async () => {
-     *      console.log("Connected successfully!");
-     *
-     *      const highsAndLows = await getHighsAndLows();
-     *      console.log("The maximum temperature today was " + highsAndLows.tempOut.high + "°F");
-     *  }
-     * );
-     * @param fn
-     * @param autoClose
-     */
-    public ready(fn: () => Promise<void>, autoClose?: boolean): void {
-        this.wakeUp()
-            .then(fn)
-            .catch(async (err: Error) => {
-                this.emit("error", err);
-            })
-            .finally(async () => {
-                if (autoClose) {
-                    this.close();
+    protected writeAndWaitForEvent = (chunk: any, event: string) => {
+        return new Promise<void>((resolve, reject) => {
+            this.port.write(chunk, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    this.port.once(event, () => {
+                        resolve();
+                    });
                 }
             });
-    }
+        });
+    };
+
+    protected writeAndWaitForBuffer = (chunk: any) => {
+        return new Promise<Buffer>((resolve, reject) => {
+            this.port.write(chunk, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    this.port.once("data", (data: Buffer) => {
+                        resolve(data);
+                    });
+                }
+            });
+        });
+    };
+
+    protected waitForBuffer = () => {
+        return new Promise<Buffer>((resolve) => {
+            this.port.once("data", (data: Buffer) => {
+                resolve(data);
+            });
+        });
+    };
 
     /**
      * Validates an acknowledgement byte.
      * @param buffer
-     * @throws a MalformedDataError if the byte is invalid
      */
-    protected validateACK(buffer: Buffer) {
+    protected validateAcknowledgementByte = (buffer: Buffer) => {
         const ack = buffer.readUInt8(0);
         if (ack == 0x06 || ack == 0x15) return;
         // 0x18 (not-ack) 0x21
         throw new MalformedDataError("Received invalid acknowledgement byte!");
-    }
+    };
 
     /**
      * Computes the CRC value from the given buffer. Based on the CRC16_CCIT_ZERO standard.
      * @param dataBuffer
      * @returns the computed CRC value (2 byte, 16 bit)
      */
-    protected computeCRC(dataBuffer: Buffer): number {
+    protected computeCRC = (dataBuffer: Buffer) => {
         return this.crc16.compute(dataBuffer);
-    }
+    };
 
     /**
      * Validates a buffer by computing its CRC value and comparing it to the exspected CRC value.
@@ -135,194 +166,169 @@ export default class VantInterface extends EventEmitter {
      * @param exspectedCRC
      * @throws a MalformedDataError if the crc value is invalid
      */
-    protected validateCRC(dataBuffer: Buffer, exspectedCRC: number) {
+    protected validateCRC = (dataBuffer: Buffer, exspectedCRC: number) => {
         const crc = this.computeCRC(dataBuffer);
         if (exspectedCRC === crc) return;
         else
             throw new MalformedDataError(
                 "Received invalid CRC value. An error occurred during data transmission. Received malformed data."
             );
-    }
+    };
 
-    protected checkState() {
+    protected validatePort = () => {
         if (!this.port.isOpen) throw new ClosedConnectionError();
-    }
+    };
+
+    public open = async () => {
+        return new Promise<void>((resolve, reject) => {
+            if (this.port.isOpen) {
+                resolve();
+            } else if (this.port.opening) {
+                this.port.once("open", () => {
+                    resolve();
+                });
+            } else {
+                this.port.open((err) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                });
+            }
+        });
+    };
 
     /**
      * Wakes up the weather station's console. This is necessary in order to send and receive data. The console automatically
      * falls asleep after two minutes of inactivity.
      */
-    public async wakeUp(): Promise<void> {
+    public wakeUp = async () => {
         let succeeded = false;
         let tries = 0;
         do {
-            succeeded = await new Promise<boolean>((resolve) => {
-                this.port.write("\n", (err) => {
-                    if (err) {
-                        return resolve(false);
-                    }
-                    this.port.once("readable", () => {
-                        const response = String.raw`${this.port.read()}`;
-                        if (response === "\n\r") {
-                            this.emit("ready");
-                            return resolve(true);
-                        } else return resolve(false);
-                    });
-                });
-            });
+            await this.writeAndWaitForEvent("\n", "readable");
+            const response = String.raw`${this.port.read()}`;
+            if (response === "\n\r") {
+                this.emit("awakening");
+                succeeded = true;
+            } else {
+                succeeded = false;
+            }
             tries++;
         } while (!succeeded && tries <= 3);
-        if (!succeeded)
+        if (!succeeded) {
             throw new SerialConnectionError("Failed to wake up console!");
-    }
+        }
+    };
 
     /**
      * Validates the connection to the console by running the TEST command. No error is thrown on failure, instead `false` is resolved.
      * @returns whether the connection is valid
      */
-    public async validateConnection(): Promise<boolean> {
-        this.checkState();
-        return new Promise<boolean>((resolve) => {
-            this.port.write("TEST\n", (err) => {
-                if (err) resolve(false);
-                this.port.once("data", (data: Buffer) => {
-                    const response = data.toString("utf-8", 2, 6);
-                    if (response === "TEST") resolve(true);
-                    else resolve(false);
-                });
-            });
-        });
-    }
+    public validateConnection = async () => {
+        this.validatePort();
+        const data = await this.writeAndWaitForBuffer("TEST\n");
+        return data.toString("utf-8", 2, 6) === "TEST";
+    };
 
     /**
      * Gets the console's firmware date code.
      * @returns the console's firmware date code
      */
-    public async getFirmwareDateCode(): Promise<string> {
-        this.checkState();
-        return new Promise<string>((resolve, reject) => {
-            this.port.write("VER\n", (err) => {
-                if (err) reject(new FailedToSendCommandError());
-                this.port.once("data", (data: Buffer) => {
-                    const response = data.toString("utf-8");
-                    try {
-                        const firmwareDateCode = response.split("OK")[1].trim();
-                        resolve(firmwareDateCode);
-                    } catch (err) {
-                        reject(
-                            new MalformedDataError("Received malformed data")
-                        );
-                    }
-                });
-            });
-        });
-    }
+    public getFirmwareDateCode = async () => {
+        this.validatePort();
+        const data = await this.writeAndWaitForBuffer("VER\n");
+        try {
+            return data.toString("utf-8").split("OK")[1].trim();
+        } catch (err) {
+            throw new MalformedDataError("Received malformed data");
+        }
+    };
 
     /**
      * Closes the connection to the weather station (if it's open).
      */
-    public close(): void {
-        if (this.port.isOpen) {
-            this.port.close();
-            this.emit("closed");
-        }
-    }
+    public close = () => {
+        return new Promise<void>((reject, resolve) => {
+            if (this.port.closing) {
+                this.port.once("close", () => {
+                    resolve();
+                });
+            } else if (this.port.isOpen) {
+                this.port.once("close", () => {
+                    resolve();
+                });
+                this.port.close();
+            } else {
+                resolve();
+            }
+        });
+    };
 
     /**
      * Gets the highs and lows of the recent time from the console.
      * @returns the highs and lows
      */
-    public async getHighsAndLows(): Promise<HighsAndLows> {
-        this.checkState();
-        return new Promise<HighsAndLows>((resolve, reject) => {
-            this.port.write("HILOWS\n", (err) => {
-                if (err) reject(new FailedToSendCommandError());
-                this.port.once("data", (data: Buffer) => {
-                    // Check ack
-                    this.validateACK(data);
+    public getHighsAndLows = async () => {
+        this.validatePort();
+        const data = await this.writeAndWaitForBuffer("HILOWS\n");
 
-                    const splittedData = this.splitCRCAckDataPackage(data);
+        // Check acknowledgment byte
+        this.validateAcknowledgementByte(data);
 
-                    // Check data (crc check)
-                    this.validateCRC(
-                        splittedData.weatherData,
-                        splittedData.crc
-                    );
+        const splittedData = this.splitCRCAckDataPackage(data);
 
-                    // Parse data
-                    const parsedWeatherData = new HighsAndLowsParser().parse(
-                        splittedData.weatherData
-                    );
+        // Check data (crc check)
+        this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-                    resolve(parsedWeatherData);
-                });
-            });
-        });
-    }
+        // Parse data
+        const parsedWeatherData = new HighsAndLowsParser().parse(
+            splittedData.weatherData
+        );
+
+        return parsedWeatherData;
+    };
 
     /**
      * Gets the default (restructured) LOOP package of the weather station. The return value is dependend on the weather station's model.
      * @returns the default LOOP package of the weather station
      */
-    public async getDefaultLOOP(): Promise<LOOP | LOOP2> {
-        this.checkState();
-        return new Promise<LoopPackage>((resolve, reject) => {
-            this.port.write("LOOP 1\n", (err) => {
-                if (err) reject(new FailedToSendCommandError());
-                this.port.once("data", (data: Buffer) => {
-                    // Check ack
-                    this.validateACK(data);
+    public getDefaultLOOP = async () => {
+        this.validatePort();
+        const data = await this.writeAndWaitForBuffer("LOOP 1\n");
+        // Check ack
+        this.validateAcknowledgementByte(data);
 
-                    const packageType = data.readUInt8(5);
-                    if (packageType === 0) {
-                        const splittedData = this.splitCRCAckDataPackage(data);
+        const packageType = data.readUInt8(5);
+        if (packageType === 0) {
+            const splittedData = this.splitCRCAckDataPackage(data);
 
-                        // Check data (crc check)
-                        this.validateCRC(
-                            splittedData.weatherData,
-                            splittedData.crc
-                        );
+            // Check data (crc check)
+            this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-                        resolve(
-                            new LOOPParser().parse(splittedData.weatherData)
-                        );
-                    } else {
-                        // LOOP 2 data is splitted (only tested on vantage pro 2)
-                        const firstPartOfLOOP2 = data;
-                        this.port.once("data", (data: Buffer) => {
-                            const dataFull = Buffer.concat([
-                                firstPartOfLOOP2,
-                                data,
-                            ]);
-                            const splittedData =
-                                this.splitCRCAckDataPackage(dataFull);
+            return new LOOPParser().parse(splittedData.weatherData);
+        } else {
+            // LOOP 2 data is splitted (only tested on vantage pro 2)
+            const firstPartOfLOOP2 = data;
 
-                            // Check data (crc check)
-                            this.validateCRC(
-                                splittedData.weatherData,
-                                splittedData.crc
-                            );
+            const secondPartOfLOOP2 = await this.waitForBuffer();
+            const dataFull = Buffer.concat([
+                firstPartOfLOOP2,
+                secondPartOfLOOP2,
+            ]);
+            const splittedData = this.splitCRCAckDataPackage(dataFull);
 
-                            resolve(
-                                new LOOP2Parser().parse(
-                                    splittedData.weatherData
-                                )
-                            );
-                        });
-                    }
-                });
-            });
-        });
-    }
+            // Check data (crc check)
+            this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-    /**
-     * Gets some basic weather data like _pressure_ (current and trend), _temperature_ (in and out), _humidity_ (in and out),
-     * _wind_ (current, avg, direction), _rain_ (rate/h, day sum, storm information), _et_, _uv_, _solar radiation_ and _time_.
-     * A `null` value is a placeholder for "no signal".
-     * @returns some basic weather data
-     */
-    public async getSimpleRealtimeRecord(): Promise<SimpleRealtimeRecord> {
-        this.checkState();
+            return new LOOP2Parser().parse(splittedData.weatherData);
+        }
+    };
+
+    public getSimpleRealtimeRecord = async () => {
+        this.validatePort();
+
         const loopPackage = await this.getDefaultLOOP();
 
         let windAvg: number | null;
@@ -331,6 +337,7 @@ export default class VantInterface extends EventEmitter {
         } else {
             windAvg = loopPackage.wind.avg;
         }
+
         return {
             pressure: {
                 current: loopPackage.pressure.current,
@@ -363,9 +370,9 @@ export default class VantInterface extends EventEmitter {
             solarRadiation: loopPackage.solarRadiation,
             time: new Date(),
         };
-    }
+    };
 
-    public isPortOpen(): boolean {
+    public isPortOpen = () => {
         return this.port.isOpen;
-    }
+    };
 }

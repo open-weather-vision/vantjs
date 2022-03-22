@@ -6,7 +6,7 @@ vantjs is a platform-independent javascript and typescript interface to the Davi
 #### Development news
 
 ❌ _Development still in progress. Some features are not stable._ <br>
-⏩ _Version 0.3.0 has just been released offering a lot of functionality to interact with your Vantage Pro, Pro 2 and Vue._
+⏩ _Version 0.4.0 has just been released offering a lot of functionality to interact with your Vantage Pro, Pro 2 and Vue._
 
 **Upcoming stuff**:
 
@@ -22,50 +22,70 @@ npm install vantjs
 
 # Usage
 
+### Interfaces
+
 The `VantInterface` class provides the basic features that all Vantage stations offer.
 
 ```typescript
 import { VantInterface, inspect } from "vantjs";
 
-// Create a new interface
-const device = new VantInterface("COM3");
+async function main() {
+    const device = new VantInterface({ path: "COM4", baudRate: 19200 });
 
-// Handle errors properly
-device.on("error", (err: Error) => {
-    console.error("An error occurred!");
-});
+    // Opening the connection to the device
+    await device.open();
 
-// Wake up the console and interact with it when it's ready
-device.ready(async () => {
-    console.log("Connected to device!");
+    // Waking up the device
+    await device.wakeUp();
 
-    // Validate the console's connection
-    if (await device.validateConnection()) {
-        console.log("Test worked!");
-    } else {
-        throw new Error("Connection to console failed.");
-    }
-
-    // Get the console's firmware date code
-    console.log("\n\nFirmware version: ");
-    const firmwareDateCode = await device.getFirmwareDateCode();
-    inspect(firmwareDateCode);
-
-    // Get the latest highs and lows values
-    console.log("\n\nHighs and lows: ");
+    // Gettings highs and lows
     const highsAndLows = await device.getHighsAndLows();
     inspect(highsAndLows);
 
-    // Get the currently measured weather data (in short)
-    console.log("\n\nRealtime Data: ");
-    const realtimeDataShort = await device.getSimpleRealtimeRecord();
-    inspect(realtimeDataShort);
+    // Getting realtime weather data
+    const realtimeWeatherData = await device.getSimpleRealtimeRecord();
+    inspect(realtimeWeatherData);
 
-    // Connection to console gets closed automatically
-});
+    // Closing the connection to the device
+    await device.close();
+}
+
+main();
 ```
 
 The `VantVueInterface`, `VantProInterface` and the `VantPro2Interface` offer station-dependent additional features.
+
+### Weather Data Containers
+
+Weather data containers are another level of abstraction hiding all the complex details from you. They are still in development, more news are coming soon.
+
+```js
+import { RichRealtimeDataContainer, DeviceModel } from "vantjs";
+
+async function main() {
+    const weather = new RichRealtimeDataContainer({
+        device: {
+            path: "COM4",
+            model: DeviceModel.VantagePro2,
+            baudRate: 19200,
+        },
+        // the interval the weather data container is updated
+        updateInterval: 4,
+    });
+
+    // waiting for the first update to happen
+    await weather.firstUpdate();
+
+    // accessing the desired weather data
+    console.log(weather.temperature.in + "°F");
+    console.log(weather.temperature.out + "°F");
+
+    // closing the connection
+    await weather.close();
+}
+
+main();
+```
 
 # Documentation
 

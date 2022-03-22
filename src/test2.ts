@@ -1,22 +1,24 @@
 import RichRealtimeDataContainer, {
     DeviceModel,
-} from "./weatherContainer/RichRealtimeDataContainer";
+} from "./dataContainers/RichRealtimeDataContainer";
+import "source-map-support/register";
 
-const weatherData: RichRealtimeDataContainer = new RichRealtimeDataContainer({
-    device: {
-        path: "COM3",
-        model: DeviceModel.VantagePro2,
-        baudRate: 19200,
-    },
-    updateInterval: 1,
-});
+async function main() {
+    const weatherData: RichRealtimeDataContainer =
+        new RichRealtimeDataContainer({
+            device: {
+                path: "COM4",
+                model: DeviceModel.VantagePro2,
+                baudRate: 19200,
+            },
+            updateInterval: 4,
+        });
 
-weatherData.on("error", (err: Error) => {
-    console.error(err);
-});
+    await weatherData.firstUpdate();
 
-weatherData.connect();
+    console.log(weatherData.temperature.in + " °F");
 
-setInterval(() => {
-    console.log(weatherData.temperature.in);
-}, 5000);
+    await weatherData.close();
+}
+
+main();

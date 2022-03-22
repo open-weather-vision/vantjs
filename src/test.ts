@@ -1,42 +1,76 @@
 import VantPro2Interface from "./interfaces/VantPro2Interface";
 import inspect from "./util/inspect";
 
-// Create a new interface
-const device = new VantPro2Interface("COM3");
+async function main() {
+    try {
+        const device = new VantPro2Interface({ path: "COM4" });
 
-// Handle errors
-device.on("error", (err: Error) => {
-    console.error(err);
-});
+        device.on("open", () => {
+            console.log("Opening-Event!");
+        });
 
-// Wake up the console and interact with it when it's ready
-device.ready(async () => {
-    console.log("Connected to device!");
+        device.on("close", () => {
+            console.log("Close event!");
+        });
 
-    // Validate the console's connection
-    if (await device.validateConnection()) {
-        console.log("Test worked!");
-    } else {
-        throw new Error("Connection to console failed");
+        device.on("awakening", () => {
+            console.log("Awakening event!");
+        });
+
+        await device.open();
+        await device.wakeUp();
+
+        // Validate the console's connection
+        if (await device.validateConnection()) {
+            console.log("Test worked!");
+        } else {
+            throw new Error("Connection to console failed");
+        }
+
+        // Getting the console's firmware date code
+        console.log("\n\nFirmware date code: ");
+        const firmwareDateCode = await device.getFirmwareDateCode();
+        inspect(firmwareDateCode);
+
+        // Getting highs and lows
+        console.log("\n\nHighs and lows: ");
+        const highsAndLows = await device.getHighsAndLows();
+        inspect(highsAndLows);
+
+        // Getting default LOOP package
+        console.log("\n\nDefault LOOP: ");
+        const defaultLOOP = await device.getDefaultLOOP();
+        inspect(defaultLOOP);
+
+        // Getting basic weather data
+        console.log("\nBasic weather data: ");
+        const basicWeatherData = await device.getSimpleRealtimeRecord();
+        inspect(basicWeatherData);
+
+        // Getting firmware version
+        console.log("\nFirmware version: ");
+        const firmwareVersion = await device.getFirmwareVersion();
+        inspect(firmwareVersion);
+
+        // Getting LOOP1 package
+        console.log("\nLOOP package: ");
+        const LOOP1 = await device.getLOOP1();
+        inspect(LOOP1);
+
+        // Getting LOOP2 package
+        console.log("\nLOOP2 package: ");
+        const LOOP2 = await device.getLOOP2();
+        inspect(LOOP2);
+
+        // Getting a lot of weather data
+        console.log("\nA lot of weather data: ");
+        const richRealtimeRecord = await device.getRichRealtimeRecord();
+        inspect(richRealtimeRecord);
+
+        //await device.close();
+    } catch (err) {
+        console.error("Catched error: " + err);
     }
+}
 
-    // Getting the console's firmware version
-    console.log("\n\nFirmware version: ");
-    const firmwareVersion = await device.getFirmwareVersion();
-    inspect(firmwareVersion);
-
-    // Getting the latest highs and lows values
-    console.log("\n\nHighs and lows: ");
-    const highsAndLows = await device.getHighsAndLows();
-    inspect(highsAndLows);
-
-    // Getting the currently measured weather data (in short)
-    console.log("\n\nRealtime Data: ");
-    const realtimeDataShort = await device.getSimpleRealtimeRecord();
-    inspect(realtimeDataShort);
-
-    // Getting the currently measured weather data (in detail)
-    console.log("\n\nRealtime Data: ");
-    const realtimeData = await device.getRichRealtimeRecord();
-    inspect(realtimeData);
-});
+main();

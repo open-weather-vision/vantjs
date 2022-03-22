@@ -1,6 +1,6 @@
 {
     "name": "vantjs",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "description": "platform independent javascript/typescript interface to Davis Vantage Pro, Pro 2 and Vue",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -35,7 +35,9 @@
         "lodash.clonedeep": "^4.5.0",
         "lodash.merge": "^4.6.2",
         "serialport": "^10.4.0",
-        "sprintf-js": "^1.0.3"
+        "source-map-support": "^0.5.21",
+        "sprintf-js": "^1.0.3",
+        "tiny-typed-emitter": "^2.1.0"
     },
     "devDependencies": {
         "@types/lodash.clonedeep": "^4.5.6",

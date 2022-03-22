@@ -10,6 +10,8 @@ import ClosedConnectionError from "../errors/ClosedConnectionError";
 import merge from "lodash.merge";
 
 import { TypedEmitter } from "tiny-typed-emitter";
+import { DeepPartial, DeepReadonly } from "ts-essentials";
+import cloneDeep from "lodash.clonedeep";
 
 interface VantInterfaceEvents {
     close: () => void;
@@ -24,15 +26,15 @@ export enum OnCreate {
 }
 
 export interface VantInterfaceSettings {
-    path: string;
-    baudRate: number;
-    onCreate: OnCreate;
+    readonly path: string;
+    readonly baudRate: number;
+    readonly onCreate: OnCreate;
 }
 
 export interface MinimumVantInterfaceSettings {
-    path: string;
-    baudRate?: number;
-    onCreate?: OnCreate;
+    readonly path: string;
+    readonly baudRate?: number;
+    readonly onCreate?: OnCreate;
 }
 
 /**
@@ -48,11 +50,12 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     public readonly port: SerialPort;
     protected readonly crc16 = CRC.default("CRC16_CCIT_ZERO") as CRC;
 
-    private settings: VantInterfaceSettings = <VantInterfaceSettings>{
+    private static defaultSettings = {
         baudRate: 19200,
         onCreate: OnCreate.OpenAndWakeUp,
     };
 
+    public readonly settings: VantInterfaceSettings;
     /**
      * Creates an interface to your vantage weather station (Vue, Pro, Pro 2) using the passed settings. The device should be connected
      * serially. The passed path specifies the path to communicate with the weather station. On Windows paths
@@ -74,34 +77,32 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     public static async create(settings: MinimumVantInterfaceSettings) {
         const device = new VantInterface(settings);
 
-        await this.setupInterface(device, settings);
+        await this.setupInterface(device);
 
         return device;
     }
 
-    protected static async setupInterface(
-        device: VantInterface,
-        settings: MinimumVantInterfaceSettings
-    ) {
-        if (settings.onCreate) {
-            switch (settings.onCreate) {
-                case OnCreate.DoNothing:
-                    break;
-                case OnCreate.Open:
-                    await device.open();
-                    break;
-                case OnCreate.OpenAndWakeUp:
-                    await device.open();
-                    await device.wakeUp();
-                    break;
-            }
+    protected static async setupInterface(device: VantInterface) {
+        switch (device.settings.onCreate) {
+            case OnCreate.DoNothing:
+                break;
+            case OnCreate.Open:
+                await device.open();
+                break;
+            case OnCreate.OpenAndWakeUp:
+                await device.open();
+                await device.wakeUp();
+                break;
         }
     }
 
     protected constructor(settings: MinimumVantInterfaceSettings) {
         super();
 
-        this.settings = merge(this.settings, settings);
+        this.settings = merge(
+            cloneDeep(VantInterface.defaultSettings),
+            settings
+        );
 
         this.port = new SerialPort({
             path: this.settings.path,

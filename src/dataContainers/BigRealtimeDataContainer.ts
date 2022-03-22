@@ -175,11 +175,15 @@ export default class BigRealtimeDataContainer
             DeviceModel.VantagePro2 | DeviceModel.VantageVue
         >
     ) {
-        return await this.initialize(new BigRealtimeDataContainer(), settings);
+        return await this.initialize(new BigRealtimeDataContainer(settings));
     }
 
-    private constructor() {
-        super();
+    private constructor(
+        settings: MinimumWeatherDataContainerSettings<
+            DeviceModel.VantagePro2 | DeviceModel.VantageVue
+        >
+    ) {
+        super(settings);
     }
 
     protected onConnectionError = async () => {

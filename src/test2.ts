@@ -1,7 +1,6 @@
 import "source-map-support/register";
 import { DeviceModel } from "./dataContainers/DeviceModel";
 import BigRealtimeDataContainer from "./dataContainers/BigRealtimeDataContainer";
-import { OnCreate } from "./dataContainers/WeatherDataContainer";
 
 async function main() {
     const weatherData = await BigRealtimeDataContainer.create({
@@ -10,7 +9,6 @@ async function main() {
             model: DeviceModel.VantagePro2,
         },
         updateInterval: 3,
-        onCreate: OnCreate.WaitForFirstValidUpdate,
     });
 
     while (true) {

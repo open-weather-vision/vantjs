@@ -1,11 +1,12 @@
 import { TypedEmitter } from "tiny-typed-emitter";
-import cloneDeep from "lodash.clonedeep";
-import merge from "lodash.merge";
 import { DeviceModel } from "./DeviceModel";
 import VantInterface from "../interfaces/VantInterface";
 import VantPro2Interface from "../interfaces/VantPro2Interface";
 import VantVueInterface from "../interfaces/VantVueInterface";
 import VantProInterface from "../interfaces/VantProInterface";
+import { DeepReadonly, DeepPartial } from "ts-essentials";
+import cloneDeep from "lodash.clonedeep";
+import merge from "lodash.merge";
 
 export enum OnCreate {
     DoNothing = 0,
@@ -17,25 +18,25 @@ export enum OnCreate {
 export interface WeatherDataContainerSettings<
     SupportedDeviceModels extends DeviceModel
 > {
-    device: {
-        path: string;
-        baudRate: number;
-        model: SupportedDeviceModels;
+    readonly device: {
+        readonly path: string;
+        readonly baudRate: number;
+        readonly model: SupportedDeviceModels;
     };
-    updateInterval: number;
-    onCreate: OnCreate;
+    readonly updateInterval: number;
+    readonly onCreate: OnCreate;
 }
 
 export type MinimumWeatherDataContainerSettings<
     SupportedDeviceModels extends DeviceModel
 > = {
-    device: {
-        path: string;
-        baudRate?: number;
-        model: SupportedDeviceModels;
+    readonly device: {
+        readonly path: string;
+        readonly baudRate?: number;
+        readonly model: SupportedDeviceModels;
     };
-    updateInterval?: number;
-    onCreate?: OnCreate;
+    readonly updateInterval?: number;
+    readonly onCreate?: OnCreate;
 };
 
 interface WeatherDataContainerEvents {
@@ -49,7 +50,7 @@ export default abstract class WeatherDataContainer<
     Interface extends VantInterface,
     SupportedDeviceModels extends DeviceModel
 > extends TypedEmitter<WeatherDataContainerEvents> {
-    public settings = <WeatherDataContainerSettings<SupportedDeviceModels>>{
+    private static defaultSettings = {
         device: {
             baudRate: 19200,
         },
@@ -57,15 +58,25 @@ export default abstract class WeatherDataContainer<
         onCreate: OnCreate.WaitForFirstUpdate,
     };
 
+    public settings: WeatherDataContainerSettings<SupportedDeviceModels>;
+
     protected currentDevice: Interface | null = null;
     private currentUpdateInterval: NodeJS.Timeout | null = null;
     private currentReconnectTimeout: NodeJS.Timeout | null = null;
 
+    protected constructor(
+        settings: MinimumWeatherDataContainerSettings<SupportedDeviceModels>
+    ) {
+        super();
+        this.settings = merge(
+            cloneDeep(WeatherDataContainer.defaultSettings),
+            settings
+        );
+    }
+
     protected static async initialize<W extends WeatherDataContainer<any, any>>(
-        container: W,
-        settings: MinimumWeatherDataContainerSettings<any>
+        container: W
     ): Promise<W> {
-        container.settings = merge(container.settings, settings);
         switch (container.settings.onCreate) {
             case OnCreate.DoNothing:
                 container.open();
@@ -113,11 +124,10 @@ export default abstract class WeatherDataContainer<
     public open = () => {
         return new Promise<void>((resolve) => {
             this.close().then(async () => {
-                const currentSettings = cloneDeep(this.settings);
-                await this.setupInterface(cloneDeep(currentSettings));
+                await this.setupInterface();
 
                 const currentDevice = this.currentDevice as Interface;
-                this.startUpdateCycle(currentDevice, currentSettings);
+                this.startUpdateCycle(currentDevice);
 
                 currentDevice.once("open", () => {
                     this.emit("open");
@@ -143,10 +153,8 @@ export default abstract class WeatherDataContainer<
         });
     };
 
-    private setupInterface = async (
-        currentSettings: WeatherDataContainerSettings<SupportedDeviceModels>
-    ) => {
-        const { path, model, baudRate } = currentSettings.device;
+    private setupInterface = async () => {
+        const { path, model, baudRate } = this.settings.device;
         switch (model) {
             case DeviceModel.VantagePro2:
                 this.currentDevice = (await VantPro2Interface.create({
@@ -169,10 +177,7 @@ export default abstract class WeatherDataContainer<
         }
     };
 
-    private startUpdateCycle = (
-        device: Interface,
-        currentSettings: WeatherDataContainerSettings<SupportedDeviceModels>
-    ) => {
+    private startUpdateCycle = (device: Interface) => {
         const update = async () => {
             try {
                 try {
@@ -195,7 +200,7 @@ export default abstract class WeatherDataContainer<
         update();
         this.currentUpdateInterval = setInterval(
             update,
-            currentSettings.updateInterval * 1000
+            this.settings.updateInterval * 1000
         );
     };
 

@@ -68,14 +68,13 @@ export default class SmallRealtimeDataContainer
     public static async create(
         settings: MinimumWeatherDataContainerSettings<DeviceModel>
     ) {
-        return await this.initialize(
-            new SmallRealtimeDataContainer(),
-            settings
-        );
+        return await this.initialize(new SmallRealtimeDataContainer(settings));
     }
 
-    private constructor() {
-        super();
+    private constructor(
+        settings: MinimumWeatherDataContainerSettings<DeviceModel>
+    ) {
+        super(settings);
     }
 
     protected onConnectionError = async () => {

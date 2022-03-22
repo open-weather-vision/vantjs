@@ -5,21 +5,6 @@ async function main() {
     try {
         const device = await VantPro2Interface.create({ path: "COM4" });
 
-        device.on("open", () => {
-            console.log("Opening-Event!");
-        });
-
-        device.on("close", () => {
-            console.log("Close event!");
-        });
-
-        device.on("awakening", () => {
-            console.log("Awakening event!");
-        });
-
-        await device.open();
-        await device.wakeUp();
-
         // Validate the console's connection
         if (await device.validateConnection()) {
             console.log("Test worked!");

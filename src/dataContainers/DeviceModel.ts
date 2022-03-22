@@ -1,5 +1,5 @@
 export enum DeviceModel {
-    VantageVue,
-    VantagePro2,
-    VantagePro,
+    VantageVue = "VantageVue",
+    VantagePro2 = "VantagePro2",
+    VantagePro = "VantagePro",
 }

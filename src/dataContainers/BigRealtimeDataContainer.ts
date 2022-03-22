@@ -4,8 +4,11 @@ import merge from "lodash.merge";
 import { VantPro2Interface, VantVueInterface } from "..";
 import createNullRichRealtimeRecord from "../structures/createNullRichRealtimeRecord";
 import { RichRealtimeRecord } from "../structures/RichRealtimeRecord";
+import { HighsAndLows } from "../structures/HighsAndLows";
+import createNullHighsAndLows from "../structures/createNullHighsAndLows";
+import { DeviceModel } from "./DeviceModel";
 
-export type RichRealtimeDataContainerSettings = {
+export type BigRealtimeDataContainerSettings = {
     device: {
         path: string;
         baudRate: number;
@@ -14,23 +17,17 @@ export type RichRealtimeDataContainerSettings = {
     updateInterval: number;
 };
 
-export enum DeviceModel {
-    VantageVue,
-    VantagePro2,
-    VantagePro,
-}
-
-interface RichRealtimeDataContainerEvents {
+interface BigRealtimeDataContainerEvents {
     open: () => void;
     close: () => void;
     update: (err?: any) => void;
 }
 
-export default class RichRealtimeDataContainer
-    extends TypedEmitter<RichRealtimeDataContainerEvents>
+export default class BigRealtimeDataContainer
+    extends TypedEmitter<BigRealtimeDataContainerEvents>
     implements RichRealtimeRecord
 {
-    public settings: RichRealtimeDataContainerSettings = {
+    public settings: BigRealtimeDataContainerSettings = {
         device: {
             path: "COM1",
             baudRate: 19200,
@@ -38,6 +35,8 @@ export default class RichRealtimeDataContainer
         },
         updateInterval: 60,
     };
+
+    public highsAndLows: HighsAndLows = createNullHighsAndLows();
 
     public pressure = {
         current: null,
@@ -165,11 +164,11 @@ export default class RichRealtimeDataContainer
     public time = new Date();
 
     private currentDevice: VantPro2Interface | VantVueInterface | null = null;
-    private currentSettings: RichRealtimeDataContainerSettings | null = null;
+    private currentSettings: BigRealtimeDataContainerSettings | null = null;
     private currentUpdateInterval: NodeJS.Timeout | null = null;
     private currentReconnectTimeout: NodeJS.Timeout | null = null;
 
-    constructor(settings: Partial<RichRealtimeDataContainerSettings>) {
+    constructor(settings: Partial<BigRealtimeDataContainerSettings>) {
         super();
         this.settings = merge(this.settings, settings);
     }
@@ -239,7 +238,7 @@ export default class RichRealtimeDataContainer
     };
 
     private setupInterface = (
-        currentSettings: RichRealtimeDataContainerSettings
+        currentSettings: BigRealtimeDataContainerSettings
     ) => {
         const { path, model, baudRate } = currentSettings.device;
 
@@ -258,16 +257,15 @@ export default class RichRealtimeDataContainer
 
     private setupUpdateCycle = (
         device: VantPro2Interface | VantVueInterface,
-        currentSettings: RichRealtimeDataContainerSettings
+        currentSettings: BigRealtimeDataContainerSettings
     ) => {
         const update = async () => {
             try {
                 await device.open();
                 await device.wakeUp();
                 const richRealtimeRecord = await device.getRichRealtimeRecord();
-                if (richRealtimeRecord) {
-                    merge(this, richRealtimeRecord);
-                }
+                merge(this, richRealtimeRecord);
+                this.highsAndLows = await device.getHighsAndLows();
                 this.emit("update");
             } catch (err) {
                 merge(this, createNullRichRealtimeRecord());

@@ -4,8 +4,8 @@ export { default as VantProInterface } from "./interfaces/VantProInterface";
 export { default as VantPro2Interface } from "./interfaces/VantPro2Interface";
 export { LoopPackage, LoopPackageType } from "./structures/LOOP";
 
-export { default as RichRealtimeDataContainer } from "./dataContainers/RichRealtimeDataContainer";
-export { DeviceModel as DeviceModel } from "./dataContainers/RichRealtimeDataContainer";
+export { default as RichRealtimeDataContainer } from "./dataContainers/BigRealtimeDataContainer";
+export { DeviceModel as DeviceModel } from "./dataContainers/DeviceModel";
 
 export { default as VantError } from "./errors/VantError";
 export { default as ClosedConnectionError } from "./errors/ClosedConnectionError";

@@ -4,7 +4,6 @@ import VantInterface from "../interfaces/VantInterface";
 import VantPro2Interface from "../interfaces/VantPro2Interface";
 import VantVueInterface from "../interfaces/VantVueInterface";
 import VantProInterface from "../interfaces/VantProInterface";
-import { DeepReadonly, DeepPartial } from "ts-essentials";
 import cloneDeep from "lodash.clonedeep";
 import merge from "lodash.merge";
 

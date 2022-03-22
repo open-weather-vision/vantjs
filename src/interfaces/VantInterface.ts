@@ -10,7 +10,6 @@ import ClosedConnectionError from "../errors/ClosedConnectionError";
 import merge from "lodash.merge";
 
 import { TypedEmitter } from "tiny-typed-emitter";
-import { DeepPartial, DeepReadonly } from "ts-essentials";
 import cloneDeep from "lodash.clonedeep";
 
 interface VantInterfaceEvents {

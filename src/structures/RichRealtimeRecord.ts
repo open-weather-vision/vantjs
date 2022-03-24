@@ -106,7 +106,7 @@ export type RichRealtimeRecord = {
         /** Current outside temperature */
         out: number | null;
 
-        /** Up to 7 extra temperatures */
+        /** Measured temperature from up to 7 extra sensors */
         extra: [
             number | null,
             number | null,
@@ -143,7 +143,7 @@ export type RichRealtimeRecord = {
         out: number | null;
 
         /**
-         * Up to 7 extra humidities
+         * Measured humidty from up to 7 extra sensors
          */
         extra: [
             number | null,
@@ -173,8 +173,20 @@ export type RichRealtimeRecord = {
             /** The average wind speed in the recent two minutes */
             twoMinutes: number | null;
         };
+        /**
+         * Currently measured wind direction. `direction.degrees` encodes it
+         * in degrees, `direction.abbrevation` as string (`"N"`, `"S"`, ....).
+         */
         direction: {
+            /**
+             * Currently measured wind direction in degrees (from `1` to `360`).
+             * `90°` is East, `180°` is South, `270°`is West and `360°` is North.
+             */
             degrees: number | null;
+
+            /**
+             * Currently measured wind direction encoded as string
+             */
             abbrevation:
                 | "NNE"
                 | "NE"
@@ -194,9 +206,25 @@ export type RichRealtimeRecord = {
                 | "N"
                 | null;
         };
+
+        /**
+         * Direction and speed of the heaviest gust in the recent 10 minutes
+         */
         heaviestGust10min: {
+            /**
+             * Direction of the heaviest gust in the recent 10 minutes. `direction.degrees` encodes it
+             * in degrees, `direction.abbrevation` as string (`"N"`, `"S"`, ....).
+             */
             direction: {
+                /**
+                 * The heaviest gust's (10min) direction in degrees (from `1` to `360`).
+                 * `90°` is East, `180°` is South, `270°`is West and `360°` is North.
+                 */
                 degrees: number | null;
+
+                /**
+                 * The heaviest gust's (10min) wind direction encoded as string
+                 */
                 abbrevation:
                     | "NNE"
                     | "NE"
@@ -216,31 +244,135 @@ export type RichRealtimeRecord = {
                     | "N"
                     | null;
             };
+
+            /**
+             * The heaviest gust's (10min) speed
+             */
             speed: number | null;
         };
+        /**
+         * The currently measured wind chill
+         */
         chill: number | null;
+
+        /**
+         * The currently measured THSW index. Requires a solar radiation sensor.
+         */
         thsw: number | null;
     };
+
+    /**
+     *  Curently measured rain related data
+     */
     rain: {
+        /**
+         * The current rain rate
+         */
         rate: number | null;
+        /**
+         * The most recent rainstorm's amount of rain
+         */
         storm: number | null;
+        /**
+         * The most recent rainstorm's start date (without time)
+         */
         stormStartDate: Date | null;
+        /**
+         * The amount of rain that fell today
+         */
         day: number | null;
+        /**
+         * The amount of rain that has fallen in this month
+         */
         month: number | null;
+        /**
+         * The amount of rain that has fallen in this year
+         */
         year: number | null;
+        /**
+         * The amount of rain that has fallen in the recent 15 minutes
+         */
         last15min: number | null;
+        /**
+         * The amount of rain that has fallen in the recent hour
+         */
         lastHour: number | null;
+        /**
+         * The amount of rain that has fallen in the recent 24 hours
+         */
         last24h: number | null;
     };
-    et: { day: number | null; month: number | null; year: number | null };
+
+    /**
+     * Evotranspiration (ET) related data
+     */
+    et: {
+        /**
+         * Measured evapotranspiration (ET) of the day
+         */
+        day: number | null;
+
+        /**
+         * Measured evapotranspiration (ET) in the current month
+         */
+        month: number | null;
+
+        /**
+         * Measured evapotranspiration (ET) in the current year
+         */
+        year: number | null;
+    };
+
+    /**
+     * Measured soil moisture from up to 4 sensors
+     */
     soilMoistures: [number | null, number | null, number | null, number | null];
+
+    /**
+     * Measured leaf wetness from up to 4 sensors
+     */
     leafWetnesses: [number | null, number | null, number | null, number | null];
+
+    /**
+     * The current UV index
+     */
     uv: number | null;
+
+    /**
+     * The current solar radiation
+     */
     solarRadiation: number | null;
+
+    /**
+     * The transmitter's battery status
+     */
     transmitterBatteryStatus: number | null;
+
+    /**
+     * The console's battery voltage
+     */
     consoleBatteryVoltage: number | null;
+
+    /**
+     * The calculated forecast. `forecast.iconNumber` encodes it as `number`, `forecast.iconText` as `string`.
+     */
     forecast: {
+        /**
+         * The calculated forecast encoded as number:
+         * - `8` => Sun
+         * - `6` => Partly Cloudy
+         * - `2` => Mostly Cloudy
+         * - `3` => Mostly Cloudy, Rain within 12 hours
+         * - `18` => Mostly Cloudy, Snow within 12 hours
+         * - `19` => Partly Cloudy, Rain or Snow within 12 hours
+         * - `7` => Partly Cloudy, Rain within 12 hours
+         * - `22` => Partly Cloudy, Snow within 12 hours
+         * - `23` => Partly Cloudy, Rain or Snow within 12 hours
+         */
         iconNumber: 8 | 6 | 2 | 3 | 18 | 19 | 7 | 22 | 23 | null;
+        /**
+         * The calculated forecast encoded as string
+         */
         iconText:
             | "Mostly Clear"
             | "Partly Cloudy"
@@ -252,9 +384,22 @@ export type RichRealtimeRecord = {
             | "Partly Cloudy, Rain or Snow within 12 hours"
             | "Partly Cloudy, Snow within 12 hours"
             | null;
+        /**
+         * Not documented
+         */
         rule: number | null;
     };
+    /**
+     * The today's sunrise time (e.g. `06:35`)
+     */
     sunrise: string | null;
+    /**
+     * The today's sunset time (e.g. `19:35`)
+     */
     sunset: string | null;
+
+    /**
+     * The time the record was created
+     */
     time: Date;
 };

@@ -64,7 +64,7 @@ export type SimpleRealtimeRecord = {
          */
         current: number | null;
         /**
-         * Currently measured average wind speed
+         * Average wind speed in the recent ten minutes
          */
         avg: number | null;
         /**
@@ -105,15 +105,15 @@ export type SimpleRealtimeRecord = {
      */
     rain: {
         /**
-         * The current rain rat
+         * The current rain rate
          */
         rate: number | null;
         /**
-         * The last rainstorm's amount of rain
+         * The most recent rainstorm's amount of rain
          */
         storm: number | null;
         /**
-         * The last rainstorm's start date (without time)
+         * The most recent rainstorm's start date (without time)
          */
         stormStartDate: Date | null;
         /**

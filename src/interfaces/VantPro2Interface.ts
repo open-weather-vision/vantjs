@@ -11,6 +11,7 @@ import createNullRichRealtimeRecord from "../structures/createNullRichRealtimeRe
  * Interface to the _Vantage Pro 2_ weather station. Is built on top of the {@link VantInterface}.
  *
  * Offers station dependent features like {@link getRichRealtimeRecord}, {@link getLOOP}, {@link getLOOP2} and {@link getFirmwareVersion}.
+ *
  */
 export default class VantPro2Interface extends VantInterface {
     /**
@@ -19,6 +20,7 @@ export default class VantPro2Interface extends VantInterface {
      * like `COM1`, `COM2`, ... are common, on osx/linux devices common paths are `/dev/tty0`, `/dev/tty2`, ...
      *
      * @example
+     * ```typescript
      * const device = await VantPro2Interface.create({ path: "COM3" });
      *
      * await device.open();
@@ -26,6 +28,7 @@ export default class VantPro2Interface extends VantInterface {
      *
      * const highsAndLows = await device.getHighsAndLows();
      * inspect(highsAndLows);
+     * ```
      * @param settings the settings
      */
     public static async create(settings: MinimumVantInterfaceSettings) {

@@ -34,8 +34,8 @@ interface VantInterfaceEvents {
 /**
  * Different actions to perform automatically on creating an interface.
  *
- * @see VantInterface.create
- * @see VantPro2Interface.create
+ * @see {VantInterface.create}
+ * @see {VantPro2Interface.create}
  * @see VantProInterface.create
  * @see VantVueInterface.create
  */
@@ -50,11 +50,15 @@ export enum OnCreate {
      */
     Open = 2,
     /**
-     * Open the serial connection to the vantage console and wakes it up.
+     * Opens the serial connection to the vantage console and wakes it up.
      */
     OpenAndWakeUp = 3,
 }
 
+/**
+ * Configures the units to use. Doesn't have to match the units displayed on your console.
+ * Can be passed to an interface or a realtime data container.
+ */
 export type UnitSettings = {
     readonly wind: "km/h" | "mph" | "ft/s" | "knots" | "Bft" | "m/s";
     readonly temperature: "°C" | "°F";
@@ -132,11 +136,14 @@ export interface MinimumVantInterfaceSettings {
 }
 
 /**
- * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). The device must be connected serially.
+ * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). Provides useful methods to access realtime weather data from your weather station's
+ * console. The device must be connected serially.
  * To interact with the weather station create an instance of this class using {@link VantInterface.create}.
  *
  * This interface is limited to station independent features.
  * Use {@link VantPro2Interface}, {@link VantProInterface} and {@link VantVueInterface} for station dependent features.
+ *
+ * @noInheritDoc
  */
 export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     /**
@@ -151,6 +158,9 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      */
     protected readonly crc16 = CRC.default("CRC16_CCIT_ZERO") as CRC;
 
+    /**
+     * @hidden
+     */
     protected readonly rainClicksToInchTransformer: (
         rainClicks: number
     ) => number;
@@ -183,12 +193,14 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * Use {@link VantPro2Interface}, {@link VantProInterface} and {@link VantVueInterface} for station dependent features.
      *
      * @example
+     * ```typescript
      * const device = await VantInterface.create({ path: "COM3" });
      *
      * const highsAndLows = await device.getHighsAndLows();
      * inspect(highsAndLows);
      *
      * await device.close();
+     * ```
      * @param settings the interface settings
      */
     public static async create(settings: MinimumVantInterfaceSettings) {

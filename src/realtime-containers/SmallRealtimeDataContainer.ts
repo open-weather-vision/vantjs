@@ -2,15 +2,15 @@ import VantInterface from "../interfaces/VantInterface";
 import createNullHighsAndLows from "../structures/createNullHighsAndLows";
 import { HighsAndLows } from "../structures/HighsAndLows";
 import { DeviceModel } from "./DeviceModel";
-import WeatherDataContainer, {
-    MinimumWeatherDataContainerSettings,
-} from "./WeatherDataContainer";
+import RealtimeDataContainer, {
+    MinimumRealtimeDataContainerSettings,
+} from "./RealtimeDataContainer";
 import { SimpleRealtimeRecord } from "../structures/SimpleRealtimeRecord";
 import merge from "lodash.merge";
 import createNullSimpleRealtimeRecord from "../structures/createNullSimpleRealtimeRecord";
 
 export default class SmallRealtimeDataContainer
-    extends WeatherDataContainer<
+    extends RealtimeDataContainer<
         VantInterface,
         | DeviceModel.VantagePro
         | DeviceModel.VantagePro2
@@ -122,13 +122,13 @@ export default class SmallRealtimeDataContainer
     public time: Date = new Date();
 
     public static async create(
-        settings: MinimumWeatherDataContainerSettings<DeviceModel>
+        settings: MinimumRealtimeDataContainerSettings<DeviceModel>
     ) {
         return await this.initialize(new SmallRealtimeDataContainer(settings));
     }
 
     private constructor(
-        settings: MinimumWeatherDataContainerSettings<DeviceModel>
+        settings: MinimumRealtimeDataContainerSettings<DeviceModel>
     ) {
         super(settings);
     }

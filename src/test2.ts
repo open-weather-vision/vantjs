@@ -1,6 +1,6 @@
 import "source-map-support/register";
-import { DeviceModel } from "./dataContainers/DeviceModel";
-import BigRealtimeDataContainer from "./dataContainers/BigRealtimeDataContainer";
+import { DeviceModel } from "./realtime-containers/DeviceModel";
+import BigRealtimeDataContainer from "./realtime-containers/BigRealtimeDataContainer";
 
 async function main() {
     const weatherData = await BigRealtimeDataContainer.create({

@@ -5,13 +5,13 @@ import createNullHighsAndLows from "../structures/createNullHighsAndLows";
 import createNullRichRealtimeRecord from "../structures/createNullRichRealtimeRecord";
 import { HighsAndLows } from "../structures/HighsAndLows";
 import { DeviceModel } from "./DeviceModel";
-import WeatherDataContainer, {
-    MinimumWeatherDataContainerSettings,
-} from "./WeatherDataContainer";
+import RealtimeDataContainer, {
+    MinimumRealtimeDataContainerSettings,
+} from "./RealtimeDataContainer";
 import { RichRealtimeRecord } from "../structures/RichRealtimeRecord";
 
 export default class BigRealtimeDataContainer
-    extends WeatherDataContainer<
+    extends RealtimeDataContainer<
         VantPro2Interface | VantVueInterface,
         DeviceModel.VantagePro2 | DeviceModel.VantageVue
     >
@@ -211,7 +211,7 @@ export default class BigRealtimeDataContainer
     public time: Date = new Date();
 
     public static async create(
-        settings: MinimumWeatherDataContainerSettings<
+        settings: MinimumRealtimeDataContainerSettings<
             DeviceModel.VantagePro2 | DeviceModel.VantageVue
         >
     ) {
@@ -219,7 +219,7 @@ export default class BigRealtimeDataContainer
     }
 
     private constructor(
-        settings: MinimumWeatherDataContainerSettings<
+        settings: MinimumRealtimeDataContainerSettings<
             DeviceModel.VantagePro2 | DeviceModel.VantageVue
         >
     ) {

@@ -16,7 +16,7 @@ export enum OnCreate {
     WaitForFirstValidUpdate = 3,
 }
 
-export interface WeatherDataContainerSettings<
+export interface RealtimeDataContainerSettings<
     SupportedDeviceModels extends DeviceModel
 > {
     readonly device: {
@@ -30,7 +30,7 @@ export interface WeatherDataContainerSettings<
     readonly units: UnitSettings;
 }
 
-export type MinimumWeatherDataContainerSettings<
+export type MinimumRealtimeDataContainerSettings<
     SupportedDeviceModels extends DeviceModel
 > = {
     readonly device: {
@@ -44,17 +44,17 @@ export type MinimumWeatherDataContainerSettings<
     readonly units?: Partial<UnitSettings>;
 };
 
-interface WeatherDataContainerEvents {
+interface RealtimeDataContainerEvents {
     open: () => void;
     close: () => void;
     update: (err?: any | undefined) => void;
     "valid-update": () => void;
 }
 
-export default abstract class WeatherDataContainer<
+export default abstract class RealtimeDataContainer<
     Interface extends VantInterface,
     SupportedDeviceModels extends DeviceModel
-> extends TypedEmitter<WeatherDataContainerEvents> {
+> extends TypedEmitter<RealtimeDataContainerEvents> {
     private static defaultSettings = {
         device: {
             baudRate: 19200,
@@ -64,25 +64,25 @@ export default abstract class WeatherDataContainer<
         units: defaultUnitSettings,
     };
 
-    public settings: WeatherDataContainerSettings<SupportedDeviceModels>;
+    public settings: RealtimeDataContainerSettings<SupportedDeviceModels>;
 
     protected currentDevice: Interface | null = null;
     private currentUpdateInterval: NodeJS.Timeout | null = null;
     private currentReconnectTimeout: NodeJS.Timeout | null = null;
 
     protected constructor(
-        settings: MinimumWeatherDataContainerSettings<SupportedDeviceModels>
+        settings: MinimumRealtimeDataContainerSettings<SupportedDeviceModels>
     ) {
         super();
         this.settings = merge(
-            cloneDeep(WeatherDataContainer.defaultSettings),
+            cloneDeep(RealtimeDataContainer.defaultSettings),
             settings
         );
     }
 
-    protected static async initialize<W extends WeatherDataContainer<any, any>>(
-        container: W
-    ): Promise<W> {
+    protected static async initialize<
+        W extends RealtimeDataContainer<any, any>
+    >(container: W): Promise<W> {
         switch (container.settings.onCreate) {
             case OnCreate.DoNothing:
                 container.open();

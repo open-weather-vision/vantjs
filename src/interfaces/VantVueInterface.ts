@@ -5,6 +5,8 @@ import VantPro2Interface from "./VantPro2Interface";
  * Interface to the _Vantage Vue_ weather station. Is built on top of the {@link VantPro2Interface}.
  *
  * Offers station dependent features like {@link getRichRealtimeRecord}, {@link getLOOP}, {@link getLOOP2} and {@link getFirmwareVersion}.
+ *
+ *
  */
 export default class VantVueInterface extends VantPro2Interface {
     /**
@@ -13,6 +15,7 @@ export default class VantVueInterface extends VantPro2Interface {
      * like `COM1`, `COM2`, ... are common, on osx/linux devices common paths are `/dev/tty0`, `/dev/tty2`, ...
      *
      * @example
+     * ```typescript
      * const device = await VantVueInterface.create({ path: "COM3" });
      *
      * await device.open();
@@ -20,6 +23,7 @@ export default class VantVueInterface extends VantPro2Interface {
      *
      * const highsAndLows = await device.getHighsAndLows();
      * inspect(highsAndLows);
+     * ```
      * @param settings the settings
      */
     public static async create(settings: MinimumVantInterfaceSettings) {

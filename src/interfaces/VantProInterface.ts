@@ -7,6 +7,7 @@ import VantInterface, {
  * Interface to the _Vantage Pro_ weather station. Is built on top of the {@link VantInterface}.
  *
  * Is currently offering nothing special.
+ *
  */
 
 export default class VantProInterface extends VantInterface {
@@ -16,6 +17,7 @@ export default class VantProInterface extends VantInterface {
      * like `COM1`, `COM2`, ... are common, on osx/linux devices common paths are `/dev/tty0`, `/dev/tty2`, ...
      *
      * @example
+     * ```typescript
      * const device = await VantProInterface.create({ path: "COM3" });
      *
      * await device.open();
@@ -23,6 +25,7 @@ export default class VantProInterface extends VantInterface {
      *
      * const highsAndLows = await device.getHighsAndLows();
      * inspect(highsAndLows);
+     * ```
      * @param settings the settings
      */
     public static async create(settings: MinimumVantInterfaceSettings) {

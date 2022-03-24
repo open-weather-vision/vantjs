@@ -1,18 +1,17 @@
-# vantjs
+# vantjs (v1.0.0 branch)
 
 ![npm](https://img.shields.io/npm/v/vantjs) ![GitHub milestones](https://img.shields.io/github/milestones/all/harrydehix/vantjs) ![GitHub last commit](https://img.shields.io/github/last-commit/harrydehix/vantjs)<br>
 vantjs is a platform-independent javascript and typescript interface to the Davis Vantage Pro, Pro 2 and Vue. It works on any linux, windows or osx device!
 
 #### Development news
 
-❌ _Development still in progress. Some features are not stable._ <br>
-⏩ _Version 0.4.0 has just been released offering a lot of functionality to interact with your Vantage Pro, Pro 2 and Vue._
+⚠ _Development on v1.0.0 is still in progress. Some features are not stable, some are not finished._ <br><br>
 
-**Upcoming stuff**:
+## **What's new in v1.0.0?**
 
--   so called _weather data containers_ offering a more abstract way to interact with your weather station hiding
-    all the complex details
--   currently I'm working on creating helpful guides and a clean documentation making developing with vantjs fun and easy!
+-   _unit settings_: select the units vantjs should use, the weather data is converted automatically
+-   _bug fixes / stability_: version 1.0.0 will be the first stable, extensively tested release of vantjs. many bug fixes have already been made in this branch.
+-   _guides/documentation_: helpful guides introducing you into vantjs step by step and a full documentation
 
 # Installation
 

@@ -12,7 +12,15 @@ import SerialConnectionError from "../errors/SerialConnectionError";
 import MalformedDataError from "../errors/MalformedDataError";
 import ClosedConnectionError from "../errors/ClosedConnectionError";
 import { SimpleRealtimeRecord } from "../structures/SimpleRealtimeRecord";
-import { RainCollectorSize } from "../parsers/RainCollector";
+import {
+    createRainClicksToInchTransformer,
+    RainCollectorSize,
+} from "../parsers/units/RainCollector";
+import {
+    createUnitTransformers,
+    UnitTransformers,
+} from "../parsers/units/unitTransformers";
+import { defaultUnitSettings } from "../parsers/units/defaultUnitSettings";
 
 interface VantInterfaceEvents {
     /** Fires when the connection to the vantage console closes. */
@@ -48,11 +56,11 @@ export enum OnCreate {
 }
 
 export type UnitSettings = {
-    wind: "km/h" | "mph" | "ft/s" | "knots" | "Bft" | "m/s";
-    temperature: "°C" | "°F";
-    pressure: "hPa" | "inHg" | "mmHg" | "mb";
-    solarRadiation: "W/m²";
-    rain: "in" | "mm";
+    readonly wind: "km/h" | "mph" | "ft/s" | "knots" | "Bft" | "m/s";
+    readonly temperature: "°C" | "°F";
+    readonly pressure: "hPa" | "inHg" | "mmHg" | "mb";
+    readonly solarRadiation: "W/m²";
+    readonly rain: "in" | "mm";
 };
 
 /**
@@ -83,6 +91,9 @@ export interface VantInterfaceSettings {
      */
     readonly rainCollectorSize: RainCollectorSize;
 
+    /**
+     * Configures the units to use. Doesn't have to match the units displayed on your console.
+     */
     readonly units: UnitSettings;
 }
 
@@ -114,7 +125,10 @@ export interface MinimumVantInterfaceSettings {
      */
     readonly rainCollectorSize: RainCollectorSize;
 
-    readonly units?: UnitSettings;
+    /**
+     * Configures the units to use. Doesn't have to match the units displayed on your console.
+     */
+    readonly units?: Partial<UnitSettings>;
 }
 
 /**
@@ -137,23 +151,24 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      */
     protected readonly crc16 = CRC.default("CRC16_CCIT_ZERO") as CRC;
 
+    protected readonly rainClicksToInchTransformer: (
+        rainClicks: number
+    ) => number;
+
+    protected readonly unitTransformers: UnitTransformers;
+
     /**
      * The VantInterface's default settings.
      */
     private static defaultSettings = {
         baudRate: 19200,
         onCreate: OnCreate.OpenAndWakeUp,
-        units: {
-            wind: "mph",
-            temperature: "°F",
-            solarRadiation: "W/m²",
-            pressure: "inHg",
-            rain: "in",
-        },
+        units: defaultUnitSettings,
     };
 
     /**
-     * The used interface settings. These control the addressed serialport, the baud rate etc.
+     * The used interface settings. These control the addressed serialport, the baud rate, the
+     * used units, etc. They are immutable.
      *
      * @see VantInterfaceSettings
      */
@@ -216,6 +231,12 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
             cloneDeep(VantInterface.defaultSettings),
             settings
         );
+
+        this.rainClicksToInchTransformer = createRainClicksToInchTransformer(
+            this.settings.rainCollectorSize
+        );
+
+        this.unitTransformers = createUnitTransformers(this.settings.units);
 
         this.port = new SerialPort({
             path: this.settings.path,
@@ -470,9 +491,10 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
         this.validateCRC(splittedData.weatherData, splittedData.crc);
 
         // Parse data
-        const parsedWeatherData = new HighsAndLowsParser().parse(
-            splittedData.weatherData
-        );
+        const parsedWeatherData = new HighsAndLowsParser(
+            this.rainClicksToInchTransformer,
+            this.unitTransformers
+        ).parse(splittedData.weatherData);
 
         return parsedWeatherData;
     };
@@ -495,9 +517,10 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOPParser(this.settings.rainCollectorSize).parse(
-                splittedData.weatherData
-            );
+            return new LOOPParser(
+                this.rainClicksToInchTransformer,
+                this.unitTransformers
+            ).parse(splittedData.weatherData);
         } else {
             // LOOP 2 data is splitted (only tested on vantage pro 2)
             const firstPartOfLOOP2 = data;
@@ -512,9 +535,10 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOP2Parser(this.settings.rainCollectorSize).parse(
-                splittedData.weatherData
-            );
+            return new LOOP2Parser(
+                this.rainClicksToInchTransformer,
+                this.unitTransformers
+            ).parse(splittedData.weatherData);
         }
     };
 

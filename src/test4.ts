@@ -12,14 +12,15 @@ async function main() {
         },
         updateInterval: 3,
         onCreate: OnCreate.WaitForFirstValidUpdate,
+        units: {
+            wind: "km/h",
+        },
     });
 
     while (true) {
         await weatherData.waitForUpdate();
         console.log(
-            weatherData.time.toLocaleString() +
-                ": " +
-                weatherData.temperature.in
+            weatherData.time.toLocaleString() + ": " + weatherData.wind.avg
         );
     }
 

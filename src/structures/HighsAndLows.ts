@@ -132,11 +132,9 @@ export type HighsAndLows = {
         dayTime: string | null;
     };
     rainRate: {
-        month: number | null;
+        hour: number | null;
         day: number | null;
         dayTime: string | null;
-    };
-    rainSum: {
         month: number | null;
         year: number | null;
     };

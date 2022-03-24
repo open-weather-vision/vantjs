@@ -1,12 +1,13 @@
 import { TypedEmitter } from "tiny-typed-emitter";
 import { DeviceModel } from "./DeviceModel";
-import VantInterface from "../interfaces/VantInterface";
+import VantInterface, { UnitSettings } from "../interfaces/VantInterface";
 import VantPro2Interface from "../interfaces/VantPro2Interface";
 import VantVueInterface from "../interfaces/VantVueInterface";
 import VantProInterface from "../interfaces/VantProInterface";
 import cloneDeep from "lodash.clonedeep";
 import merge from "lodash.merge";
-import { RainCollectorSize } from "../parsers/RainCollector";
+import { RainCollectorSize } from "../parsers/units/RainCollector";
+import { defaultUnitSettings } from "../parsers/units/defaultUnitSettings";
 
 export enum OnCreate {
     DoNothing = 0,
@@ -26,6 +27,7 @@ export interface WeatherDataContainerSettings<
     };
     readonly updateInterval: number;
     readonly onCreate: OnCreate;
+    readonly units: UnitSettings;
 }
 
 export type MinimumWeatherDataContainerSettings<
@@ -39,6 +41,7 @@ export type MinimumWeatherDataContainerSettings<
     };
     readonly updateInterval?: number;
     readonly onCreate?: OnCreate;
+    readonly units?: Partial<UnitSettings>;
 };
 
 interface WeatherDataContainerEvents {
@@ -58,6 +61,7 @@ export default abstract class WeatherDataContainer<
         },
         updateInterval: 60,
         onCreate: OnCreate.WaitForFirstUpdate,
+        units: defaultUnitSettings,
     };
 
     public settings: WeatherDataContainerSettings<SupportedDeviceModels>;
@@ -164,6 +168,7 @@ export default abstract class WeatherDataContainer<
                     path,
                     baudRate,
                     rainCollectorSize,
+                    units: this.settings.units,
                 })) as any;
                 break;
             case DeviceModel.VantageVue:
@@ -171,6 +176,7 @@ export default abstract class WeatherDataContainer<
                     path,
                     baudRate,
                     rainCollectorSize,
+                    units: this.settings.units,
                 })) as any;
                 break;
             case DeviceModel.VantagePro:
@@ -178,6 +184,7 @@ export default abstract class WeatherDataContainer<
                     path,
                     baudRate,
                     rainCollectorSize,
+                    units: this.settings.units,
                 })) as any;
                 break;
         }

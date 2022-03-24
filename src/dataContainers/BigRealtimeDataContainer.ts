@@ -43,9 +43,8 @@ export default class BigRealtimeDataContainer
         },
         userOffset: null as number | null,
         calibrationOffset: null as number | null,
+        altimeter: null as number | null,
     };
-
-    public altimeter: number | null = null;
 
     public heat: number | null = null;
 

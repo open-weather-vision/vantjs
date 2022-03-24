@@ -1,4 +1,3 @@
-import MalformedDataError from "../errors/MalformedDataError";
 import ParserError from "../errors/ParserError";
 import numberToBinaryString from "./numberToBinaryString";
 
@@ -25,18 +24,20 @@ export enum ArrayType {
     ENTRY_BASED = 2,
 }
 
+export type TransformPipeline = Array<(val: number) => any>;
+
 export type PropertyConfig =
     | {
           type: Type;
           position: number;
-          nullables?: number[] | string;
-          transform?: ((val: number) => any) | string;
+          nullables?: number[];
+          transform?: TransformPipeline;
           dependsOn?: string;
       }
     | {
           copyof: string;
-          nullables?: number[] | string;
-          transform?: ((val: number) => any) | string;
+          nullables?: number[];
+          transform?: TransformPipeline;
           dependsOn?: string;
       };
 
@@ -56,38 +57,12 @@ export interface ParsedObject {
     [propertyName: string]: any | ParsedObject;
 }
 
-export interface TransformerCollection {
-    [property: string]: (val: number) => any;
-}
-export interface NullablesCollection {
-    [property: string]: number[];
-}
-
 export default class BinaryParser<T extends ParsedObject> {
     private struct: ParsingStructure;
     private offset = 0;
-    private transformers: TransformerCollection = {};
-    private nullables: NullablesCollection = {};
 
-    constructor(
-        struct: ParsingStructure,
-        nullables?: NullablesCollection,
-        transformers?: TransformerCollection
-    ) {
+    constructor(struct: ParsingStructure) {
         this.struct = struct;
-        if (transformers) this.transformers = transformers;
-        if (nullables) this.nullables = nullables;
-    }
-
-    public setTransformer(
-        name: string,
-        transformer: (val: number) => any
-    ): void {
-        this.transformers[name] = transformer;
-    }
-
-    public setNullables(name: string, nullables: number[]): void {
-        this.nullables[name] = nullables;
     }
 
     public parse(buffer: Buffer, offset = 0): T {
@@ -162,37 +137,18 @@ export default class BinaryParser<T extends ParsedObject> {
                         position
                     );
                 }
+                // Null resolved value if its a nullable
                 if (propertyConfig.nullables && resolvedValue !== null) {
-                    if (typeof propertyConfig.nullables === "string") {
-                        const nullables =
-                            this.nullables[propertyConfig.nullables];
-                        if (nullables)
-                            resolvedValue = this.nullNullables(
-                                resolvedValue,
-                                nullables
-                            );
-                        else
-                            throw new Error(
-                                `Invalid nullables name '${propertyConfig.nullables}!`
-                            );
-                    } else
-                        resolvedValue = this.nullNullables(
-                            resolvedValue,
-                            propertyConfig.nullables
-                        );
+                    resolvedValue = this.nullNullables(
+                        resolvedValue,
+                        propertyConfig.nullables
+                    );
                 }
+                // Transform resolved values (if its not null)
                 if (propertyConfig.transform && resolvedValue !== null) {
-                    if (typeof propertyConfig.transform === "string") {
-                        const transformer =
-                            this.transformers[propertyConfig.transform];
-                        if (transformer)
-                            resolvedValue = transformer(resolvedValue);
-                        else
-                            throw new Error(
-                                `Invalid transformer name '${propertyConfig.transform}!`
-                            );
-                    } else
-                        resolvedValue = propertyConfig.transform(resolvedValue);
+                    for (const transformer of propertyConfig.transform) {
+                        resolvedValue = transformer(resolvedValue);
+                    }
                 }
                 if (propertyConfig.dependsOn && resolvedValue !== null) {
                     resolvedValue = {

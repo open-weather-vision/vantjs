@@ -6,6 +6,13 @@ async function main() {
         const device = await VantPro2Interface.create({
             path: "COM4",
             rainCollectorSize: "0.2mm",
+            units: {
+                pressure: "hPa",
+                temperature: "°C",
+                rain: "mm",
+                solarRadiation: "W/m²",
+                wind: "km/h",
+            },
         });
 
         // Validate the console's connection
@@ -41,14 +48,14 @@ async function main() {
         //inspect(firmwareVersion);
 
         // Getting LOOP1 package
-        console.log("\nLOOP package: ");
+        console.log("\nLOOP1 package: ");
         const LOOP1 = await device.getLOOP1();
         //inspect(LOOP1);
 
         // Getting LOOP2 package
         console.log("\nLOOP2 package: ");
         const LOOP2 = await device.getLOOP2();
-        //inspect(LOOP2);
+        inspect(LOOP2);
 
         // Getting a lot of weather data
         console.log("\nA lot of weather data: ");

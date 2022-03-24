@@ -3,7 +3,7 @@ export type SimpleRealtimeRecord = {
      * Currently measured pressure related weather data
      */
     pressure: {
-        /** Current pressure in inch */
+        /** Current pressure */
         current: number | null;
         /**
          * The pressure's trend. There are five possible trends:
@@ -39,12 +39,12 @@ export type SimpleRealtimeRecord = {
         };
     };
     /**
-     * Current inside and outside temperature in °F
+     * Current inside and outside temperature
      */
     temperature: {
-        /** Current inside temperature in °F */
+        /** Current inside temperature */
         in: number | null;
-        /** Current outside temperature in °F */
+        /** Current outside temperature */
         out: number | null;
     };
     /** Current inside and outside humidity (relative) in percent  */
@@ -57,11 +57,11 @@ export type SimpleRealtimeRecord = {
     /** Currently measured wind related data */
     wind: {
         /**
-         * Currently measured wind speed in mph
+         * Currently measured wind speed
          */
         current: number | null;
         /**
-         * Currently measured average wind speed in mph
+         * Currently measured average wind speed
          */
         avg: number | null;
         /**
@@ -102,7 +102,7 @@ export type SimpleRealtimeRecord = {
      */
     rain: {
         /**
-         * The current rain rate in inch/hour
+         * The current rain rat
          */
         rate: number | null;
         /**
@@ -128,7 +128,7 @@ export type SimpleRealtimeRecord = {
     uv: number | null;
 
     /**
-     * Currently measured solar radiation in W/m²
+     * Currently measured solar radiation
      */
     solarRadiation: number | null;
 

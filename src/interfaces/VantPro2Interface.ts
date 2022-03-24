@@ -74,9 +74,10 @@ export default class VantPro2Interface extends VantInterface {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOPParser(this.settings.rainCollectorSize).parse(
-                splittedData.weatherData
-            );
+            return new LOOPParser(
+                this.rainClicksToInchTransformer,
+                this.unitTransformers
+            ).parse(splittedData.weatherData);
         } else {
             throw new UnsupportedDeviceModelError(
                 "This weather station doesn't support explicitly querying LOOP (version 1) packages. Try getLOOP2() or getDefaultLOOP()."
@@ -112,9 +113,10 @@ export default class VantPro2Interface extends VantInterface {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOP2Parser(this.settings.rainCollectorSize).parse(
-                splittedData.weatherData
-            );
+            return new LOOP2Parser(
+                this.rainClicksToInchTransformer,
+                this.unitTransformers
+            ).parse(splittedData.weatherData);
         } else {
             throw new UnsupportedDeviceModelError(
                 "This weather station doesn't support LOOP2 packages. Try getLOOP() or getDefaultLOOP()."
@@ -140,8 +142,8 @@ export default class VantPro2Interface extends VantInterface {
                 reductionMethod: { value: null, text: null },
                 userOffset: null,
                 calibrationOffset: null,
+                altimeter: null,
             },
-            altimeter: null,
             heat: null,
             dewpoint: null,
             temperature: {

@@ -1,5 +1,3 @@
-import units from "typesafe-units";
-
 /**
  * Converts the passed number of rain clicks to inch using the interface's configured rain collector size.
  * @param rainClicks number of rain clicks
@@ -17,10 +15,10 @@ export function createRainClicksToInchTransformer(
                     rain = rain * 100;
                     break;
                 case "0.1mm":
-                    rain = units.from(rain * 10, "mm").to("in");
+                    rain = rain / 254;
                     break;
                 case "0.2mm":
-                    rain = units.from(rain * 5, "mm").to("in");
+                    rain = rain / 127;
                     break;
             }
         }

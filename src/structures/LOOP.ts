@@ -146,7 +146,7 @@ export type LOOP1 = {
     };
     sunrise: string | null;
     sunset: string | null;
-    packageType: "LOOP";
+    packageType: "LOOP1";
 };
 
 export type LOOP2 = {
@@ -174,8 +174,8 @@ export type LOOP2 = {
         };
         userOffset: number | null;
         calibrationOffset: number | null;
+        altimeter: number | null;
     };
-    altimeter: number | null;
     heat: number | null;
     dewpoint: number | null;
     temperature: { in: number | null; out: number | null };
@@ -200,12 +200,12 @@ export type LOOP2 = {
     et: { day: number | null };
     uv: number | null;
     solarRadiation: number | null;
-    packageType: "LOOP2";
+    packageType: LoopPackageType.LOOP2;
 };
 
 export type LoopPackage = LOOP1 | LOOP2;
 
 export enum LoopPackageType {
-    LOOP = "LOOP",
+    LOOP1 = "LOOP1",
     LOOP2 = "LOOP2",
 }

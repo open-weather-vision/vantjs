@@ -10,11 +10,16 @@ async function main() {
             rainCollectorSize: "0.2mm",
         },
         updateInterval: 3,
+        units: {
+            temperature: "°C",
+        },
     });
 
     while (true) {
         await weatherData.waitForUpdate();
-        console.log(weatherData.temperature.in + " °F");
+        console.log(
+            weatherData.temperature.in + weatherData.settings.units.temperature
+        );
     }
 
     await weatherData.close();

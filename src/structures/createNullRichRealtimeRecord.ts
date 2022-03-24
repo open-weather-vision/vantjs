@@ -16,8 +16,8 @@ export default function createNullRichRealtimeRecord() {
             },
             userOffset: null,
             calibrationOffset: null,
+            altimeter: null,
         },
-        altimeter: null,
         heat: null,
         dewpoint: null,
         temperature: {

@@ -135,11 +135,9 @@ export default function createNullRichRealtimeRecord() {
             dayTime: null,
         },
         rainRate: {
-            month: null,
+            hour: null,
             day: null,
             dayTime: null,
-        },
-        rainSum: {
             month: null,
             year: null,
         },

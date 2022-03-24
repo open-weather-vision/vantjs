@@ -25,42 +25,64 @@ export enum ArrayType {
     ENTRY_BASED = 2,
 }
 
-export type PropertyConfig = {
-    type: Type,
-    position: number,
-    nullables?: number[] | string,
-    transform?: ((val: number) => any) | string,
-    dependsOn?: string,
-} | {
-    copyof: string,
-    nullables?: number[] | string,
-    transform?: ((val: number) => any) | string,
-    dependsOn?: string,
-};
+export type PropertyConfig =
+    | {
+          type: Type;
+          position: number;
+          nullables?: number[] | string;
+          transform?: ((val: number) => any) | string;
+          dependsOn?: string;
+      }
+    | {
+          copyof: string;
+          nullables?: number[] | string;
+          transform?: ((val: number) => any) | string;
+          dependsOn?: string;
+      };
 
 export interface ParsingStructure {
-    [propertyName: string]: ParsingStructure | [ParsingStructure | PropertyConfig, number, ArrayType.PROPERTY_BASED] | [ParsingStructure | PropertyConfig, number, ArrayType.ENTRY_BASED, number] | PropertyConfig
+    [propertyName: string]:
+        | ParsingStructure
+        | [ParsingStructure | PropertyConfig, number, ArrayType.PROPERTY_BASED]
+        | [
+              ParsingStructure | PropertyConfig,
+              number,
+              ArrayType.ENTRY_BASED,
+              number
+          ]
+        | PropertyConfig;
 }
 export interface ParsedObject {
     [propertyName: string]: any | ParsedObject;
 }
 
-export interface TransformerCollection { [property: string]: (val: number) => any }
-export interface NullablesCollection { [property: string]: number[] }
+export interface TransformerCollection {
+    [property: string]: (val: number) => any;
+}
+export interface NullablesCollection {
+    [property: string]: number[];
+}
 
 export default class BinaryParser<T extends ParsedObject> {
     private struct: ParsingStructure;
     private offset = 0;
-    private transformers: TransformerCollection = {}
-    private nullables: NullablesCollection = {}
+    private transformers: TransformerCollection = {};
+    private nullables: NullablesCollection = {};
 
-    constructor(struct: ParsingStructure, nullables?: NullablesCollection, transformers?: TransformerCollection) {
+    constructor(
+        struct: ParsingStructure,
+        nullables?: NullablesCollection,
+        transformers?: TransformerCollection
+    ) {
         this.struct = struct;
         if (transformers) this.transformers = transformers;
         if (nullables) this.nullables = nullables;
     }
 
-    public setTransformer(name: string, transformer: (val: number) => any): void {
+    public setTransformer(
+        name: string,
+        transformer: (val: number) => any
+    ): void {
         this.transformers[name] = transformer;
     }
 
@@ -73,7 +95,10 @@ export default class BinaryParser<T extends ParsedObject> {
             this.offset = offset;
             return this.parseRecursivly(buffer, this.struct);
         } catch (err) {
-            throw new ParserError("Failed to parse data. If this error occurs please contact the developer on github.");
+            throw new ParserError(
+                "Failed to parse data. If this error occurs please contact the developer on github: " +
+                    err
+            );
         }
     }
 
@@ -97,7 +122,12 @@ export default class BinaryParser<T extends ParsedObject> {
         }
     }
 
-    private parseRecursivly(buffer: Buffer, struct: ParsingStructure, arrayIndex = 0, entryGap = 0): T {
+    private parseRecursivly(
+        buffer: Buffer,
+        struct: ParsingStructure,
+        arrayIndex = 0,
+        entryGap = 0
+    ): T {
         let result: ParsedObject = {};
 
         const propertyKeys = Object.keys(struct);
@@ -109,7 +139,10 @@ export default class BinaryParser<T extends ParsedObject> {
             if (this.isPropertyConfig(propertyValue)) {
                 const propertyConfig = propertyValue as PropertyConfig;
                 if ("copyof" in propertyConfig) {
-                    if (!propertyKeys.includes(propertyConfig.copyof)) throw new Error("Invalid parse structure. Property is copy of an unknown property.");
+                    if (!propertyKeys.includes(propertyConfig.copyof))
+                        throw new Error(
+                            "Invalid parse structure. Property is copy of an unknown property."
+                        );
 
                     if (result[propertyConfig.copyof] === undefined) {
                         propertyKeys.push(propertyKey);
@@ -120,30 +153,53 @@ export default class BinaryParser<T extends ParsedObject> {
                     let position = propertyConfig.position;
                     if (arrayIndex && entryGap) {
                         position += entryGap * arrayIndex;
-                    }
-                    else if (arrayIndex) position += this.byteLength(propertyConfig.type) * arrayIndex;
-                    resolvedValue = this.read(buffer, propertyConfig.type, position);
+                    } else if (arrayIndex)
+                        position +=
+                            this.byteLength(propertyConfig.type) * arrayIndex;
+                    resolvedValue = this.read(
+                        buffer,
+                        propertyConfig.type,
+                        position
+                    );
                 }
                 if (propertyConfig.nullables && resolvedValue !== null) {
                     if (typeof propertyConfig.nullables === "string") {
-                        const nullables = this.nullables[propertyConfig.nullables];
-                        if (nullables) resolvedValue = this.nullNullables(resolvedValue, nullables);
-                        else throw new Error(`Invalid nullables name '${propertyConfig.nullables}!`);
-                    }
-                    else resolvedValue = this.nullNullables(resolvedValue, propertyConfig.nullables);
+                        const nullables =
+                            this.nullables[propertyConfig.nullables];
+                        if (nullables)
+                            resolvedValue = this.nullNullables(
+                                resolvedValue,
+                                nullables
+                            );
+                        else
+                            throw new Error(
+                                `Invalid nullables name '${propertyConfig.nullables}!`
+                            );
+                    } else
+                        resolvedValue = this.nullNullables(
+                            resolvedValue,
+                            propertyConfig.nullables
+                        );
                 }
                 if (propertyConfig.transform && resolvedValue !== null) {
                     if (typeof propertyConfig.transform === "string") {
-                        const transformer = this.transformers[propertyConfig.transform];
-                        if (transformer) resolvedValue = transformer(resolvedValue);
-                        else throw new Error(`Invalid transformer name '${propertyConfig.transform}!`);
-                    }
-                    else resolvedValue = propertyConfig.transform(resolvedValue);
+                        const transformer =
+                            this.transformers[propertyConfig.transform];
+                        if (transformer)
+                            resolvedValue = transformer(resolvedValue);
+                        else
+                            throw new Error(
+                                `Invalid transformer name '${propertyConfig.transform}!`
+                            );
+                    } else
+                        resolvedValue = propertyConfig.transform(resolvedValue);
                 }
                 if (propertyConfig.dependsOn && resolvedValue !== null) {
-                    resolvedValue = { value: resolvedValue, dependsOn: propertyConfig.dependsOn };
+                    resolvedValue = {
+                        value: resolvedValue,
+                        dependsOn: propertyConfig.dependsOn,
+                    };
                 }
-
             } else if (propertyValue instanceof Array) {
                 const structure = propertyValue[0];
                 const length = propertyValue[1];
@@ -152,18 +208,32 @@ export default class BinaryParser<T extends ParsedObject> {
                 resolvedValue = [];
                 if (this.isPropertyConfig(structure)) {
                     for (let a = 0; a < length; a++) {
-                        const parsedEntry = this.parseRecursivly(buffer, { value: structure }, a, entryGap);
+                        const parsedEntry = this.parseRecursivly(
+                            buffer,
+                            { value: structure },
+                            a,
+                            entryGap
+                        );
                         resolvedValue.push(parsedEntry.value);
                     }
                 } else {
                     for (let a = 0; a < length; a++) {
-                        const parsedEntry = this.parseRecursivly(buffer, structure as ParsingStructure, a, entryGap);
+                        const parsedEntry = this.parseRecursivly(
+                            buffer,
+                            structure as ParsingStructure,
+                            a,
+                            entryGap
+                        );
                         resolvedValue.push(parsedEntry);
                     }
                 }
             } else {
                 const nestedStruct = propertyValue as ParsingStructure;
-                resolvedValue = this.parseRecursivly(buffer, nestedStruct, arrayIndex);
+                resolvedValue = this.parseRecursivly(
+                    buffer,
+                    nestedStruct,
+                    arrayIndex
+                );
             }
 
             result[propertyKey] = resolvedValue;
@@ -187,12 +257,17 @@ export default class BinaryParser<T extends ParsedObject> {
             const key = keys[i];
             let value: any = data[key];
             if (this.isDependencyObject(value)) {
-                type DependencyObject = { value: any, dependsOn: string };
+                type DependencyObject = { value: any; dependsOn: string };
                 const dependencyObject = value as DependencyObject;
                 // Check dependency's value
-                if (!keys.includes(dependencyObject.dependsOn)) throw new Error("Invalid parse structure. Property is dependend on unknown property.");
+                if (!keys.includes(dependencyObject.dependsOn))
+                    throw new Error(
+                        "Invalid parse structure. Property is dependend on unknown property."
+                    );
                 const dependency = data[dependencyObject.dependsOn];
-                const valueOfDependency = this.isDependencyObject(dependency) ? (dependency as DependencyObject).value : dependency;
+                const valueOfDependency = this.isDependencyObject(dependency)
+                    ? (dependency as DependencyObject).value
+                    : dependency;
                 if (valueOfDependency === null) value = null;
                 else value = dependencyObject.value;
             } else if (value instanceof Array) {
@@ -208,7 +283,12 @@ export default class BinaryParser<T extends ParsedObject> {
     }
 
     private isDependencyObject(value: any) {
-        return value !== null && typeof value === "object" && value.dependsOn !== undefined && value.dependsOn !== null;
+        return (
+            value !== null &&
+            typeof value === "object" &&
+            value.dependsOn !== undefined &&
+            value.dependsOn !== null
+        );
     }
 
     private read(buffer: Buffer, type: Type, position: number): number | null {
@@ -217,38 +297,51 @@ export default class BinaryParser<T extends ParsedObject> {
         switch (type) {
             case Type.INT8:
                 // console.log(`Reading INT8 at ${position}`)
-                result = buffer.readInt8(position); break;
+                result = buffer.readInt8(position);
+                break;
             case Type.INT16_BE:
                 // console.log(`Reading INT16_BE at ${position}`)
-                result = buffer.readInt16BE(position); break;
+                result = buffer.readInt16BE(position);
+                break;
             case Type.INT16_LE:
                 // console.log(`Reading INT16_LE at ${position}`)
-                result = buffer.readInt16LE(position); break;
+                result = buffer.readInt16LE(position);
+                break;
             case Type.INT32_BE:
                 // console.log(`Reading INT32_BE at ${position}`)
-                result = buffer.readInt32BE(position); break;
+                result = buffer.readInt32BE(position);
+                break;
             case Type.INT32_LE:
                 // console.log(`Reading INT32_LE at ${position}`)
-                result = buffer.readInt32LE(position); break;
+                result = buffer.readInt32LE(position);
+                break;
             case Type.UINT8:
                 // console.log(`Reading UINT8 at ${position}`)
-                result = buffer.readUInt8(position); break;
+                result = buffer.readUInt8(position);
+                break;
             case Type.UINT16_BE:
                 // console.log(`Reading UINT16_BE at ${position}`)
-                result = buffer.readUInt16BE(position); break;
+                result = buffer.readUInt16BE(position);
+                break;
             case Type.UINT16_LE:
                 // console.log(`Reading UINT16_LE at ${position}`)
-                result = buffer.readUInt16LE(position); break;
+                result = buffer.readUInt16LE(position);
+                break;
             case Type.UINT32_BE:
                 // console.log(`Reading UINT32_BE at ${position}`)
-                result = buffer.readUInt32BE(position); break;
+                result = buffer.readUInt32BE(position);
+                break;
             case Type.UINT32_LE:
                 // console.log(`Reading UINT32_LE at ${position}`)
-                result = buffer.readUInt32LE(position); break;
+                result = buffer.readUInt32LE(position);
+                break;
             case Type.BIT:
                 const bitPosition = Math.round((position % 1) * 8);
                 const bytePosition = Math.trunc(position);
-                const byteString = numberToBinaryString(buffer[bytePosition], 8);
+                const byteString = numberToBinaryString(
+                    buffer[bytePosition],
+                    8
+                );
                 result = Number(byteString[bitPosition]);
         }
         if (result === undefined) result = null;

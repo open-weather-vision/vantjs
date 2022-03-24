@@ -7,6 +7,7 @@ async function main() {
         device: {
             path: "COM4",
             model: DeviceModel.VantagePro2,
+            rainCollectorSize: "0.2mm",
         },
         updateInterval: 3,
     });

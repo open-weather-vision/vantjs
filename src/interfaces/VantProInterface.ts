@@ -28,7 +28,7 @@ export default class VantProInterface extends VantInterface {
     public static async create(settings: MinimumVantInterfaceSettings) {
         const device = new VantInterface(settings);
 
-        await this.setupInterface(device);
+        await this.performOnCreateAction(device);
 
         return device;
     }

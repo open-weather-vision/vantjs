@@ -33,7 +33,7 @@ export default class VantPro2Interface extends VantInterface {
     public static async create(settings: MinimumVantInterfaceSettings) {
         const device = new VantPro2Interface(settings);
 
-        await this.setupInterface(device);
+        await this.performOnCreateAction(device);
 
         return device;
     }
@@ -43,7 +43,7 @@ export default class VantPro2Interface extends VantInterface {
      * @returns the console's firmware version
      */
     public async getFirmwareVersion() {
-        this.validatePort();
+        this.checkPortConnection();
         const data = await this.writeAndWaitForBuffer("NVER\n");
         try {
             const firmwareVersion = data
@@ -61,7 +61,7 @@ export default class VantPro2Interface extends VantInterface {
      * @returns the LOOP (version 1) package
      */
     public async getLOOP1() {
-        this.validatePort();
+        this.checkPortConnection();
         const data = await this.writeAndWaitForBuffer("LPS 1 1\n");
 
         // Check ack
@@ -74,7 +74,9 @@ export default class VantPro2Interface extends VantInterface {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOPParser().parse(splittedData.weatherData);
+            return new LOOPParser(this.settings.rainCollectorSize).parse(
+                splittedData.weatherData
+            );
         } else {
             throw new UnsupportedDeviceModelError(
                 "This weather station doesn't support explicitly querying LOOP (version 1) packages. Try getLOOP2() or getDefaultLOOP()."
@@ -87,7 +89,7 @@ export default class VantPro2Interface extends VantInterface {
      * @returns the LOOP (version 2) package
      */
     public async getLOOP2() {
-        this.validatePort();
+        this.checkPortConnection();
         const data = await this.writeAndWaitForBuffer("LPS 2 1\n");
 
         // Check ack
@@ -110,7 +112,9 @@ export default class VantPro2Interface extends VantInterface {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOP2Parser().parse(splittedData.weatherData);
+            return new LOOP2Parser(this.settings.rainCollectorSize).parse(
+                splittedData.weatherData
+            );
         } else {
             throw new UnsupportedDeviceModelError(
                 "This weather station doesn't support LOOP2 packages. Try getLOOP() or getDefaultLOOP()."
@@ -123,7 +127,7 @@ export default class VantPro2Interface extends VantInterface {
      * @returns detailed weather information
      */
     public async getRichRealtimeRecord(): Promise<RichRealtimeRecord> {
-        this.validatePort();
+        this.checkPortConnection();
         const RichRealtimeRecord: RichRealtimeRecord = {
             pressure: {
                 current: null,

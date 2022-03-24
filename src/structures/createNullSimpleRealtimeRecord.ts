@@ -20,7 +20,10 @@ export default function createNullSimpleRealtimeRecord() {
         wind: {
             current: null,
             avg: null,
-            direction: null,
+            direction: {
+                degrees: null,
+                abbrevation: null,
+            },
         },
         rain: {
             rate: null,
@@ -28,7 +31,7 @@ export default function createNullSimpleRealtimeRecord() {
             stormStartDate: null,
             day: null,
         },
-        et: { day: null },
+        et: null,
         uv: null,
         solarRadiation: null,
         time: new Date(),

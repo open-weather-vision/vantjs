@@ -6,6 +6,7 @@ import VantVueInterface from "../interfaces/VantVueInterface";
 import VantProInterface from "../interfaces/VantProInterface";
 import cloneDeep from "lodash.clonedeep";
 import merge from "lodash.merge";
+import { RainCollectorSize } from "../parsers/RainCollector";
 
 export enum OnCreate {
     DoNothing = 0,
@@ -21,6 +22,7 @@ export interface WeatherDataContainerSettings<
         readonly path: string;
         readonly baudRate: number;
         readonly model: SupportedDeviceModels;
+        readonly rainCollectorSize: RainCollectorSize;
     };
     readonly updateInterval: number;
     readonly onCreate: OnCreate;
@@ -33,6 +35,7 @@ export type MinimumWeatherDataContainerSettings<
         readonly path: string;
         readonly baudRate?: number;
         readonly model: SupportedDeviceModels;
+        readonly rainCollectorSize: RainCollectorSize;
     };
     readonly updateInterval?: number;
     readonly onCreate?: OnCreate;
@@ -153,24 +156,28 @@ export default abstract class WeatherDataContainer<
     };
 
     private setupInterface = async () => {
-        const { path, model, baudRate } = this.settings.device;
+        const { path, model, baudRate, rainCollectorSize } =
+            this.settings.device;
         switch (model) {
             case DeviceModel.VantagePro2:
                 this.currentDevice = (await VantPro2Interface.create({
                     path,
                     baudRate,
+                    rainCollectorSize,
                 })) as any;
                 break;
             case DeviceModel.VantageVue:
                 this.currentDevice = (await VantVueInterface.create({
                     path,
                     baudRate,
+                    rainCollectorSize,
                 })) as any;
                 break;
             case DeviceModel.VantagePro:
                 this.currentDevice = (await VantProInterface.create({
                     path,
                     baudRate,
+                    rainCollectorSize,
                 })) as any;
                 break;
         }

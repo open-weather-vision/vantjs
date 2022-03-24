@@ -3,7 +3,10 @@ import inspect from "./util/inspect";
 
 async function main() {
     try {
-        const device = await VantPro2Interface.create({ path: "COM4" });
+        const device = await VantPro2Interface.create({
+            path: "COM4",
+            rainCollectorSize: "0.2mm",
+        });
 
         // Validate the console's connection
         if (await device.validateConnection()) {
@@ -15,42 +18,42 @@ async function main() {
         // Getting the console's firmware date code
         console.log("\n\nFirmware date code: ");
         const firmwareDateCode = await device.getFirmwareDateCode();
-        inspect(firmwareDateCode);
+        //inspect(firmwareDateCode);
 
         // Getting highs and lows
         console.log("\n\nHighs and lows: ");
         const highsAndLows = await device.getHighsAndLows();
-        inspect(highsAndLows);
+        //inspect(highsAndLows);
 
         // Getting default LOOP package
         console.log("\n\nDefault LOOP: ");
         const defaultLOOP = await device.getDefaultLOOP();
-        inspect(defaultLOOP);
+        //inspect(defaultLOOP);
 
         // Getting basic weather data
         console.log("\nBasic weather data: ");
         const basicWeatherData = await device.getSimpleRealtimeRecord();
-        inspect(basicWeatherData);
+        //inspect(basicWeatherData);
 
         // Getting firmware version
         console.log("\nFirmware version: ");
         const firmwareVersion = await device.getFirmwareVersion();
-        inspect(firmwareVersion);
+        //inspect(firmwareVersion);
 
         // Getting LOOP1 package
         console.log("\nLOOP package: ");
         const LOOP1 = await device.getLOOP1();
-        inspect(LOOP1);
+        //inspect(LOOP1);
 
         // Getting LOOP2 package
         console.log("\nLOOP2 package: ");
         const LOOP2 = await device.getLOOP2();
-        inspect(LOOP2);
+        //inspect(LOOP2);
 
         // Getting a lot of weather data
         console.log("\nA lot of weather data: ");
         const richRealtimeRecord = await device.getRichRealtimeRecord();
-        inspect(richRealtimeRecord);
+        //inspect(richRealtimeRecord);
 
         await device.close();
     } catch (err) {

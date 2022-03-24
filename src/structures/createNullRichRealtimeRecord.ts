@@ -61,8 +61,17 @@ export default function createNullRichRealtimeRecord() {
         wind: {
             current: null,
             avg: { tenMinutes: null, twoMinutes: null },
-            direction: null,
-            heaviestGust10min: { direction: null, speed: null },
+            direction: {
+                degrees: null,
+                abbrevation: null,
+            },
+            heaviestGust10min: {
+                direction: {
+                    degrees: null,
+                    abbrevation: null,
+                },
+                speed: null,
+            },
             chill: null,
             thsw: null,
         },

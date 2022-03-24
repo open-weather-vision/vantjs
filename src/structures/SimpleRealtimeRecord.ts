@@ -1,3 +1,6 @@
+/**
+ * Contains basic realtime weather data. Works regardless of the weather station model (Vue, Pro, Pro 2).
+ */
 export type SimpleRealtimeRecord = {
     /**
      * Currently measured pressure related weather data
@@ -42,7 +45,7 @@ export type SimpleRealtimeRecord = {
      * Current inside and outside temperature
      */
     temperature: {
-        /** Current inside temperature */
+        /** Current inside temperature (the console's temperature) */
         in: number | null;
         /** Current outside temperature */
         out: number | null;

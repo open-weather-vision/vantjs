@@ -3,11 +3,9 @@ import MalformedDataError from "../errors/MalformedDataError";
 import LOOP2Parser from "../parsers/LOOP2Parser";
 import LOOPParser from "../parsers/LOOPParser";
 import { RichRealtimeRecord } from "../structures/RichRealtimeRecord";
-import VantInterface, {
-    MinimumVantInterfaceSettings,
-    OnCreate,
-} from "./VantInterface";
+import VantInterface, { MinimumVantInterfaceSettings } from "./VantInterface";
 import UnsupportedDeviceModelError from "../errors/UnsupportedDeviceModelError";
+import createNullRichRealtimeRecord from "../structures/createNullRichRealtimeRecord";
 
 /**
  * Interface to the _Vantage Pro 2_ weather station. Is built on top of the {@link VantInterface}.
@@ -130,65 +128,8 @@ export default class VantPro2Interface extends VantInterface {
      */
     public async getRichRealtimeRecord(): Promise<RichRealtimeRecord> {
         this.checkPortConnection();
-        const RichRealtimeRecord: RichRealtimeRecord = {
-            pressure: {
-                current: null,
-                currentRaw: null,
-                currentAbsolute: null,
-                trend: {
-                    value: null,
-                    text: null,
-                },
-                reductionMethod: { value: null, text: null },
-                userOffset: null,
-                calibrationOffset: null,
-                altimeter: null,
-            },
-            heat: null,
-            dewpoint: null,
-            temperature: {
-                in: null,
-                out: null,
-                extra: [null, null, null, null, null, null, null],
-            },
-            leafTemps: [null, null, null, null],
-            soilTemps: [null, null, null, null],
-            humidity: {
-                in: null,
-                out: null,
-                extra: [null, null, null, null, null, null, null],
-            },
-            wind: {
-                current: null,
-                avg: { tenMinutes: null, twoMinutes: null },
-                direction: null,
-                heaviestGust10min: { direction: null, speed: null },
-                chill: null,
-                thsw: null,
-            },
-            rain: {
-                rate: null,
-                storm: null,
-                stormStartDate: null,
-                day: null,
-                month: null,
-                year: null,
-                last15min: null,
-                lastHour: null,
-                last24h: null,
-            },
-            et: { day: null, month: null, year: null },
-            soilMoistures: [null, null, null, null],
-            leafWetnesses: [null, null, null, null],
-            uv: null,
-            solarRadiation: null,
-            transmitterBatteryStatus: null,
-            consoleBatteryVoltage: null,
-            forecast: { iconNumber: null, iconText: null, rule: null },
-            sunrise: null,
-            sunset: null,
-            time: new Date(),
-        };
+        const richRealtimeRecord: RichRealtimeRecord =
+            createNullRichRealtimeRecord();
 
         const loopPackage = (await this.getLOOP1()) as any;
         delete loopPackage["alarms"];
@@ -203,9 +144,27 @@ export default class VantPro2Interface extends VantInterface {
         delete loop2Package["packageType"];
         delete loop2Package["graphPointers"];
 
-        merge(RichRealtimeRecord, loopPackage);
-        merge(RichRealtimeRecord, loop2Package);
+        merge(richRealtimeRecord, loopPackage);
+        merge(richRealtimeRecord, loop2Package);
 
-        return RichRealtimeRecord as RichRealtimeRecord;
+        richRealtimeRecord.wind.direction = {
+            degrees: richRealtimeRecord.wind.direction as unknown as
+                | number
+                | null,
+            abbrevation: this.convertWindDirectionDegreesToAbbrevation(
+                richRealtimeRecord.wind.direction as unknown as number | null
+            ),
+        };
+
+        richRealtimeRecord.wind.heaviestGust10min.direction = {
+            degrees: richRealtimeRecord.wind.heaviestGust10min
+                .direction as unknown as number | null,
+            abbrevation: this.convertWindDirectionDegreesToAbbrevation(
+                richRealtimeRecord.wind.heaviestGust10min
+                    .direction as unknown as number | null
+            ),
+        };
+
+        return richRealtimeRecord;
     }
 }

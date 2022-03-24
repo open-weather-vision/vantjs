@@ -600,7 +600,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
             };
         };
 
-    private convertWindDirectionDegreesToAbbrevation(
+    protected convertWindDirectionDegreesToAbbrevation(
         windDirection: number | null
     ):
         | "NNE"

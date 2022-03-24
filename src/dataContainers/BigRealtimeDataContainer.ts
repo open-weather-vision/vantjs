@@ -98,9 +98,49 @@ export default class BigRealtimeDataContainer
             tenMinutes: null as number | null,
             twoMinutes: null as number | null,
         },
-        direction: null as number | null,
+        direction: {
+            degrees: null as number | null,
+            abbrevation: null as
+                | "NNE"
+                | "NE"
+                | "ENE"
+                | "E"
+                | "ESE"
+                | "SE"
+                | "SSE"
+                | "S"
+                | "SSW"
+                | "SW"
+                | "WSW"
+                | "W"
+                | "WNW"
+                | "NW"
+                | "NNW"
+                | "N"
+                | null,
+        },
         heaviestGust10min: {
-            direction: null as number | null,
+            direction: {
+                degrees: null as number | null,
+                abbrevation: null as
+                    | "NNE"
+                    | "NE"
+                    | "ENE"
+                    | "E"
+                    | "ESE"
+                    | "SE"
+                    | "SSE"
+                    | "S"
+                    | "SSW"
+                    | "SW"
+                    | "WSW"
+                    | "W"
+                    | "WNW"
+                    | "NW"
+                    | "NNW"
+                    | "N"
+                    | null,
+            },
             speed: null as number | null,
         },
         chill: null as number | null,

@@ -55,12 +55,12 @@ async function main() {
         // Getting LOOP2 package
         console.log("\nLOOP2 package: ");
         const LOOP2 = await device.getLOOP2();
-        inspect(LOOP2);
+        //inspect(LOOP2);
 
         // Getting a lot of weather data
         console.log("\nA lot of weather data: ");
         const richRealtimeRecord = await device.getRichRealtimeRecord();
-        //inspect(richRealtimeRecord);
+        inspect(richRealtimeRecord);
 
         await device.close();
     } catch (err) {

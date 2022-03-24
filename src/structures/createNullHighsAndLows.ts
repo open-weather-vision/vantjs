@@ -1,6 +1,6 @@
 import { HighsAndLows } from "./HighsAndLows";
 
-export default function createNullRichRealtimeRecord() {
+export default function createNullHighsAndLows() {
     return {
         pressure: {
             day: {

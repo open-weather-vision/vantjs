@@ -200,6 +200,18 @@ export type LOOP2 = {
     et: { day: number | null };
     uv: number | null;
     solarRadiation: number | null;
+    graphPointers: {
+        next10mWindSpeed: number;
+        next15mWindSpeed: number;
+        nextHourWindSpeed: number;
+        nextDailyWindSpeed: number;
+        nextMinuteRain: number;
+        nextMonthlyRain: number;
+        nextYearlyRain: number;
+        nextSeasonalRain: number;
+        nextRainStorm: number;
+        currentMinuteIndex: number;
+    };
     packageType: LoopPackageType.LOOP2;
 };
 

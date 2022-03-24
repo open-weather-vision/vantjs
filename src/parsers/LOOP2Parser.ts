@@ -1,5 +1,5 @@
 import BinaryParser, { Type } from "../util/BinaryParser";
-import { LOOP2, LoopPackageType } from "../structures/LOOP";
+import { LOOP2, LOOPPackageType } from "../structures/LOOP";
 import nullables from "./reusables/nullables";
 import transformers from "./reusables/transformers";
 import { UnitTransformers } from "./units/unitTransformers";
@@ -116,8 +116,18 @@ export default class LOOP2Parser extends BinaryParser<LOOP2> {
                     transform: [(val) => val / 1000, unitTransformers.pressure],
                 },
             },
-            heat: { type: Type.INT16, position: 35, nullables: [255] },
-            dewpoint: { type: Type.INT16, position: 30, nullables: [255] },
+            heat: {
+                type: Type.INT16,
+                position: 35,
+                nullables: [255],
+                transform: [unitTransformers.temperature],
+            },
+            dewpoint: {
+                type: Type.INT16,
+                position: 30,
+                nullables: [255],
+                transform: [unitTransformers.temperature],
+            },
             temperature: {
                 in: {
                     type: Type.INT16,
@@ -191,12 +201,12 @@ export default class LOOP2Parser extends BinaryParser<LOOP2> {
                     nullables: [255],
                     transform: [unitTransformers.temperature],
                 },
-                thsw: {
-                    type: Type.INT16,
-                    position: 39,
-                    nullables: [255],
-                    transform: [unitTransformers.temperature],
-                },
+            },
+            thsw: {
+                type: Type.INT16,
+                position: 39,
+                nullables: [255],
+                transform: [unitTransformers.temperature],
             },
             rain: {
                 rate: {
@@ -286,7 +296,7 @@ export default class LOOP2Parser extends BinaryParser<LOOP2> {
 
     public parse(buffer: Buffer) {
         const result = super.parse(buffer) as Partial<LOOP2>;
-        result.packageType = LoopPackageType.LOOP2;
+        result.packageType = LOOPPackageType.LOOP2;
         return result as LOOP2;
     }
 }

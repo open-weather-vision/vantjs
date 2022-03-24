@@ -1,5 +1,5 @@
 import BinaryParser, { ArrayType, Type } from "../util/BinaryParser";
-import { LOOP1, LoopPackageType } from "../structures/LOOP";
+import { LOOP1, LOOPPackageType } from "../structures/LOOP";
 import nullables from "./reusables/nullables";
 import transformers from "./reusables/transformers";
 import { UnitTransformers } from "./units/unitTransformers";
@@ -363,7 +363,7 @@ export default class LOOPParser extends BinaryParser<LOOP1> {
                     position: 72 + 7 / 8,
                     transform: [transformers.alarm],
                 },
-                THSW: {
+                thsw: {
                     type: Type.BIT,
                     position: 73,
                     transform: [transformers.alarm],
@@ -586,7 +586,7 @@ export default class LOOPParser extends BinaryParser<LOOP1> {
 
     public parse(buffer: Buffer) {
         const result = super.parse(buffer) as Partial<LOOP1>;
-        result.packageType = LoopPackageType.LOOP1;
+        result.packageType = LOOPPackageType.LOOP1;
         return result as LOOP1;
     }
 }

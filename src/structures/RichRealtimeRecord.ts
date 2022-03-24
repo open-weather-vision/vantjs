@@ -106,7 +106,7 @@ export type RichRealtimeRecord = {
         /** Current outside temperature */
         out: number | null;
 
-        /** Measured temperature from up to 7 extra sensors */
+        /** Measured temperatures from up to 7 extra sensors */
         extra: [
             number | null,
             number | null,
@@ -119,12 +119,12 @@ export type RichRealtimeRecord = {
     };
 
     /**
-     * Currently measured leaf temperatures (up to 4)
+     * Currently measured leaf temperatures (from up to 4 sensors)
      */
     leafTemps: [number | null, number | null, number | null, number | null];
 
     /**
-     * Currently measured soil temperatures (up to 4)
+     * Currently measured soil temperatures (from up to 4 sensors)
      */
     soilTemps: [number | null, number | null, number | null, number | null];
 
@@ -161,7 +161,7 @@ export type RichRealtimeRecord = {
      */
     wind: {
         /**
-         * The current wind speed
+         * Currently measured wind speed
          */
         current: number | null;
         /**
@@ -254,12 +254,12 @@ export type RichRealtimeRecord = {
          * The currently measured wind chill
          */
         chill: number | null;
-
-        /**
-         * The currently measured THSW index. Requires a solar radiation sensor.
-         */
-        thsw: number | null;
     };
+
+    /**
+     * The currently measured THSW index. Requires a solar radiation sensor.
+     */
+    thsw: number | null;
 
     /**
      *  Curently measured rain related data
@@ -344,7 +344,7 @@ export type RichRealtimeRecord = {
     solarRadiation: number | null;
 
     /**
-     * The transmitter's battery status
+     * The transmitter's battery status (poorly documented)
      */
     transmitterBatteryStatus: number | null;
 

@@ -73,8 +73,8 @@ export default function createNullRichRealtimeRecord() {
                 speed: null,
             },
             chill: null,
-            thsw: null,
         },
+        thsw: null,
         rain: {
             rate: null,
             storm: null,

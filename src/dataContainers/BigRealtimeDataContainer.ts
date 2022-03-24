@@ -144,8 +144,9 @@ export default class BigRealtimeDataContainer
             speed: null as number | null,
         },
         chill: null as number | null,
-        thsw: null as number | null,
     };
+
+    public thsw: number | null = null;
 
     public rain = {
         rate: null as number | null,

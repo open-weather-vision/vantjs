@@ -91,4 +91,5 @@ main();
 
 # Documentation
 
-_Coming soon!_
+⚠ _Work in (early) progress!_ ⚠
+Read the full documentation [here](https://harrydehix.github.io/vantjs/).

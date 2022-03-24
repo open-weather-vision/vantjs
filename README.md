@@ -26,12 +26,13 @@ npm install vantjs
 The `VantInterface` class provides the basic features that all Vantage stations offer.
 
 ```typescript
-import { VantInterface, inspect } from "vantjs";
+import { VantInterface } from "vantjs/interfaces";
+import { inspect } from "vantjs/utils";
 
 async function main() {
     const device = await VantInterface.create({ path: "COM4" });
 
-    // Gettings highs and lows
+    // Getting highs and lows
     const highsAndLows = await device.getHighsAndLows();
     inspect(highsAndLows);
 
@@ -48,12 +49,15 @@ main();
 
 The `VantVueInterface`, `VantProInterface` and the `VantPro2Interface` offer station-dependent additional features.
 
-### Weather Data Containers
+### Realtime Data Containers
 
-Weather data containers are another level of abstraction hiding all the complex details from you. They are still in development, more news are coming soon.
+Realtime data containers are another level of abstraction hiding all the complex details from you. They are still in development, more news are coming soon.
 
 ```ts
-import { BigRealtimeDataContainer, DeviceModel } from "vantjs";
+import {
+    BigRealtimeDataContainer,
+    DeviceModel,
+} from "vantjs/realtime-containers";
 
 async function main() {
     const weather = await BigRealtimeDataContainer.create({

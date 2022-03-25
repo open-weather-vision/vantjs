@@ -564,7 +564,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
 
         const loopPackage = await this.getDefaultLOOP();
 
-        return {
+        return merge(new SimpleRealtimeData(), {
             pressure: {
                 current: loopPackage.pressure.current,
                 trend: {
@@ -594,8 +594,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
             et: loopPackage.et.day,
             uv: loopPackage.uv,
             solarRadiation: loopPackage.solarRadiation,
-            time: new Date(),
-        };
+        });
     };
 
     /**

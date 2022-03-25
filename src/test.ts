@@ -40,7 +40,7 @@ async function main() {
         // Getting basic weather data
         console.log("\nBasic weather data: ");
         const basicWeatherData = await device.getSimpleRealtimeData();
-        //inspect(basicWeatherData);
+        inspect(basicWeatherData);
 
         // Getting firmware version
         console.log("\nFirmware version: ");
@@ -60,7 +60,7 @@ async function main() {
         // Getting a lot of weather data
         console.log("\nA lot of weather data: ");
         const richRealtimeRecord = await device.getRichRealtimeData();
-        inspect(richRealtimeRecord);
+        //inspect(richRealtimeRecord);
 
         await device.close();
     } catch (err) {

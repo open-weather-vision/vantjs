@@ -1,10 +1,12 @@
 import merge from "lodash.merge";
 import MalformedDataError from "../errors/MalformedDataError";
 import LOOP2Parser from "../parsers/LOOP2Parser";
-import LOOPParser from "../parsers/LOOPParser";
+import LOOP1Parser from "../parsers/LOOP1Parser";
 import RichRealtimeData from "../structures/RichRealtimeData";
 import VantInterface, { MinimumVantInterfaceSettings } from "./VantInterface";
 import UnsupportedDeviceModelError from "../errors/UnsupportedDeviceModelError";
+import { LOOP1, LOOP2 } from "../structures";
+import { RichRainData } from "../structures/subtypes";
 
 /**
  * Interface to the _Vantage Pro 2_ weather station. Is built on top of the {@link VantInterface}.
@@ -74,7 +76,7 @@ export default class VantPro2Interface extends VantInterface {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOPParser(
+            return new LOOP1Parser(
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
             ).parse(splittedData.weatherData);
@@ -132,17 +134,32 @@ export default class VantPro2Interface extends VantInterface {
         this.checkPortConnection();
         const richRealtimeRecord: RichRealtimeData = new RichRealtimeData();
 
-        const loop1Package = (await this.getLOOP1()) as any;
+        const loop1Package = (await this.getLOOP1()) as Partial<LOOP1>;
+        const rain1Data = loop1Package.rain;
+
         delete loop1Package["alarms"];
         delete loop1Package["packageType"];
         delete loop1Package["nextArchiveRecord"];
+        delete loop1Package["rain"];
 
-        const loop2Package = (await this.getLOOP2()) as any;
+        const loop2Package = (await this.getLOOP2()) as Partial<LOOP2>;
+        const rain2Data = loop2Package.rain;
+
+        delete loop2Package["et"];
         delete loop2Package["packageType"];
         delete loop2Package["graphPointers"];
+        delete loop2Package["humidity"];
+        delete loop2Package["temperature"];
+        delete loop2Package["rain"];
 
         merge(richRealtimeRecord, loop1Package);
         merge(richRealtimeRecord, loop2Package);
+
+        richRealtimeRecord.rain = merge(
+            new RichRainData(),
+            rain1Data,
+            rain2Data
+        );
 
         return richRealtimeRecord;
     }

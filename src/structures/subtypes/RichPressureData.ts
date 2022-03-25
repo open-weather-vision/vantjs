@@ -1,7 +1,7 @@
 import PressureReductionMethod from "./PressureReductionMethod";
 import SimplePressureData from "./SimplePressureData";
 
-export default class RichPressureDta extends SimplePressureData {
+export default class RichPressureData extends SimplePressureData {
     /** Barometric sensor raw reading */
     public currentRaw: number | null = null;
 

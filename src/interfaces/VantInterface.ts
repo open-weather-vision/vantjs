@@ -5,7 +5,7 @@ import cloneDeep from "lodash.clonedeep";
 import merge from "lodash.merge";
 
 import HighsAndLowsParser from "../parsers/HighsAndLowsParser";
-import LOOPParser from "../parsers/LOOPParser";
+import LOOP1Parser from "../parsers/LOOP1Parser";
 import LOOP2Parser from "../parsers/LOOP2Parser";
 
 import SerialConnectionError from "../errors/SerialConnectionError";
@@ -529,7 +529,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOPParser(
+            return new LOOP1Parser(
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
             ).parse(splittedData.weatherData);

@@ -39,7 +39,7 @@ async function main() {
     inspect(highsAndLows);
 
     // Getting realtime weather data
-    const realtimeWeatherData = await device.getSimpleRealtimeRecord();
+    const realtimeWeatherData = await device.getSimpleRealtimeData();
     inspect(realtimeWeatherData);
 
     // Closing the connection to the device

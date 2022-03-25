@@ -1,4 +1,4 @@
-import { UnitSettings } from "../../interfaces/VantInterface";
+import { UnitSettings } from "../../units/UnitSettings";
 
 const transformerCreators = {
     rain(targetUnit: "mm" | "in") {

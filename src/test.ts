@@ -25,7 +25,7 @@ async function main() {
         // Getting the console's firmware date code
         console.log("\n\nFirmware date code: ");
         const firmwareDateCode = await device.getFirmwareDateCode();
-        //inspect(firmwareDateCode);
+        inspect(firmwareDateCode);
 
         // Getting highs and lows
         console.log("\n\nHighs and lows: ");
@@ -40,12 +40,14 @@ async function main() {
         // Getting basic weather data
         console.log("\nBasic weather data: ");
         const basicWeatherData = await device.getSimpleRealtimeData();
-        inspect(basicWeatherData);
+        //inspect(basicWeatherData);
+
+        console.log(await device.isSupportingLOOP2Packages());
 
         // Getting firmware version
         console.log("\nFirmware version: ");
         const firmwareVersion = await device.getFirmwareVersion();
-        //inspect(firmwareVersion);
+        inspect(firmwareVersion);
 
         // Getting LOOP1 package
         console.log("\nLOOP1 package: ");

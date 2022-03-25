@@ -1,4 +1,4 @@
-import { UnitSettings } from "../../interfaces/VantInterface";
+import { UnitSettings } from "./UnitSettings";
 
 export const defaultUnitSettings: UnitSettings = {
     wind: "mph",

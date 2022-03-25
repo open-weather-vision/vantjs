@@ -3,32 +3,30 @@ import MalformedDataError from "../errors/MalformedDataError";
 import LOOP2Parser from "../parsers/LOOP2Parser";
 import LOOP1Parser from "../parsers/LOOP1Parser";
 import RichRealtimeData from "../structures/RichRealtimeData";
-import VantInterface, { MinimumVantInterfaceSettings } from "./VantInterface";
+import VantInterface from "./VantInterface";
 import UnsupportedDeviceModelError from "../errors/UnsupportedDeviceModelError";
 import { LOOP1, LOOP2 } from "../structures";
 import { RichRainData } from "../structures/subtypes";
+import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSettings";
 
 /**
  * Interface to the _Vantage Pro 2_ weather station. Is built on top of the {@link VantInterface}.
  *
- * Offers station dependent features like {@link getRichRealtimeData}, {@link getLOOP}, {@link getLOOP2} and {@link getFirmwareVersion}.
- *
+ * Offers station dependent features like {@link VantPro2Interface.getRichRealtimeData}, {@link VantPro2Interface.getLOOP1}, {@link VantPro2Interface.getLOOP2}, {@link VantPro2Interface.isSupportingLOOP2Packages} and {@link VantPro2Interface.getFirmwareVersion}.
  */
 export default class VantPro2Interface extends VantInterface {
     /**
      * Creates an interface to your vantage pro 2 weather station using the passed settings. The device should be connected
-     * serially. The passed path specifies the path to communicate with the weather station. On Windows paths
-     * like `COM1`, `COM2`, ... are common, on osx/linux devices common paths are `/dev/tty0`, `/dev/tty2`, ...
+     * serially.
      *
      * @example
      * ```typescript
-     * const device = await VantPro2Interface.create({ path: "COM3" });
+     * const device = await VantPro2Interface.create({ path: "COM3", rainCollectorSize: "0.2mm" });
      *
-     * await device.open();
-     * await device.wakeUp();
+     * const richRealtimeData = await device.getRichRealtimeData();
+     * inspect(richRealtimeData);
      *
-     * const highsAndLows = await device.getHighsAndLows();
-     * inspect(highsAndLows);
+     * await device.close();
      * ```
      * @param settings the settings
      */
@@ -41,7 +39,16 @@ export default class VantPro2Interface extends VantInterface {
     }
 
     /**
-     * Gets the console's firmware version.
+     * Checks whether the connected weather station is supporting {@link LOOP2} packages. This is done using the firmware's date code.
+     * @returns whether the connected weather station is supporting {@link LOOP2} packages
+     */
+    public async isSupportingLOOP2Packages(): Promise<boolean> {
+        const firmwareDateCode = await this.getFirmwareDateCode();
+        return Date.parse(firmwareDateCode) > Date.parse("Apr 24 2002");
+    }
+
+    /**
+     * Gets the console's firmware version in the `"vX.XX"` format (e.g. `"v3.80"`).
      * @returns the console's firmware version
      */
     public async getFirmwareVersion() {
@@ -59,8 +66,8 @@ export default class VantPro2Interface extends VantInterface {
     }
 
     /**
-     * Gets the LOOP (version 1) package.
-     * @returns the LOOP (version 1) package
+     * Gets the {@link LOOP1} package.
+     * @returns the {@link LOOP1} package
      */
     public async getLOOP1() {
         this.checkPortConnection();
@@ -88,8 +95,9 @@ export default class VantPro2Interface extends VantInterface {
     }
 
     /**
-     * Gets the LOOP (version 2) package.
-     * @returns the LOOP (version 2) package
+     * Gets the {@link LOOP2} package. Requires firmware dated after April 24, 2002 (v1.90 or above).
+     * To check if your weather station supports the {@link LOOP2} package call {@link isSupportingLOOP2Packages}.
+     * @returns the {@link LOOP2} package
      */
     public async getLOOP2() {
         this.checkPortConnection();
@@ -127,7 +135,8 @@ export default class VantPro2Interface extends VantInterface {
     }
 
     /**
-     * Gets detailed weather information from all sensors (internally combining LOOP1 and LOOP2 packages).
+     * Gets detailed weather information from all sensors (internally combining {@link LOOP1} and {@link LOOP2} packages).
+     * Only works if your weather station supports {@link LOOP2} packages. This can be checked by calling {@link isSupportingLOOP2Packages}.
      * @returns detailed weather information
      */
     public async getRichRealtimeData(): Promise<RichRealtimeData> {

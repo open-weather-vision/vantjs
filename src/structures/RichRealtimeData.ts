@@ -9,7 +9,7 @@ import {
 } from "./subtypes";
 
 /**
- * Contains a lot of useful realtime weather data. Only works on Vantage Vue and Vantage Pro 2.
+ * Contains a lot of useful realtime weather data. Only works on Vantage Vue and Vantage Pro 2 (having firmware dated after April 24, 2002 / v1.90 or above).
  */
 export default class RichRealtimeData {
     /**

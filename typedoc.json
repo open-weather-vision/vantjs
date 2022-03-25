@@ -5,6 +5,9 @@
         "src/structures/subtypes/index.ts",
         "src/realtime-containers/index.ts",
         "src/interfaces/index.ts",
+        "src/interfaces/settings/index.ts",
+        "src/interfaces/events/index.ts",
+        "src/units/index.ts",
         "src/errors/index.ts"
     ],
     "out": "docs",

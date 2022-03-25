@@ -8,7 +8,7 @@ import SimpleHumidityData from "./subtypes/SimpleHumidityData";
 import SimpleTemperatureData from "./subtypes/SimpleTemperatureData";
 
 /**
- * The newer LOOP2 package used by Rev "B" firmware (dated after April 24, 2002 / Firmware 1.90^).
+ * The newer LOOP2 package used by Rev "B" firmware (dated after April 24, 2002 / v1.90 or above).
  * Older weather stations don't support this package type. The Vantage Pro doesn't support this package at all.
  */
 export default class LOOP2 {

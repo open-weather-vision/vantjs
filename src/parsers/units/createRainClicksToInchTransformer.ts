@@ -1,3 +1,5 @@
+import { RainCollectorSize } from "../../interfaces/settings/RainCollectorSize";
+
 /**
  * Converts the passed number of rain clicks to inch using the interface's configured rain collector size.
  * @param rainClicks number of rain clicks
@@ -25,5 +27,3 @@ export function createRainClicksToInchTransformer(
         return rain;
     };
 }
-
-export type RainCollectorSize = "0.01in" | "0.2mm" | "0.1mm";

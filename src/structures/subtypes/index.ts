@@ -30,3 +30,4 @@ export { default as PressureAlarms } from "./PressureAlarms";
 export { default as RainAlarms } from "./RainAlarms";
 export { default as UVAlarms } from "./UVAlarms";
 export { default as WindAlarms } from "./WindAlarms";
+export { default as WindDirection } from "./WindDirection";

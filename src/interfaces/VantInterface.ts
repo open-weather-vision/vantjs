@@ -11,7 +11,7 @@ import LOOP2Parser from "../parsers/LOOP2Parser";
 import SerialConnectionError from "../errors/SerialConnectionError";
 import MalformedDataError from "../errors/MalformedDataError";
 import ClosedConnectionError from "../errors/ClosedConnectionError";
-import { SimpleRealtimeRecord } from "../structures/SimpleRealtimeRecord";
+import { SimpleRealtimeData } from "../structures";
 import {
     createRainClicksToInchTransformer,
     RainCollectorSize,
@@ -559,144 +559,44 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * humidy, wind, rain, ...
      * @returns a handful of useful realtime weather data (a simple realtime record)
      */
-    public getSimpleRealtimeRecord =
-        async (): Promise<SimpleRealtimeRecord> => {
-            this.checkPortConnection();
+    public getSimpleRealtimeData = async (): Promise<SimpleRealtimeData> => {
+        this.checkPortConnection();
 
-            const loopPackage = await this.getDefaultLOOP();
+        const loopPackage = await this.getDefaultLOOP();
 
-            let windAvg: number | null;
-            if (loopPackage.wind.avg instanceof Object) {
-                windAvg = loopPackage.wind.avg.twoMinutes;
-            } else {
-                windAvg = loopPackage.wind.avg;
-            }
-
-            return {
-                pressure: {
-                    current: loopPackage.pressure.current,
-                    trend: {
-                        value: loopPackage.pressure.trend.value,
-                        text: loopPackage.pressure.trend.text,
-                    },
+        return {
+            pressure: {
+                current: loopPackage.pressure.current,
+                trend: {
+                    value: loopPackage.pressure.trend.value,
+                    text: loopPackage.pressure.trend.text,
                 },
-                temperature: {
-                    in: loopPackage.temperature.in,
-                    out: loopPackage.temperature.out,
-                },
-                humidity: {
-                    in: loopPackage.humidity.in,
-                    out: loopPackage.humidity.out,
-                },
-                wind: {
-                    current: loopPackage.wind.current,
-                    avg: windAvg,
-                    direction: {
-                        degrees: loopPackage.wind.direction,
-                        abbrevation:
-                            this.convertWindDirectionDegreesToAbbrevation(
-                                loopPackage.wind.direction
-                            ),
-                    },
-                },
-                rain: {
-                    rate: loopPackage.rain.rate,
-                    storm: loopPackage.rain.storm,
-                    stormStartDate: loopPackage.rain.stormStartDate,
-                    day: loopPackage.rain.day,
-                },
-                et: loopPackage.et.day,
-                uv: loopPackage.uv,
-                solarRadiation: loopPackage.solarRadiation,
-                time: new Date(),
-            };
+            },
+            temperature: {
+                in: loopPackage.temperature.in,
+                out: loopPackage.temperature.out,
+            },
+            humidity: {
+                in: loopPackage.humidity.in,
+                out: loopPackage.humidity.out,
+            },
+            wind: {
+                current: loopPackage.wind.current,
+                avg10min: loopPackage.wind.avg10min,
+                direction: loopPackage.wind.direction,
+            },
+            rain: {
+                rate: loopPackage.rain.rate,
+                storm: loopPackage.rain.storm,
+                stormStartDate: loopPackage.rain.stormStartDate,
+                day: loopPackage.rain.day,
+            },
+            et: loopPackage.et.day,
+            uv: loopPackage.uv,
+            solarRadiation: loopPackage.solarRadiation,
+            time: new Date(),
         };
-
-    protected convertWindDirectionDegreesToAbbrevation(
-        windDirection: number | null
-    ):
-        | "NNE"
-        | "NE"
-        | "ENE"
-        | "E"
-        | "ESE"
-        | "SE"
-        | "SSE"
-        | "S"
-        | "SSW"
-        | "SW"
-        | "WSW"
-        | "W"
-        | "WNW"
-        | "NW"
-        | "NNW"
-        | "N"
-        | null {
-        if (windDirection === null) return null;
-        const steps = [
-            22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270,
-            292.5, 315, 337.5, 360,
-        ];
-        const stepsAbbrevations: [
-            "NNE",
-            "NE",
-            "ENE",
-            "E",
-            "ESE",
-            "SE",
-            "SSE",
-            "S",
-            "SSW",
-            "SW",
-            "WSW",
-            "W",
-            "WNW",
-            "NW",
-            "NNW",
-            "N"
-        ] = [
-            "NNE",
-            "NE",
-            "ENE",
-            "E",
-            "ESE",
-            "SE",
-            "SSE",
-            "S",
-            "SSW",
-            "SW",
-            "WSW",
-            "W",
-            "WNW",
-            "NW",
-            "NNW",
-            "N",
-        ];
-        const differences = [];
-
-        for (const step of steps) {
-            let difference = Math.abs(step - windDirection);
-            if (difference > 180) {
-                difference = 360 - difference;
-            }
-            differences.push(difference);
-        }
-
-        let smallestDifference = 361;
-        let smallestDifferenceIndex = -1;
-        for (let i = 0; i < differences.length; i++) {
-            if (differences[i] < smallestDifference) {
-                smallestDifference = differences[i];
-                smallestDifferenceIndex = i;
-            }
-        }
-
-        if (smallestDifferenceIndex === -1) {
-            return null;
-        } else {
-            return stepsAbbrevations[smallestDifferenceIndex];
-        }
-    }
+    };
 
     /**
      * Returns whether the serial port connection is currently open.

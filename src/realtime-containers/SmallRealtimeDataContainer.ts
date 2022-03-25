@@ -1,13 +1,18 @@
+import merge from "lodash.merge";
 import VantInterface from "../interfaces/VantInterface";
-import createNullHighsAndLows from "../structures/createNullHighsAndLows";
-import { HighsAndLows } from "../structures/HighsAndLows";
+import HighsAndLows from "../structures/HighsAndLows";
 import { DeviceModel } from "./DeviceModel";
 import RealtimeDataContainer, {
     MinimumRealtimeDataContainerSettings,
 } from "./RealtimeDataContainer";
-import { SimpleRealtimeRecord } from "../structures/SimpleRealtimeRecord";
-import merge from "lodash.merge";
-import createNullSimpleRealtimeRecord from "../structures/createNullSimpleRealtimeRecord";
+import { SimpleRealtimeData } from "../structures";
+import {
+    SimpleHumidityData,
+    SimplePressureData,
+    SimpleRainData,
+    SimpleTemperatureData,
+    SimpleWindData,
+} from "../structures/subtypes";
 
 export default class SmallRealtimeDataContainer
     extends RealtimeDataContainer<
@@ -16,109 +21,45 @@ export default class SmallRealtimeDataContainer
         | DeviceModel.VantagePro2
         | DeviceModel.VantageVue
     >
-    implements SimpleRealtimeRecord
+    implements SimpleRealtimeData
 {
-    public highsAndLows: HighsAndLows = createNullHighsAndLows();
+    public highsAndLows: HighsAndLows = new HighsAndLows();
 
     /**
      * Currently measured pressure related weather data
      */
-    public pressure = {
-        /** Current pressure in inch */
-        current: null as number | null,
-
-        /**
-         * The pressure's trend. There are five possible trends:
-         *  - Falling Rapidly
-         *  - Falling Slowly
-         *  - Steady
-         *  - Rising Slowly
-         *  - Rising Rapidly
-         *
-         * `trend.value` encodes them as number, `trend.text` as string.
-         */
-        trend: {
-            /**
-             * The pressure's trend encoded as number.
-             *  - `-60` stands for *Falling Rapidly*
-             *  - `-20` stands for *Falling Slowly*
-             *  - `0` stands for *Steady*
-             *  - `20` stands for *Rising Slowly*
-             *  - `60` stands for *Rising Rapidly*
-             */
-            value: null as -60 | -20 | 0 | 20 | 60 | null,
-
-            /**
-             * The pressure's trend encoded as string.
-             * Possible values are `"Falling Rapidly"`, `"Falling Slowly"`, `"Steady"`, `"Rising Slowly"` and `"Rising Rapidly"`.
-             */
-            text: null as
-                | "Falling Rapidly"
-                | "Steady"
-                | "Rising Rapidly"
-                | "Rising Slowly"
-                | "Falling Slowly"
-                | null,
-        },
-    };
-
+    public pressure = new SimplePressureData();
     /**
-     * Current inside and outside temperature in °F
+     * Current inside and outside temperature
      */
-    public temperature = {
-        /** Current inside temperature in °F */
-        in: null as number | null,
-        /** Current outside temperature in °F */
-        out: null as number | null,
-    };
+    public temperature = new SimpleTemperatureData();
 
     /** Current inside and outside humidity (relative) in percent  */
-    public humidity = {
-        /** Current inside humidity (relative) in percent */
-        in: null as number | null,
-        /** Current outside humidity (relative) in percent */
-        out: null as number | null,
-    };
+    public humidity = new SimpleHumidityData();
 
-    public wind = {
-        current: null as number | null,
-        avg: null as number | null,
-        direction: {
-            degrees: null as number | null,
-            abbrevation: null as
-                | "NNE"
-                | "NE"
-                | "ENE"
-                | "E"
-                | "ESE"
-                | "SE"
-                | "SSE"
-                | "S"
-                | "SSW"
-                | "SW"
-                | "WSW"
-                | "W"
-                | "WNW"
-                | "NW"
-                | "NNW"
-                | "N"
-                | null,
-        },
-    };
+    /** Currently measured wind related data */
+    public wind = new SimpleWindData();
+    /**
+     *  Curently measured rain related data
+     */
+    public rain = new SimpleRainData();
+    /**
+     * Measured evapotranspiration (ET) of the day
+     */
+    public et: number | null = null;
+    /**
+     * Currently measured UV index
+     */
+    public uv: number | null = null;
 
-    public rain = {
-        rate: null as number | null,
-        storm: null as number | null,
-        stormStartDate: null,
-        day: null as number | null,
-    };
+    /**
+     * Currently measured solar radiation
+     */
+    public solarRadiation: number | null = null;
 
-    public et = null as number | null;
-
-    public uv = null as number | null;
-
-    public solarRadiation = null as number | null;
-
+    /**
+     * The time the record was created
+     */
     public time: Date = new Date();
 
     public static async create(
@@ -134,22 +75,22 @@ export default class SmallRealtimeDataContainer
     }
 
     protected onConnectionError = async () => {
-        merge(this, createNullSimpleRealtimeRecord());
-        this.highsAndLows = createNullHighsAndLows();
+        merge(this, new SimpleRealtimeData());
+        this.highsAndLows = new HighsAndLows();
     };
     protected onUpdate = async (device: VantInterface) => {
         try {
-            const simpleRealtimeRecord = await device.getSimpleRealtimeRecord();
+            const simpleRealtimeRecord = await device.getSimpleRealtimeData();
             merge(this, simpleRealtimeRecord);
         } catch (err) {
-            merge(this, createNullSimpleRealtimeRecord());
+            merge(this, new SimpleRealtimeData());
             throw err;
         }
 
         try {
             this.highsAndLows = await device.getHighsAndLows();
         } catch (err) {
-            this.highsAndLows = createNullHighsAndLows();
+            this.highsAndLows = new HighsAndLows();
             throw err;
         }
     };

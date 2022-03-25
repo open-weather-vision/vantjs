@@ -1,3 +1,89 @@
+function convertWindDirectionDegreesToAbbrevation(
+    windDirection: number | null
+):
+    | "NNE"
+    | "NE"
+    | "ENE"
+    | "E"
+    | "ESE"
+    | "SE"
+    | "SSE"
+    | "S"
+    | "SSW"
+    | "SW"
+    | "WSW"
+    | "W"
+    | "WNW"
+    | "NW"
+    | "NNW"
+    | "N"
+    | null {
+    if (windDirection === null) return null;
+    const steps = [
+        22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270,
+        292.5, 315, 337.5, 360,
+    ];
+    const stepsAbbrevations: [
+        "NNE",
+        "NE",
+        "ENE",
+        "E",
+        "ESE",
+        "SE",
+        "SSE",
+        "S",
+        "SSW",
+        "SW",
+        "WSW",
+        "W",
+        "WNW",
+        "NW",
+        "NNW",
+        "N"
+    ] = [
+        "NNE",
+        "NE",
+        "ENE",
+        "E",
+        "ESE",
+        "SE",
+        "SSE",
+        "S",
+        "SSW",
+        "SW",
+        "WSW",
+        "W",
+        "WNW",
+        "NW",
+        "NNW",
+        "N",
+    ];
+    const differences = [];
+
+    for (const step of steps) {
+        let difference = Math.abs(step - windDirection);
+        if (difference > 180) {
+            difference = 360 - difference;
+        }
+        differences.push(difference);
+    }
+
+    let smallestDifference = 361;
+    let smallestDifferenceIndex = -1;
+    for (let i = 0; i < differences.length; i++) {
+        if (differences[i] < smallestDifference) {
+            smallestDifference = differences[i];
+            smallestDifferenceIndex = i;
+        }
+    }
+
+    if (smallestDifferenceIndex === -1) {
+        return null;
+    } else {
+        return stepsAbbrevations[smallestDifferenceIndex];
+    }
+}
+
 const transformers = {
     alarm: (value: number) => value === 1,
     temperature: (value: number) => value / 10,
@@ -34,6 +120,18 @@ const transformers = {
         const month = (0xf000 & value) >> 12;
         const year = (0x007f & value) + 2000;
         return new Date(`${year}-${month}-${day}`);
+    },
+    windDirection: (value: number) => {
+        if (value === 0) {
+            return {
+                degrees: null,
+                abbrevation: null,
+            };
+        }
+        return {
+            degrees: value,
+            abbrevation: convertWindDirectionDegreesToAbbrevation(value),
+        };
     },
 };
 

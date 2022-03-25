@@ -1,8 +1,10 @@
 import BinaryParser, { ArrayType, Type } from "../util/BinaryParser";
-import { LOOP1, LOOPPackageType } from "../structures/LOOP";
+import { LOOPPackageType } from "../structures/LOOPPackageType";
 import nullables from "./reusables/nullables";
 import transformers from "./reusables/transformers";
 import { UnitTransformers } from "./units/unitTransformers";
+import LOOP1 from "../structures/LOOP1";
+import merge from "lodash.merge";
 
 /**
  * Parser for a LOOP binary data package (without the acknowledgement byte and the crc bytes).
@@ -151,7 +153,7 @@ export default class LOOPParser extends BinaryParser<LOOP1> {
                     position: 14,
                     transform: [unitTransformers.wind],
                 },
-                avg: {
+                avg10min: {
                     type: Type.UINT8,
                     position: 15,
                     transform: [unitTransformers.wind],
@@ -159,7 +161,7 @@ export default class LOOPParser extends BinaryParser<LOOP1> {
                 direction: {
                     type: Type.UINT16,
                     position: 16,
-                    nullables: [0],
+                    transform: [transformers.windDirection],
                 },
             },
             rain: {
@@ -585,8 +587,9 @@ export default class LOOPParser extends BinaryParser<LOOP1> {
     }
 
     public parse(buffer: Buffer) {
-        const result = super.parse(buffer) as Partial<LOOP1>;
+        const result = super.parse(buffer) as Omit<LOOP1, "packageType"> &
+            Partial<LOOP1>;
         result.packageType = LOOPPackageType.LOOP1;
-        return result as LOOP1;
+        return merge(new LOOP1(), result) as LOOP1;
     }
 }

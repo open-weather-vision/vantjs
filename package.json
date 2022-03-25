@@ -10,7 +10,8 @@
         "start": "cd ./dist && node ",
         "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
         "docs": "npx typedoc --options typedoc.json",
-        "watch-docs": "npx typedoc --options typedoc.json --watch"
+        "watch-docs": "npx typedoc --options typedoc.json --watch",
+        "clear-dist": "rmdir /s dist && npx tsc"
     },
     "repository": {
         "type": "git",
@@ -36,6 +37,7 @@
         "crc-full": "^1.1.0",
         "lodash.clonedeep": "^4.5.0",
         "lodash.merge": "^4.6.2",
+        "lodash.mergewith": "^4.6.2",
         "serialport": "^10.4.0",
         "source-map-support": "^0.5.21",
         "sprintf-js": "^1.0.3",
@@ -44,6 +46,7 @@
     "devDependencies": {
         "@types/lodash.clonedeep": "^4.5.6",
         "@types/lodash.merge": "^4.6.6",
+        "@types/lodash.mergewith": "^4.6.6",
         "@types/node": "^15.14.9",
         "@types/sprintf-js": "^1.1.2",
         "@typescript-eslint/eslint-plugin": "^4.28.1",

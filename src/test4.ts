@@ -20,7 +20,7 @@ async function main() {
     while (true) {
         await weatherData.waitForUpdate();
         console.log(
-            weatherData.time.toLocaleString() + ": " + weatherData.wind.avg
+            weatherData.time.toLocaleString() + ": " + weatherData.wind.avg10min
         );
     }
 

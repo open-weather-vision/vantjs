@@ -1,8 +1,10 @@
 import BinaryParser, { Type } from "../util/BinaryParser";
-import { LOOP2, LOOPPackageType } from "../structures/LOOP";
+import { LOOPPackageType } from "../structures/LOOPPackageType";
 import nullables from "./reusables/nullables";
 import transformers from "./reusables/transformers";
 import { UnitTransformers } from "./units/unitTransformers";
+import LOOP2 from "../structures/LOOP2";
+import merge from "lodash.merge";
 
 /**
  * Parser for a LOOP2 binary data package (without the acknowledgement byte and the crc bytes).
@@ -166,28 +168,26 @@ export default class LOOP2Parser extends BinaryParser<LOOP2> {
                     position: 14,
                     transform: [unitTransformers.wind],
                 },
-                avg: {
-                    tenMinutes: {
-                        type: Type.UINT16,
-                        position: 18,
-                        transform: [(val) => val / 10, unitTransformers.wind],
-                    },
-                    twoMinutes: {
-                        type: Type.UINT16,
-                        position: 20,
-                        transform: [(val) => val / 10, unitTransformers.wind],
-                    },
+                avg2min: {
+                    type: Type.UINT16,
+                    position: 20,
+                    transform: [(val) => val / 10, unitTransformers.wind],
+                },
+                avg10min: {
+                    type: Type.UINT16,
+                    position: 18,
+                    transform: [(val) => val / 10, unitTransformers.wind],
                 },
                 direction: {
                     type: Type.UINT16,
                     position: 16,
-                    nullables: [0],
+                    transform: [transformers.windDirection],
                 },
                 heaviestGust10min: {
                     direction: {
                         type: Type.UINT16,
                         position: 24,
-                        nullables: [0],
+                        transform: [transformers.windDirection],
                     },
                     speed: {
                         type: Type.UINT16,
@@ -297,6 +297,6 @@ export default class LOOP2Parser extends BinaryParser<LOOP2> {
     public parse(buffer: Buffer) {
         const result = super.parse(buffer) as Partial<LOOP2>;
         result.packageType = LOOPPackageType.LOOP2;
-        return result as LOOP2;
+        return merge(new LOOP2(), result) as LOOP2;
     }
 }

@@ -11,6 +11,8 @@ vantjs is a platform-independent javascript and typescript interface to the Davi
 
 -   _unit settings_: select the units vantjs should use, the weather data is converted automatically
 -   _bug fixes / stability_: version 1.0.0 will be the first stable, extensively tested release of vantjs. many bug fixes have already been made in this branch.
+-   _better types_: more subtypes were created, leading to a more readable documentation
+-   _better imports_: imports are now structured in multiple modules
 -   _guides/documentation_: helpful guides introducing you into vantjs step by step and a full documentation
 
 # Installation

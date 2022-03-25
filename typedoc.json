@@ -2,6 +2,7 @@
     "entryPoints": [
         "src/util/index.ts",
         "src/structures/index.ts",
+        "src/structures/subtypes/index.ts",
         "src/realtime-containers/index.ts",
         "src/interfaces/index.ts",
         "src/errors/index.ts"

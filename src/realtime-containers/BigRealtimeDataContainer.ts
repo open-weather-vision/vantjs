@@ -1,214 +1,153 @@
 import merge from "lodash.merge";
 import VantPro2Interface from "../interfaces/VantPro2Interface";
 import VantVueInterface from "../interfaces/VantVueInterface";
-import createNullHighsAndLows from "../structures/createNullHighsAndLows";
-import createNullRichRealtimeRecord from "../structures/createNullRichRealtimeRecord";
-import { HighsAndLows } from "../structures/HighsAndLows";
+import HighsAndLows from "../structures/HighsAndLows";
 import { DeviceModel } from "./DeviceModel";
 import RealtimeDataContainer, {
     MinimumRealtimeDataContainerSettings,
 } from "./RealtimeDataContainer";
-import { RichRealtimeRecord } from "../structures/RichRealtimeRecord";
+import RichRealtimeData from "../structures/RichRealtimeData";
+import {
+    ForecastData,
+    RichETData,
+    RichHumidityData,
+    RichPressureData,
+    RichRainData,
+    RichTemperatureData,
+    RichWindData,
+} from "../structures/subtypes";
 
 export default class BigRealtimeDataContainer
     extends RealtimeDataContainer<
         VantPro2Interface | VantVueInterface,
         DeviceModel.VantagePro2 | DeviceModel.VantageVue
     >
-    implements RichRealtimeRecord
+    implements RichRealtimeData
 {
-    public highsAndLows: HighsAndLows = createNullHighsAndLows();
+    /**
+     * Currently measured pressure related weather data
+     */
+    public pressure = new RichPressureData();
 
-    public pressure = {
-        current: null as number | null,
-        currentRaw: null as number | null,
-        currentAbsolute: null as number | null,
-        trend: {
-            value: null as -60 | -20 | 0 | 20 | 60 | null,
-            text: null as
-                | "Falling Rapidly"
-                | "Steady"
-                | "Rising Rapidly"
-                | "Rising Slowly"
-                | "Falling Slowly"
-                | null,
-        },
-        reductionMethod: {
-            value: null as 0 | 1 | 2 | null,
-            text: null as
-                | "user offset"
-                | "altimeter setting"
-                | "NOAA bar reduction"
-                | null,
-        },
-        userOffset: null as number | null,
-        calibrationOffset: null as number | null,
-        altimeter: null as number | null,
-    };
-
+    /**
+     * The measured heat index
+     */
     public heat: number | null = null;
 
+    /**
+     * The calculated dew point
+     */
     public dewpoint: number | null = null;
 
-    public temperature = {
-        in: null as number | null,
-        out: null as number | null,
-        extra: [null, null, null, null, null, null, null] as [
-            number | null,
-            number | null,
-            number | null,
-            number | null,
-            number | null,
-            number | null,
-            number | null
-        ],
-    };
+    /**
+     * The currently measured temperatures
+     */
+    public temperature = new RichTemperatureData();
 
-    public leafTemps = [null, null, null, null] as [
+    /**
+     * Currently measured leaf temperatures (from up to 4 sensors)
+     */
+    public leafTemps: [
         number | null,
         number | null,
         number | null,
         number | null
-    ];
+    ] = [null, null, null, null];
 
-    public soilTemps = [null, null, null, null] as [
+    /**
+     * Currently measured soil temperatures (from up to 4 sensors)
+     */
+    public soilTemps: [
         number | null,
         number | null,
         number | null,
         number | null
-    ];
+    ] = [null, null, null, null];
 
-    public humidity = {
-        in: null as number | null,
-        out: null as number | null,
-        extra: [null, null, null, null, null, null, null] as [
-            number | null,
-            number | null,
-            number | null,
-            number | null,
-            number | null,
-            number | null,
-            number | null
-        ],
-    };
+    /**
+     * Currently measured (relative) humidities in percent
+     */
+    public humidity = new RichHumidityData();
 
-    public wind = {
-        current: null as number | null,
-        avg: {
-            tenMinutes: null as number | null,
-            twoMinutes: null as number | null,
-        },
-        direction: {
-            degrees: null as number | null,
-            abbrevation: null as
-                | "NNE"
-                | "NE"
-                | "ENE"
-                | "E"
-                | "ESE"
-                | "SE"
-                | "SSE"
-                | "S"
-                | "SSW"
-                | "SW"
-                | "WSW"
-                | "W"
-                | "WNW"
-                | "NW"
-                | "NNW"
-                | "N"
-                | null,
-        },
-        heaviestGust10min: {
-            direction: {
-                degrees: null as number | null,
-                abbrevation: null as
-                    | "NNE"
-                    | "NE"
-                    | "ENE"
-                    | "E"
-                    | "ESE"
-                    | "SE"
-                    | "SSE"
-                    | "S"
-                    | "SSW"
-                    | "SW"
-                    | "WSW"
-                    | "W"
-                    | "WNW"
-                    | "NW"
-                    | "NNW"
-                    | "N"
-                    | null,
-            },
-            speed: null as number | null,
-        },
-        chill: null as number | null,
-    };
+    /**
+     * Wind related realtime data
+     */
+    public wind = new RichWindData();
 
+    /**
+     * The currently measured THSW index. Requires a solar radiation sensor.
+     */
     public thsw: number | null = null;
 
-    public rain = {
-        rate: null as number | null,
-        storm: null as number | null,
-        stormStartDate: null as Date | null,
-        day: null as number | null,
-        month: null as number | null,
-        year: null as number | null,
-        last15min: null as number | null,
-        lastHour: null as number | null,
-        last24h: null as number | null,
-    };
+    /**
+     *  Curently measured rain related data
+     */
+    public rain = new RichRainData();
 
-    public et = {
-        day: null as number | null,
-        month: null as number | null,
-        year: null as number | null,
-    };
+    /**
+     * Evotranspiration (ET) related data
+     */
+    public et = new RichETData();
 
-    public soilMoistures = [null, null, null, null] as [
+    /**
+     * Measured soil moisture from up to 4 sensors
+     */
+    public soilMoistures: [
         number | null,
         number | null,
         number | null,
         number | null
-    ];
+    ] = [null, null, null, null];
 
-    public leafWetnesses = [null, null, null, null] as [
+    /**
+     * Measured leaf wetness from up to 4 sensors
+     */
+    public leafWetnesses: [
         number | null,
         number | null,
         number | null,
         number | null
-    ];
+    ] = [null, null, null, null];
 
+    /**
+     * The current UV index
+     */
     public uv: number | null = null;
 
+    /**
+     * The current solar radiation
+     */
     public solarRadiation: number | null = null;
 
+    /**
+     * The transmitter's battery status (poorly documented)
+     */
     public transmitterBatteryStatus: number | null = null;
 
+    /**
+     * The console's battery voltage
+     */
     public consoleBatteryVoltage: number | null = null;
 
-    public forecast = {
-        iconNumber: null as 8 | 6 | 2 | 3 | 18 | 19 | 7 | 22 | 23 | null,
-        iconText: null as
-            | "Mostly Clear"
-            | "Partly Cloudy"
-            | "Mostly Cloudy"
-            | "Mostly Cloudy, Rain within 12 hours"
-            | "Mostly Cloudy, Snow within 12 hours"
-            | "Mostly Cloudy, Rain or Snow within 12 hours"
-            | "Partly Cloudy, Rain within 12 hours"
-            | "Partly Cloudy, Rain or Snow within 12 hours"
-            | "Partly Cloudy, Snow within 12 hours"
-            | null,
-        rule: null as number | null,
-    };
-
+    /**
+     * The calculated forecast. `forecast.iconNumber` encodes it as `number`, `forecast.iconText` as `string`.
+     */
+    public forecast = new ForecastData();
+    /**
+     * The today's sunrise time (e.g. `06:35`)
+     */
     public sunrise: string | null = null;
-
+    /**
+     * The today's sunset time (e.g. `19:35`)
+     */
     public sunset: string | null = null;
 
+    /**
+     * The time the record was created
+     */
     public time: Date = new Date();
+
+    public highsAndLows = new HighsAndLows();
 
     public static async create(
         settings: MinimumRealtimeDataContainerSettings<
@@ -227,25 +166,25 @@ export default class BigRealtimeDataContainer
     }
 
     protected onConnectionError = async () => {
-        merge(this, createNullRichRealtimeRecord());
-        this.highsAndLows = createNullHighsAndLows();
+        merge(this, new RichRealtimeData());
+        this.highsAndLows = new HighsAndLows();
     };
 
     protected onUpdate = async (
         device: VantPro2Interface | VantVueInterface
     ) => {
         try {
-            const richRealtimeRecord = await device.getRichRealtimeRecord();
+            const richRealtimeRecord = await device.getRichRealtimeData();
             merge(this, richRealtimeRecord);
         } catch (err) {
-            merge(this, createNullRichRealtimeRecord());
+            merge(this, new RichRealtimeData());
             throw err;
         }
 
         try {
             this.highsAndLows = await device.getHighsAndLows();
         } catch (err) {
-            this.highsAndLows = createNullHighsAndLows();
+            this.highsAndLows = new HighsAndLows();
             throw err;
         }
     };

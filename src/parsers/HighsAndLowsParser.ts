@@ -1,8 +1,10 @@
 import BinaryParser, { ArrayType, Type } from "../util/BinaryParser";
-import { HighsAndLows } from "../structures/HighsAndLows";
+import HighsAndLows from "../structures/HighsAndLows";
 import nullables from "./reusables/nullables";
 import transformers from "./reusables/transformers";
 import { UnitTransformers } from "./units/unitTransformers";
+import merge from "lodash.merge";
+import inspect from "../util/inspect";
 
 /**
  * Parser for a highs and lows binary data package (without the acknowledgement byte and the crc bytes).
@@ -562,7 +564,7 @@ export default class HighsAndLowsParser extends BinaryParser<HighsAndLows> {
                     ],
                 },
             },
-            extraTemp: [
+            extraTemps: [
                 {
                     day: {
                         low: {
@@ -644,7 +646,7 @@ export default class HighsAndLowsParser extends BinaryParser<HighsAndLows> {
                 7,
                 ArrayType.PROPERTY_BASED,
             ],
-            soilTemp: [
+            soilTemps: [
                 {
                     day: {
                         low: {
@@ -726,7 +728,7 @@ export default class HighsAndLowsParser extends BinaryParser<HighsAndLows> {
                 4,
                 ArrayType.PROPERTY_BASED,
             ],
-            leafTemp: [
+            leafTemps: [
                 {
                     day: {
                         low: {
@@ -986,9 +988,11 @@ export default class HighsAndLowsParser extends BinaryParser<HighsAndLows> {
     }
 
     public parse(buffer: Buffer) {
-        const result = super.parse(buffer) as Partial<HighsAndLows>;
+        const parsed = super.parse(buffer) as any;
         // extract outside humidity from extraHums array
-        if (result.extraHums) result.humOut = result.extraHums.shift()!;
+        parsed.humOut = parsed.extraHums.shift()!;
+
+        const result = merge(new HighsAndLows(), parsed);
         return result as HighsAndLows;
     }
 }

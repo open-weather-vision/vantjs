@@ -1,4 +1,5 @@
-export { LOOPPackage, LOOPPackageType, LOOP1, LOOP2 } from "./LOOP";
-export { HighsAndLows } from "./HighsAndLows";
-export { SimpleRealtimeRecord } from "./SimpleRealtimeRecord";
-export { RichRealtimeRecord } from "./RichRealtimeRecord";
+export { default as SimpleRealtimeData } from "./SimpleRealtimeData";
+export { default as RichRealtimeData } from "./RichRealtimeData";
+export { default as LOOP1 } from "./LOOP1";
+export { default as LOOP2 } from "./LOOP2";
+export { default as HighsAndLows } from "./HighsAndLows";

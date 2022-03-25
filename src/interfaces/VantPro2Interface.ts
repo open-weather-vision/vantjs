@@ -2,15 +2,14 @@ import merge from "lodash.merge";
 import MalformedDataError from "../errors/MalformedDataError";
 import LOOP2Parser from "../parsers/LOOP2Parser";
 import LOOPParser from "../parsers/LOOPParser";
-import { RichRealtimeRecord } from "../structures/RichRealtimeRecord";
+import RichRealtimeData from "../structures/RichRealtimeData";
 import VantInterface, { MinimumVantInterfaceSettings } from "./VantInterface";
 import UnsupportedDeviceModelError from "../errors/UnsupportedDeviceModelError";
-import createNullRichRealtimeRecord from "../structures/createNullRichRealtimeRecord";
 
 /**
  * Interface to the _Vantage Pro 2_ weather station. Is built on top of the {@link VantInterface}.
  *
- * Offers station dependent features like {@link getRichRealtimeRecord}, {@link getLOOP}, {@link getLOOP2} and {@link getFirmwareVersion}.
+ * Offers station dependent features like {@link getRichRealtimeData}, {@link getLOOP}, {@link getLOOP2} and {@link getFirmwareVersion}.
  *
  */
 export default class VantPro2Interface extends VantInterface {
@@ -129,44 +128,21 @@ export default class VantPro2Interface extends VantInterface {
      * Gets detailed weather information from all sensors (internally combining LOOP1 and LOOP2 packages).
      * @returns detailed weather information
      */
-    public async getRichRealtimeRecord(): Promise<RichRealtimeRecord> {
+    public async getRichRealtimeData(): Promise<RichRealtimeData> {
         this.checkPortConnection();
-        const richRealtimeRecord: RichRealtimeRecord =
-            createNullRichRealtimeRecord();
+        const richRealtimeRecord: RichRealtimeData = new RichRealtimeData();
 
-        const loopPackage = (await this.getLOOP1()) as any;
-        delete loopPackage["alarms"];
-        delete loopPackage["packageType"];
-        delete loopPackage["nextArchiveRecord"];
-        loopPackage.wind.avg = {
-            tenMinutes: loopPackage.wind.avg,
-            twoMinutes: null,
-        };
+        const loop1Package = (await this.getLOOP1()) as any;
+        delete loop1Package["alarms"];
+        delete loop1Package["packageType"];
+        delete loop1Package["nextArchiveRecord"];
 
         const loop2Package = (await this.getLOOP2()) as any;
         delete loop2Package["packageType"];
         delete loop2Package["graphPointers"];
 
-        merge(richRealtimeRecord, loopPackage);
+        merge(richRealtimeRecord, loop1Package);
         merge(richRealtimeRecord, loop2Package);
-
-        richRealtimeRecord.wind.direction = {
-            degrees: richRealtimeRecord.wind.direction as unknown as
-                | number
-                | null,
-            abbrevation: this.convertWindDirectionDegreesToAbbrevation(
-                richRealtimeRecord.wind.direction as unknown as number | null
-            ),
-        };
-
-        richRealtimeRecord.wind.heaviestGust10min.direction = {
-            degrees: richRealtimeRecord.wind.heaviestGust10min
-                .direction as unknown as number | null,
-            abbrevation: this.convertWindDirectionDegreesToAbbrevation(
-                richRealtimeRecord.wind.heaviestGust10min
-                    .direction as unknown as number | null
-            ),
-        };
 
         return richRealtimeRecord;
     }

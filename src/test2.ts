@@ -1,14 +1,12 @@
 import "source-map-support/register";
-import { DeviceModel } from "./realtime-containers/DeviceModel";
-import BigRealtimeDataContainer from "./realtime-containers/BigRealtimeDataContainer";
+import BigRealtimeDataContainer from "./realtime-data-containers/BigRealtimeDataContainer";
+import { DeviceModel } from "./realtime-data-containers/settings";
 
 async function main() {
     const weatherData = await BigRealtimeDataContainer.create({
-        device: {
-            path: "COM4",
-            model: DeviceModel.VantagePro2,
-            rainCollectorSize: "0.2mm",
-        },
+        path: "COM4",
+        model: DeviceModel.VantagePro2,
+        rainCollectorSize: "0.2mm",
         updateInterval: 3,
         units: {
             temperature: "°C",

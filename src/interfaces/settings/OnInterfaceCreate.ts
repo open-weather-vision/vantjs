@@ -1,7 +1,7 @@
 /**
  * Different actions to perform automatically on creating an interface.
  */
-export enum OnCreate {
+export enum OnInterfaceCreate {
     /**
      * Does nothing.
      */
@@ -12,7 +12,7 @@ export enum OnCreate {
      */
     Open = 2,
     /**
-     * Opens the serial connection to the vantage console and wakes it up. This is the default value.
+     * **Default setting**. Opens the serial connection to the vantage console and wakes it up.
      */
     OpenAndWakeUp = 3,
 }

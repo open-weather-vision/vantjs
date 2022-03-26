@@ -8,7 +8,6 @@ import HighsAndLowsParser from "../parsers/HighsAndLowsParser";
 import LOOP1Parser from "../parsers/LOOP1Parser";
 import LOOP2Parser from "../parsers/LOOP2Parser";
 
-import SerialConnectionError from "../errors/SerialConnectionError";
 import MalformedDataError from "../errors/MalformedDataError";
 import ClosedConnectionError from "../errors/ClosedConnectionError";
 import { SimpleRealtimeData } from "../structures";
@@ -20,8 +19,9 @@ import {
 import { defaultUnitSettings } from "../units/defaultUnitSettings";
 import { VantInterfaceEvents } from "./events/VantInterfaceEvents";
 import { VantInterfaceSettings } from "./settings/VantInterfaceSettings";
-import { OnCreate } from "./settings/OnCreate";
+import { OnInterfaceCreate } from "./settings/OnInterfaceCreate";
 import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSettings";
+import { FailedToWakeUpError } from "../errors";
 
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). Provides useful methods to access realtime weather data from your weather station's
@@ -232,7 +232,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      */
     private static defaultSettings = {
         baudRate: 19200,
-        onCreate: OnCreate.OpenAndWakeUp,
+        onCreate: OnInterfaceCreate.OpenAndWakeUp,
         units: defaultUnitSettings,
     };
 
@@ -277,12 +277,12 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      */
     protected static async performOnCreateAction(device: VantInterface) {
         switch (device.settings.onCreate) {
-            case OnCreate.DoNothing:
+            case OnInterfaceCreate.DoNothing:
                 break;
-            case OnCreate.Open:
+            case OnInterfaceCreate.Open:
                 await device.open();
                 break;
-            case OnCreate.OpenAndWakeUp:
+            case OnInterfaceCreate.OpenAndWakeUp:
                 await device.open();
                 await device.wakeUp();
                 break;
@@ -291,7 +291,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
 
     /**
      * Creates a new interface. Merges the passed settings with the default ones, prepares the internally used serial port connection and
-     * configures the `"close"` and `"open"` event. Doesn't perform the configured {@link OnCreate} action.
+     * configures the `"close"` and `"open"` event. Doesn't perform the configured {@link OnInterfaceCreate} action.
      * @param settings the interface settings to use
      * @hidden
      */
@@ -474,7 +474,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      *
      * Fires the {@link VantInterfaceEvents.awakening} event if the console wakes up.
      *
-     * @throws {SerialConnectionError} if the console doesn't wake up
+     * @throws {FailedToWakeUpError} if the console doesn't wake up
      */
     public wakeUp = async () => {
         let succeeded = false;
@@ -491,7 +491,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
             tries++;
         } while (!succeeded && tries <= 3);
         if (!succeeded) {
-            throw new SerialConnectionError("Failed to wake up console!");
+            throw new FailedToWakeUpError();
         }
     };
 
@@ -615,7 +615,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
 
     /**
      * Gets a handful of useful realtime weather data (see {@link SimpleRealtimeData}). This includes temperature (in and out), pressure,
-     * humidy, wind, rain, ...
+     * humidity, wind speed, rain, ...
      * @returns a handful of useful realtime weather data (a simple realtime record)
      */
     public getSimpleRealtimeData = async (): Promise<SimpleRealtimeData> => {

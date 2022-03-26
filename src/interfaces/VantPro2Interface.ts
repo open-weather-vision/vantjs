@@ -12,7 +12,7 @@ import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSet
 /**
  * Interface to the _Vantage Pro 2_ weather station. Is built on top of the {@link VantInterface}.
  *
- * Offers station dependent features like {@link VantPro2Interface.getRichRealtimeData}, {@link VantPro2Interface.getLOOP1}, {@link VantPro2Interface.getLOOP2}, {@link VantPro2Interface.isSupportingLOOP2Packages} and {@link VantPro2Interface.getFirmwareVersion}.
+ * Offers station dependent features like {@link VantPro2Interface.getRichRealtimeData}, {@link VantPro2Interface.getLOOP1}, {@link VantPro2Interface.getLOOP2}, {@link VantPro2Interface.is} and {@link VantPro2Interface.getFirmwareVersion}.
  */
 export default class VantPro2Interface extends VantInterface {
     /**

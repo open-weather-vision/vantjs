@@ -1,4 +1,4 @@
 export { MinimumVantInterfaceSettings } from "./MinimumVantInterfaceSettings";
-export { OnCreate } from "./OnCreate";
+export { OnInterfaceCreate } from "./OnInterfaceCreate";
 export { RainCollectorSize } from "./RainCollectorSize";
 export { VantInterfaceSettings } from "./VantInterfaceSettings";

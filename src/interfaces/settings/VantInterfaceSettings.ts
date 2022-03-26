@@ -1,4 +1,4 @@
-import { OnCreate } from "./OnCreate";
+import { OnInterfaceCreate } from "./OnInterfaceCreate";
 import { RainCollectorSize } from "./RainCollectorSize";
 import { UnitSettings } from "../../units/UnitSettings";
 
@@ -8,7 +8,7 @@ import { UnitSettings } from "../../units/UnitSettings";
 export interface VantInterfaceSettings {
     /**
      * The used (serial) path to communicate with your weather station. On windows devices paths usually start with `COM` followed by the port number, on linux/osx
-     * common paths start with `"/dev/tty"` followed by the port number.
+     * common paths start with `/dev/tty` followed by the port number.
      */
     readonly path: string;
 
@@ -21,7 +21,7 @@ export interface VantInterfaceSettings {
     /**
      * The action to perform automatically on creating an interface. See {@link OnCreate}.
      */
-    readonly onCreate: OnCreate;
+    readonly onCreate: OnInterfaceCreate;
 
     /**
      * The weather station's collector size. See {@link RainCollectorSize}.

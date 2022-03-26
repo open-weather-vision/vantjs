@@ -32,7 +32,10 @@ import { VantInterface } from "vantjs/interfaces";
 import { inspect } from "vantjs/utils";
 
 async function main() {
-    const device = await VantInterface.create({ path: "COM4" });
+    const device = await VantInterface.create({
+        path: "COM4",
+        rainCollectorSize: "0.2mm",
+    });
 
     // Getting highs and lows
     const highsAndLows = await device.getHighsAndLows();
@@ -62,30 +65,29 @@ import {
 } from "vantjs/realtime-containers";
 
 async function main() {
-    const weather = await BigRealtimeDataContainer.create({
-        device: {
-            path: "COM4",
-            model: DeviceModel.VantagePro2,
-        },
+    const container = await BigRealtimeDataContainer.create({
+        path: "COM4",
+        model: DeviceModel.VantagePro2,
+        rainCollectorSize: "0.2mm",
         // the interval (in seconds) the realtime data container is updated
         updateInterval: 10,
     });
 
     for (let i = 0; i < 100; i++) {
-        const err = await weather.waitForUpdate();
+        const err = await container.waitForUpdate();
         if (err) {
             console.error("Device not connected!");
         } else {
             console.log(
-                `${weather.time.toLocaleString()}: ${
-                    weather.temperature.out
+                `${container.time.toLocaleString()}: ${
+                    container.temperature.out
                 } °F`
             );
         }
     }
 
     // closing the connection
-    await weather.close();
+    await container.close();
 }
 
 main();

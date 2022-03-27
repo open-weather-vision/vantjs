@@ -5,6 +5,10 @@ import VantError from "./VantError";
  * This shouldn't happen. Please contact the package developer if this error occurrs.
  */
 export default class ParserError extends VantError {
+    /**
+     * @hidden
+     * @param msg
+     */
     constructor(msg: string) {
         super(msg, "(parser-error)");
         Error.captureStackTrace(this, this.constructor);

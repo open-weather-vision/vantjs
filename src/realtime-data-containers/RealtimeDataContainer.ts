@@ -50,6 +50,13 @@ export default abstract class RealtimeDataContainer<
      */
     private currentUpdateInterval: NodeJS.Timeout | null = null;
 
+    public get isPortOpen() {
+        if (!this.currentDevice) {
+            return false;
+        }
+        return this.currentDevice.isPortOpen;
+    }
+
     /**
      * Creates a new instance and merges the passed settings with the default settings.
      * @param settings the realtime data container's settings
@@ -75,15 +82,18 @@ export default abstract class RealtimeDataContainer<
         switch (container.settings.onCreate) {
             case OnContainerCreate.DoNothing:
                 break;
-            case OnContainerCreate.Open:
-                await container.open();
+            case OnContainerCreate.Start:
+                await container.start();
+                break;
+            case OnContainerCreate.StartAndWaitUntilOpen:
+                await container.startAndWaitUntilOpen();
                 break;
             case OnContainerCreate.WaitForFirstUpdate:
-                container.open();
+                container.start();
                 await container.waitForUpdate();
                 break;
             case OnContainerCreate.WaitForFirstValidUpdate:
-                container.open();
+                container.start();
                 await container.waitForValidUpdate();
                 break;
         }
@@ -91,10 +101,10 @@ export default abstract class RealtimeDataContainer<
     }
 
     /**
-     * Closes the realtime data container. The update cycle is stopped and the connection to the
+     * Stops the realtime data container. The update cycle is stopped and the connection to the
      * weather station gets closed.
      */
-    public close = () => {
+    public stop = () => {
         return new Promise<void>((resolve) => {
             if (this.currentUpdateInterval) {
                 clearInterval(this.currentUpdateInterval);
@@ -104,7 +114,7 @@ export default abstract class RealtimeDataContainer<
             if (this.currentDevice) {
                 this.currentDevice.close().then(() => {
                     this.currentDevice = null;
-                    this.emit("close");
+                    this.emit("stop");
                     resolve();
                 });
             } else {
@@ -115,22 +125,65 @@ export default abstract class RealtimeDataContainer<
     };
 
     /**
-     * Opens the realtime data container. If the container is already open it gets closed first.
-     * Starts the update cycle and tries to connect to the weather station console.
-     * @returns
+     * Starts the realtime data container. Doesn't wait for the serial port connection to be opened.
+     *
+     * If the container got already started it is stopped first.
+     *
+     * Starts the update cycle and tries to connect to the weather station console. If connecting fails,
+     * the realtime data container tries to reconnect every `settings.updateInterval` seconds.
      */
-    public open = () => {
+    public start = () => {
         return new Promise<void>((resolve) => {
-            this.close().then(async () => {
+            this.stop().then(async () => {
                 await this.setupInterface();
 
                 const currentDevice = this.currentDevice as Interface;
                 this.startUpdateCycle(currentDevice);
 
-                currentDevice.once("open", () => {
-                    this.emit("open");
-                    resolve();
+                currentDevice.on("open", () => {
+                    this.emit("device-open");
                 });
+
+                currentDevice.on("close", () => {
+                    this.emit("device-close");
+                });
+
+                currentDevice.open();
+
+                this.emit("start");
+                resolve();
+            });
+        });
+    };
+
+    /**
+     * Starts the realtime data container and waits for the serial port connection to be opened.
+     *
+     * If the container got already started it is stopped first.
+     *
+     * Starts the update cycle and tries to connect to the weather station console. If connecting fails,
+     * the realtime data container tries to reconnect every `settings.updateInterval` seconds.
+     */
+    public startAndWaitUntilOpen = () => {
+        return new Promise<void>((resolve) => {
+            this.stop().then(async () => {
+                await this.setupInterface();
+
+                const currentDevice = this.currentDevice as Interface;
+                this.startUpdateCycle(currentDevice);
+
+                currentDevice.on("open", () => {
+                    this.emit("device-open");
+                });
+
+                currentDevice.on("close", () => {
+                    this.emit("device-close");
+                });
+
+                await currentDevice.open();
+
+                this.emit("start");
+                resolve();
             });
         });
     };
@@ -181,7 +234,7 @@ export default abstract class RealtimeDataContainer<
                     baudRate,
                     rainCollectorSize,
                     units,
-                    onCreate: OnInterfaceCreate.Open,
+                    onCreate: OnInterfaceCreate.DoNothing,
                 })) as any;
                 break;
             case DeviceModel.VantageVue:
@@ -190,7 +243,7 @@ export default abstract class RealtimeDataContainer<
                     baudRate,
                     rainCollectorSize,
                     units,
-                    onCreate: OnInterfaceCreate.Open,
+                    onCreate: OnInterfaceCreate.DoNothing,
                 })) as any;
                 break;
             case DeviceModel.VantagePro:
@@ -199,7 +252,7 @@ export default abstract class RealtimeDataContainer<
                     baudRate,
                     rainCollectorSize,
                     units,
-                    onCreate: OnInterfaceCreate.Open,
+                    onCreate: OnInterfaceCreate.DoNothing,
                 })) as any;
                 break;
         }

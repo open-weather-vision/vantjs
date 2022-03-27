@@ -447,6 +447,8 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * the console also needs to be woken up via {@link wakeUp}. This is necessary in order to send and receive data.
      *
      * Don't forget to close the connection to the console.
+     *
+     * Calling this method even though the connection is already open won't cause any problems.
      */
     public open = async () => {
         return new Promise<void>((resolve, reject) => {
@@ -660,7 +662,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * Returns whether the serial port connection is currently open.
      * @returns whether the serial port connection is currently open
      */
-    public isPortOpen = () => {
+    public get isPortOpen() {
         return this.port.isOpen;
-    };
+    }
 }

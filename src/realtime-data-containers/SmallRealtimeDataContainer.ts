@@ -94,6 +94,10 @@ export default class SmallRealtimeDataContainer
         );
     }
 
+    /**
+     * Creates a new instance of the small realtime container and sets the settings. Doesn't perform the {@link OnContainerCreate} action.
+     * @param settings
+     */
     private constructor(
         settings: MinimumRealtimeDataContainerSettings<DeviceModel>
     ) {

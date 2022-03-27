@@ -182,6 +182,10 @@ export default class BigRealtimeDataContainer
         );
     }
 
+    /**
+     * Creates a new instance of the big realtime container and sets the settings. Doesn't perform the {@link OnContainerCreate} action.
+     * @param settings
+     */
     private constructor(
         settings: MinimumRealtimeDataContainerSettings<
             DeviceModel.VantagePro2 | DeviceModel.VantageVue

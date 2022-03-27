@@ -9,7 +9,7 @@ async function main() {
         model: DeviceModel.VantagePro2,
         rainCollectorSize: "0.2mm",
         updateInterval: 3,
-        onCreate: OnContainerCreate.Open,
+        onCreate: OnContainerCreate.Start,
         units: {
             wind: "km/h",
         },
@@ -22,7 +22,7 @@ async function main() {
         );
     }
 
-    await weatherData.close();
+    await weatherData.stop();
 }
 
 main();

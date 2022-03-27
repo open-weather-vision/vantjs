@@ -22,6 +22,7 @@ import { VantInterfaceSettings } from "./settings/VantInterfaceSettings";
 import { OnInterfaceCreate } from "./settings/OnInterfaceCreate";
 import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSettings";
 import { FailedToWakeUpError } from "../errors";
+import SerialPortError from "../errors/SerialPortError";
 
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). Provides useful methods to access realtime weather data from your weather station's
@@ -261,6 +262,10 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * await device.close();
      * ```
      * @param settings the interface settings
+     *
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     * @throws {@link FailedToWakeUpError} if the console doesn't wake up after trying three times
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
      */
     public static async create(settings: MinimumVantInterfaceSettings) {
         const device = new VantInterface(settings);
@@ -273,6 +278,10 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     /**
      * Performs the configured {@link OnCreate} action.
      * @param device the device on which the action is to be performed
+     *
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     * @throws {@link FailedToWakeUpError} if the console doesn't wake up after trying three times
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
      * @hidden
      */
     protected static async performOnCreateAction(device: VantInterface) {
@@ -329,13 +338,17 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * to occurr.
      * @param chunk the data to write to the output stream
      * @param event the event to wait for
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      * @hidden
      */
     protected writeAndWaitForEvent = (chunk: any, event: string) => {
         return new Promise<void>((resolve, reject) => {
+            this.port.once("error", (err) => {
+                reject(new SerialPortError(err));
+            });
             this.port.write(chunk, (err) => {
                 if (err) {
-                    reject(err);
+                    reject(new SerialPortError(err));
                 } else {
                     this.port.once(event, () => {
                         resolve();
@@ -349,13 +362,17 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * Writes the passed data to the output stream ({@link port}) and waits for an incoming buffer.
      * @param chunk the data to write to the output stream
      * @returns the incoming buffer
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      * @hidden
      */
     protected writeAndWaitForBuffer = (chunk: any) => {
         return new Promise<Buffer>((resolve, reject) => {
+            this.port.once("error", (err) => {
+                reject(new SerialPortError(err));
+            });
             this.port.write(chunk, (err) => {
                 if (err) {
-                    reject(err);
+                    reject(new SerialPortError(err));
                 } else {
                     this.port.once("data", (data: Buffer) => {
                         resolve(data);
@@ -382,28 +399,42 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * Splits a buffer received from the console into the acknowledgement byte, the weather data itself and the two crc bytes.
      * @param buffer
      * @returns the buffer split in thee pieces (acknowledgement byte, the weather data itself, the two crc bytes)
+     * @throws {@link MalformedDataError} if the passed buffer is malformed
      * @hidden
      */
     protected splitCRCAckDataPackage = (buffer: Buffer) => {
-        const bufferCopy = Buffer.alloc(buffer.length - 3);
-        buffer.copy(bufferCopy, 0, 1, buffer.length - 2);
-        return {
-            ack: buffer.readUInt8(0),
-            weatherData: bufferCopy,
-            crc: buffer.readUInt16BE(buffer.length - 2),
-        };
+        try {
+            const bufferCopy = Buffer.alloc(buffer.length - 3);
+            buffer.copy(bufferCopy, 0, 1, buffer.length - 2);
+            return {
+                ack: buffer.readUInt8(0),
+                weatherData: bufferCopy,
+                crc: buffer.readUInt16BE(buffer.length - 2),
+            };
+        } catch (err: any) {
+            throw new MalformedDataError(
+                "Received malformed data! Failed to split the received buffer: " +
+                    err.message
+            );
+        }
     };
 
     /**
      * Validates the acknowledgement byte (first byte) of an buffer received from the vantage console.
      * @param buffer
-     * @throws {MalformedDataError} if the acknowledgement byte is invalid
+     * @throws {@link MalformedDataError} if the acknowledgement byte is invalid or the received buffer is malformed
      * @hidden
      */
     protected validateAcknowledgementByte = (buffer: Buffer) => {
-        const ack = buffer.readUInt8(0);
-        if (ack == 0x06 || ack == 0x15) return;
-        // 0x18 (not-ack) 0x21
+        try {
+            const ack = buffer.readUInt8(0);
+            if (ack == 0x06 || ack == 0x15) return;
+        } catch (err: any) {
+            throw new MalformedDataError(
+                "Received malformed data! Failed to validate the acknowledgement byte: " +
+                    err.message
+            );
+        }
         throw new MalformedDataError("Received invalid acknowledgement byte!");
     };
 
@@ -421,7 +452,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * Validates a buffer by computing its CRC value and comparing it to the exspected CRC value.
      * @param buffer
      * @param exspectedCRC
-     * @throws {MalformedDataError} if the CRC value is invalid
+     * @throws {@link MalformedDataError} if the CRC value is invalid
      * @hidden
      */
     protected validateCRC = (buffer: Buffer, exspectedCRC: number) => {
@@ -435,7 +466,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
 
     /**
      * Checks the serial port connection.
-     * @throws {ClosedConnectionError} if the connection is already closed or closing
+     * @throws {@link ClosedConnectionError} if the connection is already closed or closing
      */
     protected checkPortConnection = () => {
         if (!this.port.isOpen || this.port.closing)
@@ -449,6 +480,8 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * Don't forget to close the connection to the console.
      *
      * Calling this method even though the connection is already open won't cause any problems.
+     *
+     * @throws {@link SerialPortError} if an error occurs while opening the serialport connection
      */
     public open = async () => {
         return new Promise<void>((resolve, reject) => {
@@ -461,7 +494,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
             } else {
                 this.port.open((err) => {
                     if (err) {
-                        reject(err);
+                        reject(new SerialPortError(err));
                     } else {
                         resolve();
                     }
@@ -476,9 +509,12 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      *
      * Fires the {@link VantInterfaceEvents.awakening} event if the console wakes up.
      *
-     * @throws {FailedToWakeUpError} if the console doesn't wake up
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link FailedToWakeUpError} if the console doesn't wake up after trying three times
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
     public wakeUp = async () => {
+        this.checkPortConnection();
         let succeeded = false;
         let tries = 0;
         do {
@@ -500,6 +536,9 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     /**
      * Validates the connection to the console by running the TEST command. No error is thrown on failure, instead `false` is resolved.
      * @returns whether the connection is valid
+     *
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
     public validateConnection = async () => {
         this.checkPortConnection();
@@ -510,7 +549,10 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     /**
      * Gets the console's firmware date code in the `"Month dd yyyy"` format (e.g. `"Sep 12 2017"`).
      * @returns the console's firmware date code
-     * @throws {MalformedDataError} if the received data is malformed
+     *
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link MalformedDataError} if the data received from the console is malformed
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
     public getFirmwareDateCode = async () => {
         this.checkPortConnection();
@@ -525,7 +567,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     /**
      * Closes the connection to the weather station (if it's open). Throws no error if the connection is already closed.
      *
-     * @throws an error when something unexpectedly goes wrong
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
     public close = () => {
         return new Promise<void>((resolve, reject) => {
@@ -536,7 +578,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
             } else if (this.port.isOpen) {
                 this.port.close((err) => {
                     if (err) {
-                        reject(err);
+                        reject(new SerialPortError(err));
                     } else {
                         resolve();
                     }
@@ -550,6 +592,11 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     /**
      * Gets the highs and lows from the console.
      * @returns the highs and lows
+     *
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link MalformedDataError} if the data received from the console is malformed
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     * @throws {@link ParserError} if vantjs failed to parse the data received from the console, this shouldn't happen
      */
     public getHighsAndLows = async () => {
         this.checkPortConnection();
@@ -576,6 +623,11 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * Gets the default (restructured) LOOP package. The return value is dependent on the weather station's model.
      * This might be either a {@link LOOP1} or a {@link LOOP2} package.
      * @returns the default LOOP package
+     *
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link MalformedDataError} if the data received from the console is malformed
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     * @throws {@link ParserError} if vantjs failed to parse the data received from the console, this shouldn't happen
      */
     public getDefaultLOOP = async () => {
         this.checkPortConnection();
@@ -619,6 +671,11 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * Gets a handful of useful realtime weather data (see {@link SimpleRealtimeData}). This includes temperature (in and out), pressure,
      * humidity, wind speed, rain, ...
      * @returns a handful of useful realtime weather data (a simple realtime record)
+     *
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link MalformedDataError} if the data received from the console is malformed
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     * @throws {@link ParserError} if vantjs failed to parse the data received from the console, this shouldn't happen
      */
     public getSimpleRealtimeData = async (): Promise<SimpleRealtimeData> => {
         this.checkPortConnection();

@@ -24,6 +24,10 @@ export default class VantProInterface extends VantInterface {
      * await device.close();
      * ```
      * @param settings the settings
+     *
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     * @throws {@link FailedToWakeUpError} if the console doesn't wake up after trying three times
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
      */
     public static async create(settings: MinimumVantInterfaceSettings) {
         const device = new VantInterface(settings);

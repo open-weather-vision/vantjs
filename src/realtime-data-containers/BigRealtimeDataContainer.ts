@@ -26,7 +26,7 @@ import { MinimumRealtimeDataContainerSettings } from "./settings/MinimumRealtime
  * {@link VantInterface.getHighsAndLows} or {@link VantPro2Interface.getRichRealtimeData}, you just access the properties of an instance of this class.
  * E.g. to get the current outside temperature you just create a realtime data container and access it using `container.temperature.out`.
  *
- * Internally this works via an update cycle. Every `container.settings.updateInterval` seconds the container uses a interface to update its properties.
+ * Internally this works via an update cycle. Every `container.settings.updateInterval` seconds the container uses an interface to update its properties.
  * As the realtime data container is an [EventEmitter](https://nodejs.org/api/events.html#class-eventemitter), you can listen to the `"update"` event. Additionally
  * there is the `"valid-update"` event which only fires if no error occurrs.
  *

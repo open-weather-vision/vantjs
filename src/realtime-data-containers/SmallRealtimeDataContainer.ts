@@ -3,6 +3,7 @@ import VantInterface from "../interfaces/VantInterface";
 import HighsAndLows from "../structures/HighsAndLows";
 import { DeviceModel } from "./settings/DeviceModel";
 import RealtimeDataContainer from "./RealtimeDataContainer";
+import { RealtimeDataContainerEvents } from "./events";
 import { SimpleRealtimeData } from "../structures";
 import {
     SimpleHumidityData,
@@ -23,9 +24,9 @@ import { MinimumRealtimeDataContainerSettings } from "./settings/MinimumRealtime
  * {@link VantInterface.getHighsAndLows} or {@link VantInterface.getSimpleRealtimeData}, you just access the properties of an instance of this class.
  * E.g. to get the current outside temperature you just create a realtime data container and access it using `container.temperature.out`.
  *
- * Internally this works via an update cycle. Every `container.settings.updateInterval` seconds the container uses a {@link VantInterface} to update its properties.
+ * Internally this works via an update cycle. Every `container.settings.updateInterval` seconds the container uses an {@link VantInterface} to update its properties.
  * As the realtime data container is an [EventEmitter](https://nodejs.org/api/events.html#class-eventemitter), you can listen to the `"update"` event. Additionally
- * there is the `"valid-update"` event which only fires if no error occurrs.
+ * there is the `"valid-update"` event which only fires if no error occurrs. To get an overview of all fired events take a look at {@link RealtimeDataContainerEvents this}.
  *
  * Realtime data containers provide another level of stability. If the console disconnects from your computer the realtime data container stays alive waiting
  * for the console to reconnect.

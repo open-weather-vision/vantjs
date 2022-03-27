@@ -343,14 +343,17 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      */
     protected writeAndWaitForEvent = (chunk: any, event: string) => {
         return new Promise<void>((resolve, reject) => {
-            this.port.once("error", (err) => {
+            const listener = (err: Error) => {
                 reject(new SerialPortError(err));
-            });
+            };
+            this.port.once("error", listener);
             this.port.write(chunk, (err) => {
                 if (err) {
+                    this.port.removeListener("error", listener);
                     reject(new SerialPortError(err));
                 } else {
                     this.port.once(event, () => {
+                        this.port.removeListener("error", listener);
                         resolve();
                     });
                 }
@@ -367,14 +370,17 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      */
     protected writeAndWaitForBuffer = (chunk: any) => {
         return new Promise<Buffer>((resolve, reject) => {
-            this.port.once("error", (err) => {
+            const listener = (err: Error) => {
                 reject(new SerialPortError(err));
-            });
+            };
+            this.port.once("error", listener);
             this.port.write(chunk, (err) => {
                 if (err) {
+                    this.port.removeListener("error", listener);
                     reject(new SerialPortError(err));
                 } else {
                     this.port.once("data", (data: Buffer) => {
+                        this.port.removeListener("error", listener);
                         resolve(data);
                     });
                 }

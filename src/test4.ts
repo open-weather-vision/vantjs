@@ -16,10 +16,16 @@ async function main() {
     });
 
     while (true) {
-        await weatherData.waitForUpdate();
-        console.log(
-            weatherData.time.toLocaleString() + ": " + weatherData.wind.avg10min
-        );
+        try {
+            await weatherData.waitForUpdate();
+        } catch (err) {
+        } finally {
+            console.log(
+                weatherData.time.toLocaleString() +
+                    ": " +
+                    weatherData.wind.avg10min
+            );
+        }
     }
 
     await weatherData.stop();

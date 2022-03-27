@@ -16,7 +16,6 @@ export interface RealtimeDataContainerEvents {
     update: (err?: any | undefined) => void;
     /** Fires when the realtime data container is updated successfully. */
     "valid-update": () => void;
-
     /**
      * Inherited event. Fires when a new event listener is added. See [here](https://nodejs.org/api/events.html#event-newlistener).
      */

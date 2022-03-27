@@ -376,22 +376,26 @@ export default abstract class RealtimeDataContainer<
 
     /**
      * Waits for the next update on the realtime data container. If an error occurrs while updating
-     * an error object is resolved (not rejected / thrown). This can be used to handle errors. See {@link RealtimeDataContainerEvents}.
+     * the promise is rejected. This can be used to handle errors. See {@link RealtimeDataContainerEvents}.
      *
      * @example
      * ```ts
-     * const err = await container.waitForUpdate();
-     * if(err){
-     *   // handle error
-     * }else{
-     *   // ...
+     * try{
+     *    await container.waitForUpdate();
+     *     // ...
+     * }catch(err){
+     *    // handle error
      * }
      * ```
      */
     public waitForUpdate = (): Promise<void | any> => {
-        return new Promise<void | any>((resolve) => {
+        return new Promise<void>((resolve, reject) => {
             this.once("update", (err) => {
-                resolve(err);
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
             });
         });
     };

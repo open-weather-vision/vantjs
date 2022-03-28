@@ -1,3 +1,6 @@
+/**
+ * Activity of the wind alarms
+ */
 export default class WindAlarms {
     /**
      * @hidden

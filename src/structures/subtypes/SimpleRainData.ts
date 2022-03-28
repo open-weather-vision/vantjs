@@ -1,3 +1,6 @@
+/**
+ * Holds basic rain-related data.
+ */
 export default class SimpleRainData {
     /**
      * @hidden

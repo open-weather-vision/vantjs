@@ -1,5 +1,5 @@
 /**
- * Pressure alarms
+ * Activity of the pressure alarms
  */
 export default class PressureAlarms {
     /**

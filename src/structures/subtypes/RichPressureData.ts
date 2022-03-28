@@ -1,6 +1,9 @@
 import PressureReductionMethod from "./PressureReductionMethod";
 import SimplePressureData from "./SimplePressureData";
 
+/**
+ * Holds a lot of pressure related data.
+ */
 export default class RichPressureData extends SimplePressureData {
     /** Barometric sensor raw reading */
     public currentRaw: number | null = null;

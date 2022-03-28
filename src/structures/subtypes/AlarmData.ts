@@ -4,6 +4,9 @@ import RainAlarms from "./RainAlarms";
 import UVAlarms from "./UVAlarms";
 import WindAlarms from "./WindAlarms";
 
+/**
+ * Activity of all alarms
+ */
 export default class AlarmData {
     /**
      * @hidden

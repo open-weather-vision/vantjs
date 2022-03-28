@@ -11,6 +11,11 @@ import {
  */
 export default class SimpleRealtimeData {
     /**
+     * @hidden
+     */
+    constructor() {}
+
+    /**
      * Currently measured pressure related weather data
      */
     public pressure = new SimplePressureData();

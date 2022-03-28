@@ -13,6 +13,11 @@ import {
  */
 export default class RichRealtimeData {
     /**
+     * @hidden
+     */
+    constructor(){}
+
+    /**
      * Currently measured pressure related weather data
      */
     public pressure = new RichPressureData();

@@ -1,3 +1,6 @@
+/**
+ * Pointers pointing to the graph points in the vantage's EEPROM
+ */
 export default class GraphPointers {
     /**
      * Points to the next 10-minute wind speed graph point. For current

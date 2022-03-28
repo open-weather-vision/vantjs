@@ -1,5 +1,8 @@
 import SimpleRainData from "./SimpleRainData";
 
+/**
+ * Holds a lot of rain-related data.
+ */
 export default class RichRainData extends SimpleRainData {
     /**
      * The amount of rain that has fallen in this month

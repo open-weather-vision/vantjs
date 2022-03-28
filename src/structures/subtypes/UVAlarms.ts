@@ -1,3 +1,6 @@
+/**
+ * Activity of the UV alarms
+ */
 export default class UVAlarms {
     /**
      * @hidden

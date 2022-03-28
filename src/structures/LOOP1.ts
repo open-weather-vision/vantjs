@@ -101,7 +101,7 @@ export default class LOOP1 {
     /**
      * Points to the next archive record
      */
-    public nextArchiveRecord: string | null = null;
+    public nextArchiveRecord: number | null = null;
 
     /**
      * Current alarms states

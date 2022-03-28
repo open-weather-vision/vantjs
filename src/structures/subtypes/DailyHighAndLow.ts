@@ -1,5 +1,5 @@
 /**
- * Holds a weather element's / sensor's high and low (and the time they were measured) of the current day
+ * Holds a weather element's / sensor's high and low (and the time they were measured) of the current day.
  */
 export default class DailyHighAndLow {
     /**

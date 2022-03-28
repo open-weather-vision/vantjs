@@ -1,3 +1,6 @@
+/**
+ * Holds information about the currently used pressure reduction method.
+ */
 export default class PressureReductionMethod {
     /**
      * @hidden

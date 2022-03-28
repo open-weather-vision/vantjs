@@ -1,3 +1,6 @@
+/**
+ *  Holds two booleans storing whether the weather element's high / low alarm is active.
+ */
 export default class HighLowAlarms {
     /**
      * @hidden

@@ -1,3 +1,19 @@
+/**
+ * Current forecast computed by the connected vantage console
+ *
+ * There are the following options:
+ * - Sun
+ * - Partly Cloudy
+ * - Mostly Cloudy
+ * - Mostly Cloudy, Rain within 12 hours
+ * - Mostly Cloudy, Snow within 12 hours
+ * - Partly Cloudy, Rain or Snow within 12 hours
+ * - Partly Cloudy, Rain within 12 hours
+ * - Partly Cloudy, Snow within 12 hours
+ * - Partly Cloudy, Rain or Snow within 12 hours
+ *
+ * {@link ForecastData.iconNumber} encodes them as number, {@link iconText} as string.
+ */
 export default class ForecastData {
     /**
      * @hidden
@@ -5,7 +21,7 @@ export default class ForecastData {
     constructor() {}
     /**
      * The calculated forecast encoded as number:
-     * - `8` => Sun
+     * - `8` => Mostly Clear
      * - `6` => Partly Cloudy
      * - `2` => Mostly Cloudy
      * - `3` => Mostly Cloudy, Rain within 12 hours
@@ -33,7 +49,7 @@ export default class ForecastData {
         | null = null;
 
     /**
-     * Not documented
+     * Not documented. Please create an issue on github if you know more about this.
      */
     public rule: number | null = null;
 }

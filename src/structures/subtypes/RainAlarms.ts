@@ -1,3 +1,7 @@
+/**
+ * Activity of the rain alarms
+ */
+
 export default class RainAlarms {
     /**
      * @hidden

@@ -1,7 +1,7 @@
 import "source-map-support/register";
-import { DeviceModel } from "./realtime-data-containers/settings";
-import { OnContainerCreate } from "./realtime-data-containers/settings/OnContainerCreate";
-import SmallRealtimeDataContainer from "./realtime-data-containers/SmallRealtimeDataContainer";
+import { DeviceModel } from "../realtime-data-containers/settings";
+import { OnContainerCreate } from "../realtime-data-containers/settings/OnContainerCreate";
+import SmallRealtimeDataContainer from "../realtime-data-containers/SmallRealtimeDataContainer";
 
 async function main() {
     const weatherData = await SmallRealtimeDataContainer.create({

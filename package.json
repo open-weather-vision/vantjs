@@ -11,7 +11,8 @@
         "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
         "docs": "npx typedoc --options typedoc.json",
         "watch-docs": "npx typedoc --options typedoc.json --watch",
-        "clear-dist": "rmdir /s dist && npx tsc"
+        "clear-dist": "rmdir /s dist && npx tsc",
+        "test": "mocha --require ts-node/register --watch-exentsions ts 'test/**/*.ts'"
     },
     "repository": {
         "type": "git",

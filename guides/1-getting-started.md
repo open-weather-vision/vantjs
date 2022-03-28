@@ -5,7 +5,7 @@ first realtime data (temperature, pressure, humidity, wind, ...) directly from y
 
 ### Steps
 
-1. [Connect the vantage console serially to your computer](#1-connect-the-vantjs-package)
+1. [Connect the vantage console serially to your computer](#1-connect-the-vantage-console-serially-to-your-computer)
 2. [Install the _vantjs_ package](#2-install-the-vantjs-package)
 3. [Get the first realtime data from your weather station](#3-get-the-first-realtime-data-from-your-weather-station)
 
@@ -15,7 +15,7 @@ When you connect your weather station console via the datalogger for the first t
 
 However, if you have installed the Weather Link software, configured your weather station there, and _selected USB as the communication type_, you will need to run the **CP210X USB to Serial Converter**. This utility is included in the Weather Link software. You can run it from the Windows Start menu by selecting _WeatherLink_ **>** _CP210X USB to Serial Converter_.
 
-## 2. Install the _vantjs_ package
+## 2. Install the vantjs package
 
 Now that your weather station is serially connected, _vantjs_ can be easily installed via npm.
 

@@ -115,7 +115,7 @@ export default class BinaryParser<T extends ParsedObject> {
                 const propertyConfig = propertyValue as PropertyConfig;
                 if ("copyof" in propertyConfig) {
                     if (!propertyKeys.includes(propertyConfig.copyof))
-                        throw new Error(
+                        throw new ParserError(
                             "Invalid parse structure. Property is copy of an unknown property."
                         );
 
@@ -217,7 +217,7 @@ export default class BinaryParser<T extends ParsedObject> {
                 const dependencyObject = value as DependencyObject;
                 // Check dependency's value
                 if (!keys.includes(dependencyObject.dependsOn))
-                    throw new Error(
+                    throw new ParserError(
                         "Invalid parse structure. Property is dependend on unknown property."
                     );
                 const dependency = data[dependencyObject.dependsOn];

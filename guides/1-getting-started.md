@@ -7,7 +7,7 @@ first realtime data (temperature, pressure, humidity, wind, ...) directly from y
 
 1. [Connect the vantage console serially to your computer](#1-connect-the-vantjs-package)
 2. [Install the _vantjs_ package](#2-install-the-vantjs-package)
-3. [Get the first realtime data from your weather station](#3-perform-your-first-unit-conversion)
+3. [Get the first realtime data from your weather station](#3-get-the-first-realtime-data-from-your-weather-station)
 
 ## 1. Connect the vantage console serially to your computer
 

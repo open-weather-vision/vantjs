@@ -72,7 +72,8 @@ main();
 
 # Getting Started
 
-Read an introductory guide [here](/vantjs/guides/1-getting-started.md).
+Read an introductory guide [here](
+    /guides/1-getting-started.md).
 
 # Documentation
 

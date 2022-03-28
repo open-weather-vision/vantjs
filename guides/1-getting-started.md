@@ -1,6 +1,6 @@
 # Getting started
 
-This quick start guide will introduce you to vantjs. You will retrieve the
+This quick start guide will introduce you to vantjs. After reading this guide, you will be able to retrieve the
 first realtime data (temperature, pressure, humidity, wind, ...) directly from your weather station.
 
 ### Steps
@@ -25,12 +25,12 @@ npm install vantjs
 
 ## 3. Get the first realtime data from your weather station
 
-Now let's a new javascript/typescript file and start coding!
+Now let's create a new javascript/typescript file and start coding!
 
 #### 1. Creating the interface
 
 To connect to your weather station you have to create a `VantInterface`.
-In _vantjs_ interfaces are the most straightforward way to directly access
+In _vantjs_ interfaces are the most straightforward way to directly access various kinds of
 realtime weather data from your weather station.
 
 This can be done using the `VantInterface.create()` method. As nearly all methods of vantjs, this method is returning a `Promise`. It is therefore recommended to use an asynchronous wrapper method, as this makes the code more readable.
@@ -58,8 +58,7 @@ When creating an interface, specify:
 -   _optional_ `units`: Your desired unit settings (learn more [here]())
 -   _optional_ `onCreate`: The action automatically to perform on creating the interface (learn more [here](https://harrydehix.github.io/vantjs/interfaces/interfaces_settings.MinimumVantInterfaceSettings.html#units))
 
-The most importing thing to specify is the serial port's path. This defines the channel used to communicate with the weather station. If you don't know the serial path to your weather station read more [here]().
-
+The most importing thing to specify is the serial port's path. This defines the channel used to communicate with the weather station.
 #### 2. Getting the realtime data
 
 After creating the interface you are ready to retrieve data from your weather station. Let's start simple by getting some `SimpleRealtimeData`.
@@ -74,15 +73,45 @@ console.log("The wind speed is " + simpleRealtimeData.wind.current + " mph");
 console.log("The wind direction is " + simpleRealtimeData.wind.direction.abbrevation);
 console.log("The current rain rate is " + simpleRealtimeData.rain.rate + " in/h");
 console.log("The current pressure " + simpleRealtimeData.pressure.current + " inHg");
+console.log("(measured at " + simpleRealtimeData.time.toLocaleString() + ")");
 ```
 
 The returned `SimpleRealtimeData` object contains basic realtime information about temperature,
-pressure, humidity, wind speed / direction, rain (rate), et, uv and solar radiation. Read more [here](https://harrydehix.github.io/vantjs/classes/structures.SimpleRealtimeData.html). The default units are listed [here](https://harrydehix.github.io/vantjs/modules/units.html).
+pressure, humidity, wind speed / direction, rain (rate), et, uv and solar radiation. It is documented in detail [here](https://harrydehix.github.io/vantjs/classes/structures.SimpleRealtimeData.html). The default units are listed [here](https://harrydehix.github.io/vantjs/modules/units.html).
 
 #### 3. Closing the serial connection
 
 After getting the data from your weather station you should close the connection to the console.
+Not doing so will prevent the program from exiting.
 
 ```ts
 await device.close();
 ```
+
+#### 4. Run the code!
+
+Running the code should result in something similar to this:
+
+```
+Outside it's 71.1 °F
+The wind speed is 4 mph
+The wind direction is SW
+The current rain rate is 0 in/h
+The current pressure 30.115 inHg
+(measured at 28.3.2022, 15:40:25)
+```
+
+Wow, you just accessed some realtime weather data in a few simple steps!
+
+#### Beyond simple realtime data
+
+_vantjs_ provides much more than just accessing some simple realtime data.
+
+For example:
+
+- getting daily, monthly and yearly highs and lows
+- getting more - station dependent - realtime weather data
+- repeatedly accessing realtime weather data in a steady interval using realtime data containers
+- and much more...
+
+To learn more about these topics read its [official documentation](https://harrydehix.github.io/vantjs/).

@@ -1,19 +1,7 @@
-# vantjs (v1.0.0 branch)
+# vantjs
 
 ![npm](https://img.shields.io/npm/v/vantjs) ![GitHub milestones](https://img.shields.io/github/milestones/all/harrydehix/vantjs) ![GitHub last commit](https://img.shields.io/github/last-commit/harrydehix/vantjs)<br>
 vantjs is a platform-independent javascript and typescript interface to the Davis Vantage Pro, Pro 2 and Vue. It works on any linux, windows or osx device!
-
-#### Development news
-
-⚠ _Development on v1.0.0 is still in progress. Some features are not stable, some are not finished._ <br><br>
-
-## **What's new in v1.0.0?**
-
--   _unit settings_: select the units vantjs should use, the weather data is converted automatically
--   _bug fixes / stability_: version 1.0.0 will be the first stable, extensively tested release of vantjs. many bug fixes have already been made in this branch.
--   _better types_: more subtypes were created, leading to a more readable documentation
--   _better imports_: imports are now structured in multiple modules
--   _guides/documentation_: helpful guides introducing you into vantjs step by step and a full documentation
 
 # Installation
 
@@ -56,13 +44,11 @@ The `VantVueInterface`, `VantProInterface` and the `VantPro2Interface` offer sta
 
 ### Realtime Data Containers
 
-Realtime data containers are another level of abstraction hiding all the complex details from you. They are still in development, more news are coming soon.
+Realtime data containers are another level of abstraction hiding all the complex details from you.
 
 ```ts
-import {
-    BigRealtimeDataContainer,
-    DeviceModel,
-} from "vantjs/realtime-containers";
+import { BigRealtimeDataContainer } from "vantjs/realtime-containers";
+import { DeviceModel } from "vantjs/realtime-containers/settings";
 
 async function main() {
     const container = await BigRealtimeDataContainer.create({
@@ -73,27 +59,21 @@ async function main() {
         updateInterval: 10,
     });
 
-    for (let i = 0; i < 100; i++) {
-        const err = await container.waitForUpdate();
-        if (err) {
-            console.error("Device not connected!");
-        } else {
-            console.log(
-                `${container.time.toLocaleString()}: ${
-                    container.temperature.out
-                } °F`
-            );
-        }
-    }
+    setInterval(() => {
+        const time = container.time.toLocaleString();
+        const temperature = container.temperature.out;
 
-    // closing the connection
-    await container.close();
+        console.log(`${time}: ${temperature} °F`);
+    }, 60 * 1000);
 }
 
 main();
 ```
 
+# Getting Started
+
+Read an introductory guide [here](./guides/1-getting-started.md).
+
 # Documentation
 
-⚠ _Work in (early) progress!_ ⚠
 Read the full documentation [here](https://harrydehix.github.io/vantjs/).

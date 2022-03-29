@@ -1,6 +1,11 @@
 # vantjs
 
-![npm](https://img.shields.io/npm/v/vantjs) ![GitHub milestones](https://img.shields.io/github/milestones/all/harrydehix/vantjs) ![GitHub last commit](https://img.shields.io/github/last-commit/harrydehix/vantjs)<br>
+![](https://badgen.net/npm/v/vantjs)
+![](https://badgen.net/npm/dy/vantjs)
+![](https://badgen.net/npm/types/vantjs)
+![](https://badgen.net/npm/license/vantjs)
+![](https://badgen.net/badge/documentation/available/green?icon=wiki)
+<br>
 vantjs is a platform-independent javascript and typescript interface to the Davis Vantage Pro, Pro 2 and Vue. It works on any linux, windows or osx device!
 
 # Installation

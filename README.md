@@ -76,7 +76,7 @@ async function main() {
     setTimeout(async () => {
         // This data is still up-to-date, because the container updates itself automatically
         console.log(`It's ${container.tempOut} °F outside!`);
-        await container.close();
+        await container.stop();
     }, 1000 * 60);
 }
 

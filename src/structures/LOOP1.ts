@@ -1,35 +1,27 @@
 import { LOOPPackageType } from "./LOOPPackageType";
+import SimpleRealtimeData from "./SimpleRealtimeData";
 import AlarmData from "./subtypes/AlarmData";
-import ForecastData from "./subtypes/ForecastData";
-import RainData1 from "./subtypes/RainData1";
-import RichETData from "./subtypes/RichETData";
-import RichHumidityData from "./subtypes/RichHumidityData";
-import RichTemperatureData from "./subtypes/RichTemperatureData";
-import SimplePressureData from "./subtypes/SimplePressureData";
-import SimpleWindData from "./subtypes/SimpleWindData";
 
 /**
  * The older LOOP(1) package used by Rev "A" firmware (dated before April 24, 2002).
  * Newer weather stations support this package type too.
  */
-export default class LOOP1 {
+export default class LOOP1 extends SimpleRealtimeData {
     /**
-     * @hidden
+     * Measured extra temperatures (from up to 7 sensors)
      */
-    constructor() {}
+    public tempExtra: [
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null
+    ] = [null, null, null, null, null, null, null];
 
     /**
-     * Holds the current pressure and the pressure's trend
-     */
-    public pressure = new SimplePressureData();
-
-    /**
-     * The currently measured temperatures
-     */
-    public temperature = new RichTemperatureData();
-
-    /**
-     * Currently measured leaf temperatures (from up to 4 sensors)
+     * Measured leaf temperatures (from up to 4 sensors)
      */
     public leafTemps: [
         number | null,
@@ -39,7 +31,7 @@ export default class LOOP1 {
     ] = [null, null, null, null];
 
     /**
-     * Currently measured soil temperatures (from up to 4 sensors)
+     * Measured soil temperatures (from up to 4 sensors)
      */
     public soilTemps: [
         number | null,
@@ -49,24 +41,37 @@ export default class LOOP1 {
     ] = [null, null, null, null];
 
     /**
-     * Currently measured (relative) humidities in percent
+     * Measured extra humidities (from up to 7 sensors)
      */
-    public humidity = new RichHumidityData();
+    public humExtra: [
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null
+    ] = [null, null, null, null, null, null, null];
 
     /**
-     * Wind related realtime data
+     * The amount of rain that has fallen in this month
      */
-    public wind = new SimpleWindData();
+    public rainMonth: number | null = null;
 
     /**
-     *  Curently measured rain related data
+     * The amount of rain that has fallen in this year
      */
-    public rain = new RainData1();
+    public rainYear: number | null = null;
 
     /**
-     * Evotranspiration (ET) related data
+     * Measured evapotranspiration (ET) in the current month
      */
-    public et = new RichETData();
+    public etMonth: number | null = null;
+
+    /**
+     * Measured evapotranspiration (ET) in the current year
+     */
+    public etYear: number | null = null;
 
     /**
      * Measured soil moisture from up to 4 sensors
@@ -89,14 +94,49 @@ export default class LOOP1 {
     ] = [null, null, null, null];
 
     /**
-     * The current UV index
+     * Current forecast computed by the connected vantage console
+     *
+     * There are the following options:
+     * - Sun
+     * - Partly Cloudy
+     * - Mostly Cloudy
+     * - Mostly Cloudy, Rain within 12 hours
+     * - Mostly Cloudy, Snow within 12 hours
+     * - Partly Cloudy, Rain or Snow within 12 hours
+     * - Partly Cloudy, Rain within 12 hours
+     * - Partly Cloudy, Snow within 12 hours
+     * - Partly Cloudy, Rain or Snow within 12 hours
      */
-    public uv: number | null = null;
+    public forecast:
+        | "Mostly Clear"
+        | "Partly Cloudy"
+        | "Mostly Cloudy"
+        | "Mostly Cloudy, Rain within 12 hours"
+        | "Mostly Cloudy, Snow within 12 hours"
+        | "Mostly Cloudy, Rain or Snow within 12 hours"
+        | "Partly Cloudy, Rain within 12 hours"
+        | "Partly Cloudy, Rain or Snow within 12 hours"
+        | "Partly Cloudy, Snow within 12 hours"
+        | null = null;
 
     /**
-     * The current solar radiation
+     * The calculated forecast encoded as number:
+     * - `8` => Mostly Clear
+     * - `6` => Partly Cloudy
+     * - `2` => Mostly Cloudy
+     * - `3` => Mostly Cloudy, Rain within 12 hours
+     * - `18` => Mostly Cloudy, Snow within 12 hours
+     * - `19` => Partly Cloudy, Rain or Snow within 12 hours
+     * - `7` => Partly Cloudy, Rain within 12 hours
+     * - `22` => Partly Cloudy, Snow within 12 hours
+     * - `23` => Partly Cloudy, Rain or Snow within 12 hours
      */
-    public solarRadiation: number | null = null;
+    public forecastID: 8 | 6 | 2 | 3 | 18 | 19 | 7 | 22 | 23 | null = null;
+
+    /**
+     * Not documented. Please create an issue on github if you know more about this.
+     */
+    public forecastRule: number | null = null;
 
     /**
      * Points to the next archive record
@@ -117,11 +157,6 @@ export default class LOOP1 {
      * The console's battery voltage
      */
     public consoleBatteryVoltage: number | null = null;
-
-    /**
-     * The calculated forecast. `forecast.iconNumber` encodes it as `number`, `forecast.iconText` as `string`.
-     */
-    public forecast = new ForecastData();
 
     /**
      * The today's sunrise time (e.g. `06:35`)

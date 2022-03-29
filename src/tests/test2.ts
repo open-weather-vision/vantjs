@@ -39,7 +39,7 @@ async function main() {
     while (i < 12) {
         await weatherData.waitForUpdate();
         console.log(
-            weatherData.temperature.in + weatherData.settings.units.temperature
+            weatherData.tempIn + weatherData.settings.units.temperature
         );
         i++;
     }

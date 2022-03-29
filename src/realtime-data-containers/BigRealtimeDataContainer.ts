@@ -5,15 +5,6 @@ import HighsAndLows from "../structures/HighsAndLows";
 import { DeviceModel } from "./settings/DeviceModel";
 import RealtimeDataContainer from "./RealtimeDataContainer";
 import RichRealtimeData from "../structures/RichRealtimeData";
-import {
-    ForecastData,
-    RichETData,
-    RichHumidityData,
-    RichPressureData,
-    RichRainData,
-    RichTemperatureData,
-    RichWindData,
-} from "../structures/subtypes";
 import { MinimumRealtimeDataContainerSettings } from "./settings/MinimumRealtimeDataContainerSettings";
 
 /**
@@ -41,124 +32,6 @@ export default class BigRealtimeDataContainer
     implements RichRealtimeData
 {
     /**
-     * Currently measured pressure related weather data
-     */
-    public pressure = new RichPressureData();
-
-    /**
-     * The measured heat index
-     */
-    public heat: number | null = null;
-
-    /**
-     * The calculated dew point
-     */
-    public dewpoint: number | null = null;
-
-    /**
-     * The currently measured temperatures
-     */
-    public temperature = new RichTemperatureData();
-
-    /**
-     * Currently measured leaf temperatures (from up to 4 sensors)
-     */
-    public leafTemps: [
-        number | null,
-        number | null,
-        number | null,
-        number | null
-    ] = [null, null, null, null];
-
-    /**
-     * Currently measured soil temperatures (from up to 4 sensors)
-     */
-    public soilTemps: [
-        number | null,
-        number | null,
-        number | null,
-        number | null
-    ] = [null, null, null, null];
-
-    /**
-     * Currently measured (relative) humidities in percent
-     */
-    public humidity = new RichHumidityData();
-
-    /**
-     * Wind related realtime data
-     */
-    public wind = new RichWindData();
-
-    /**
-     * The currently measured THSW index. Requires a solar radiation sensor.
-     */
-    public thsw: number | null = null;
-
-    /**
-     *  Curently measured rain related data
-     */
-    public rain = new RichRainData();
-
-    /**
-     * Evotranspiration (ET) related data
-     */
-    public et = new RichETData();
-
-    /**
-     * Measured soil moisture from up to 4 sensors
-     */
-    public soilMoistures: [
-        number | null,
-        number | null,
-        number | null,
-        number | null
-    ] = [null, null, null, null];
-
-    /**
-     * Measured leaf wetness from up to 4 sensors
-     */
-    public leafWetnesses: [
-        number | null,
-        number | null,
-        number | null,
-        number | null
-    ] = [null, null, null, null];
-
-    /**
-     * The current UV index
-     */
-    public uv: number | null = null;
-
-    /**
-     * The current solar radiation
-     */
-    public solarRadiation: number | null = null;
-
-    /**
-     * The transmitter's battery status (poorly documented)
-     */
-    public transmitterBatteryStatus: number | null = null;
-
-    /**
-     * The console's battery voltage
-     */
-    public consoleBatteryVoltage: number | null = null;
-
-    /**
-     * The calculated forecast. `forecast.iconNumber` encodes it as `number`, `forecast.iconText` as `string`.
-     */
-    public forecast = new ForecastData();
-    /**
-     * The today's sunrise time (e.g. `06:35`)
-     */
-    public sunrise: string | null = null;
-    /**
-     * The today's sunset time (e.g. `19:35`)
-     */
-    public sunset: string | null = null;
-
-    /**
      * The time the record was created
      */
     public time: Date = new Date();
@@ -167,6 +40,150 @@ export default class BigRealtimeDataContainer
      * Holds daily, monthly and yearly highs and lows for all weather elements / sensors.
      */
     public highsAndLows = new HighsAndLows();
+
+    public tempExtra: [
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null
+    ] = [null, null, null, null, null, null, null];
+    public leafTemps: [
+        number | null,
+        number | null,
+        number | null,
+        number | null
+    ] = [null, null, null, null];
+    public soilTemps: [
+        number | null,
+        number | null,
+        number | null,
+        number | null
+    ] = [null, null, null, null];
+    public humExtra: [
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null
+    ] = [null, null, null, null, null, null, null];
+    public rainMonth: number | null = null;
+    public rainYear: number | null = null;
+    public etMonth: number | null = null;
+    public etYear: number | null = null;
+    public soilMoistures: [
+        number | null,
+        number | null,
+        number | null,
+        number | null
+    ] = [null, null, null, null];
+    public leafWetnesses: [
+        number | null,
+        number | null,
+        number | null,
+        number | null
+    ] = [null, null, null, null];
+    public forecast:
+        | "Mostly Clear"
+        | "Partly Cloudy"
+        | "Mostly Cloudy"
+        | "Mostly Cloudy, Rain within 12 hours"
+        | "Mostly Cloudy, Snow within 12 hours"
+        | "Mostly Cloudy, Rain or Snow within 12 hours"
+        | "Partly Cloudy, Rain within 12 hours"
+        | "Partly Cloudy, Rain or Snow within 12 hours"
+        | "Partly Cloudy, Snow within 12 hours"
+        | null = null;
+    public forecastID: 7 | 8 | 6 | 2 | 3 | 18 | 19 | 22 | 23 | null = null;
+    public forecastRule: number | null = null;
+    public transmitterBatteryStatus: number | null = null;
+    public consoleBatteryVoltage: number | null = null;
+    public sunrise: string | null = null;
+    public sunset: string | null = null;
+    public pressRaw: number | null = null;
+    public pressAbs: number | null = null;
+    public pressReductionMethod:
+        | "user offset"
+        | "altimeter setting"
+        | "NOAA bar reduction"
+        | null = null;
+    public pressReductionMethodID: 0 | 2 | 1 | null = null;
+    public pressUserOffset: number | null = null;
+    public pressCalibrationOffset: number | null = null;
+    public altimeter: number | null = null;
+    public heat: number | null = null;
+    public dewpoint: number | null = null;
+    public windAvg2m: number | null = null;
+    public windGust: number | null = null;
+    public windGustDir:
+        | "NNE"
+        | "NE"
+        | "ENE"
+        | "E"
+        | "ESE"
+        | "SE"
+        | "SSE"
+        | "S"
+        | "SSW"
+        | "SW"
+        | "WSW"
+        | "W"
+        | "WNW"
+        | "NW"
+        | "NNW"
+        | "N"
+        | null = null;
+    public windGustDirDeg: number | null = null;
+    public chill: number | null = null;
+    public thsw: number | null = null;
+    public rain15m: number | null = null;
+    public rain1h: number | null = null;
+    public rain24h: number | null = null;
+    public press: number | null = null;
+    public pressTrend:
+        | "Falling Rapidly"
+        | "Steady"
+        | "Rising Rapidly"
+        | "Rising Slowly"
+        | "Falling Slowly"
+        | null = null;
+    public pressTrendID: 0 | 60 | -60 | 20 | -20 | null = null;
+    public tempOut: number | null = null;
+    public tempIn: number | null = null;
+    public humIn: number | null = null;
+    public humOut: number | null = null;
+    public wind: number | null = null;
+    public windAvg10m: number | null = null;
+    public windDir:
+        | "NNE"
+        | "NE"
+        | "ENE"
+        | "E"
+        | "ESE"
+        | "SE"
+        | "SSE"
+        | "S"
+        | "SSW"
+        | "SW"
+        | "WSW"
+        | "W"
+        | "WNW"
+        | "NW"
+        | "NNW"
+        | "N"
+        | null = null;
+    public windDirDeg: number | null = null;
+    public rainRate: number | null = null;
+    public rainDay: number | null = null;
+    public stormRain: number | null = null;
+    public stormStartDate: Date | null = null;
+    public etDay: number | null = null;
+    public uv: number | null = null;
+    public solarRadiation: number | null = null;
 
     /**
      * Creates a small realtime container using the passed settings. Your device should be connected serially.

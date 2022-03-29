@@ -23,6 +23,8 @@ import { OnInterfaceCreate } from "./settings/OnInterfaceCreate";
 import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSettings";
 import { FailedToWakeUpError } from "../errors";
 import SerialPortError from "../errors/SerialPortError";
+import mergeWith from "lodash.mergewith";
+import { flatMerge, inspect } from "../util";
 
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). Provides useful methods to access realtime weather data from your weather station's
@@ -686,39 +688,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     public getSimpleRealtimeData = async (): Promise<SimpleRealtimeData> => {
         this.checkPortConnection();
 
-        const loopPackage = await this.getDefaultLOOP();
-
-        return merge(new SimpleRealtimeData(), {
-            pressure: {
-                current: loopPackage.pressure.current,
-                trend: {
-                    value: loopPackage.pressure.trend.value,
-                    text: loopPackage.pressure.trend.text,
-                },
-            },
-            temperature: {
-                in: loopPackage.temperature.in,
-                out: loopPackage.temperature.out,
-            },
-            humidity: {
-                in: loopPackage.humidity.in,
-                out: loopPackage.humidity.out,
-            },
-            wind: {
-                current: loopPackage.wind.current,
-                avg10min: loopPackage.wind.avg10min,
-                direction: loopPackage.wind.direction,
-            },
-            rain: {
-                rate: loopPackage.rain.rate,
-                storm: loopPackage.rain.storm,
-                stormStartDate: loopPackage.rain.stormStartDate,
-                day: loopPackage.rain.day,
-            },
-            et: loopPackage.et.day,
-            uv: loopPackage.uv,
-            solarRadiation: loopPackage.solarRadiation,
-        });
+        return flatMerge(new SimpleRealtimeData(), await this.getDefaultLOOP());
     };
 
     /**

@@ -3,15 +3,7 @@ import VantInterface from "../interfaces/VantInterface";
 import HighsAndLows from "../structures/HighsAndLows";
 import { DeviceModel } from "./settings/DeviceModel";
 import RealtimeDataContainer from "./RealtimeDataContainer";
-import { RealtimeDataContainerEvents } from "./events";
 import { SimpleRealtimeData } from "../structures";
-import {
-    SimpleHumidityData,
-    SimplePressureData,
-    SimpleRainData,
-    SimpleTemperatureData,
-    SimpleWindData,
-} from "../structures/subtypes";
 import { MinimumRealtimeDataContainerSettings } from "./settings/MinimumRealtimeDataContainerSettings";
 
 /**
@@ -45,42 +37,47 @@ export default class SmallRealtimeDataContainer
      */
     public highsAndLows: HighsAndLows = new HighsAndLows();
 
-    /**
-     * Currently measured pressure related weather data
-     */
-    public pressure = new SimplePressureData();
-    /**
-     * Current inside and outside temperature
-     */
-    public temperature = new SimpleTemperatureData();
-
-    /** Current inside and outside humidity (relative) in percent  */
-    public humidity = new SimpleHumidityData();
-
-    /** Currently measured wind related data */
-    public wind = new SimpleWindData();
-
-    /**
-     *  Curently measured rain related data
-     */
-    public rain = new SimpleRainData();
-    /**
-     * Measured evapotranspiration (ET) of the day
-     */
-    public et: number | null = null;
-    /**
-     * Currently measured UV index
-     */
+    public press: number | null = null;
+    public pressTrend:
+        | "Falling Rapidly"
+        | "Steady"
+        | "Rising Rapidly"
+        | "Rising Slowly"
+        | "Falling Slowly"
+        | null = null;
+    public pressTrendID: 0 | 60 | -60 | 20 | -20 | null = null;
+    public tempOut: number | null = null;
+    public tempIn: number | null = null;
+    public humIn: number | null = null;
+    public humOut: number | null = null;
+    public wind: number | null = null;
+    public windAvg10m: number | null = null;
+    public windDir:
+        | "NNE"
+        | "NE"
+        | "ENE"
+        | "E"
+        | "ESE"
+        | "SE"
+        | "SSE"
+        | "S"
+        | "SSW"
+        | "SW"
+        | "WSW"
+        | "W"
+        | "WNW"
+        | "NW"
+        | "NNW"
+        | "N"
+        | null = null;
+    public windDirDeg: number | null = null;
+    public rainRate: number | null = null;
+    public rainDay: number | null = null;
+    public stormRain: number | null = null;
+    public stormStartDate: Date | null = null;
+    public etDay: number | null = null;
     public uv: number | null = null;
-
-    /**
-     * Currently measured solar radiation
-     */
     public solarRadiation: number | null = null;
-
-    /**
-     * The time the record was created
-     */
     public time: Date = new Date();
 
     /**

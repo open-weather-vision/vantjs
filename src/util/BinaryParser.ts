@@ -24,7 +24,7 @@ export enum ArrayType {
     ENTRY_BASED = 2,
 }
 
-export type TransformPipeline = Array<(val: number) => any>;
+export type TransformPipeline = Array<(val: any) => any>;
 
 export type PropertyConfig =
     | {

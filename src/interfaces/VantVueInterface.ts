@@ -1,31 +1,36 @@
-import { MinimumVantInterfaceSettings } from "./VantInterface";
+import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSettings";
 import VantPro2Interface from "./VantPro2Interface";
 
 /**
  * Interface to the _Vantage Vue_ weather station. Is built on top of the {@link VantPro2Interface}.
  *
- * Offers station dependent features like {@link getRichRealtimeRecord}, {@link getLOOP}, {@link getLOOP2} and {@link getFirmwareVersion}.
+ * Offers station dependent features like {@link VantVueInterface.getRichRealtimeData}, {@link VantVueInterface.getLOOP1}, {@link VantVueInterface.getLOOP2}, {@link VantVueInterface.isSupportingLOOP2Packages}  and {@link VantVueInterface.getFirmwareVersion}.
  */
 export default class VantVueInterface extends VantPro2Interface {
     /**
      * Creates an interface to your vantage vue weather station using the passed settings. The device should be connected
-     * serially. The passed path specifies the path to communicate with the weather station. On Windows paths
-     * like `COM1`, `COM2`, ... are common, on osx/linux devices common paths are `/dev/tty0`, `/dev/tty2`, ...
+     * serially.
      *
      * @example
-     * const device = await VantVueInterface.create({ path: "COM3" });
+     * ```typescript
+     * const device = await VantVueInterface.create({ path: "COM3", rainCollectorSize: "0.2mm" });
      *
-     * await device.open();
-     * await device.wakeUp();
      *
-     * const highsAndLows = await device.getHighsAndLows();
-     * inspect(highsAndLows);
+     * const richRealtimeData = await device.getRichRealtimeData();
+     * inspect(richRealtimeData);
+     *
+     * await device.close();
+     * ```
      * @param settings the settings
+     *
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     * @throws {@link FailedToWakeUpError} if the console doesn't wake up after trying three times
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
      */
     public static async create(settings: MinimumVantInterfaceSettings) {
         const device = new VantVueInterface(settings);
 
-        await this.setupInterface(device);
+        await this.performOnCreateAction(device);
 
         return device;
     }

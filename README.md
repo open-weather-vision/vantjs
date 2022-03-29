@@ -1,18 +1,12 @@
 # vantjs
 
-![npm](https://img.shields.io/npm/v/vantjs) ![GitHub milestones](https://img.shields.io/github/milestones/all/harrydehix/vantjs) ![GitHub last commit](https://img.shields.io/github/last-commit/harrydehix/vantjs)<br>
+![](https://badgen.net/npm/v/vantjs)
+![](https://badgen.net/npm/dy/vantjs)
+![](https://badgen.net/npm/types/vantjs)
+![](https://badgen.net/npm/license/vantjs)
+![](https://badgen.net/badge/documentation/available/green?icon=wiki)
+<br>
 vantjs is a platform-independent javascript and typescript interface to the Davis Vantage Pro, Pro 2 and Vue. It works on any linux, windows or osx device!
-
-#### Development news
-
-❌ _Development still in progress. Some features are not stable._ <br>
-⏩ _Version 0.4.0 has just been released offering a lot of functionality to interact with your Vantage Pro, Pro 2 and Vue._
-
-**Upcoming stuff**:
-
--   so called _weather data containers_ offering a more abstract way to interact with your weather station hiding
-    all the complex details
--   currently I'm working on creating helpful guides and a clean documentation making developing with vantjs fun and easy!
 
 # Installation
 
@@ -24,21 +18,30 @@ npm install vantjs
 
 ### Interfaces
 
-The `VantInterface` class provides the basic features that all Vantage stations offer.
+The `VantInterface` is the most straightforward way to connect with your
+weather station and retrieve realtime weather data.
 
 ```typescript
-import { VantInterface, inspect } from "vantjs";
+import { VantInterface } from "vantjs/interfaces";
+// or
+const { VantInterface } = require("vantjs/interfaces");
 
 async function main() {
-    const device = await VantInterface.create({ path: "COM4" });
+    // Connecting to the weather station
+    const device = await VantInterface.create({
+        path: "COM4",
+        rainCollectorSize: "0.2mm",
+    });
 
-    // Gettings highs and lows
+    // Getting highs and lows
     const highsAndLows = await device.getHighsAndLows();
-    inspect(highsAndLows);
+    console.log(
+        `The maximum rain rate measured today was ${highsAndLows.rainRate.day} in/h`
+    );
 
     // Getting realtime weather data
-    const realtimeWeatherData = await device.getSimpleRealtimeRecord();
-    inspect(realtimeWeatherData);
+    const realtimeWeatherData = await device.getSimpleRealtimeData();
+    console.log(`It's ${realtimeWeatherData.tempOut} °F outside!`);
 
     // Closing the connection to the device
     await device.close();
@@ -49,43 +52,41 @@ main();
 
 The `VantVueInterface`, `VantProInterface` and the `VantPro2Interface` offer station-dependent additional features.
 
-### Weather Data Containers
+### Realtime Data Containers
 
-Weather data containers are another level of abstraction hiding all the complex details from you. They are still in development, more news are coming soon.
+Realtime data containers are another level of abstraction hiding all the complex details from you. They are self updating.
 
 ```ts
-import { BigRealtimeDataContainer, DeviceModel } from "vantjs";
+import { BigRealtimeDataContainer } from "vantjs/realtime-containers";
+import { DeviceModel } from "vantjs/realtime-containers/settings";
+// or
+const { BigRealtimeDataContainer } = require("vantjs/realtime-containers");
+const { DeviceModel } = require("vantjs/realtime-containers/settings");
 
 async function main() {
-    const weather = await BigRealtimeDataContainer.create({
-        device: {
-            path: "COM4",
-            model: DeviceModel.VantagePro2,
-        },
+    // Connecting to the weather station
+    const container = await BigRealtimeDataContainer.create({
+        path: "COM4",
+        model: DeviceModel.VantagePro2,
+        rainCollectorSize: "0.2mm",
         // the interval (in seconds) the realtime data container is updated
         updateInterval: 10,
     });
 
-    for (let i = 0; i < 100; i++) {
-        const err = await weather.waitForUpdate();
-        if (err) {
-            console.error("Device not connected!");
-        } else {
-            console.log(
-                `${weather.time.toLocaleString()}: ${
-                    weather.temperature.out
-                } °F`
-            );
-        }
-    }
-
-    // closing the connection
-    await weather.close();
+    setTimeout(async () => {
+        // This data is still up-to-date, because the container updates itself automatically
+        console.log(`It's ${container.tempOut} °F outside!`);
+        await container.close();
+    }, 1000 * 60);
 }
 
 main();
 ```
 
+# Getting Started
+
+Read an introductory guide [here](/guides/1-getting-started.md).
+
 # Documentation
 
-_Coming soon!_
+Read the full documentation [here](https://harrydehix.github.io/vantjs/).

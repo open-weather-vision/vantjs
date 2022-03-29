@@ -1,49 +1,69 @@
-import merge from "lodash.merge";
 import MalformedDataError from "../errors/MalformedDataError";
 import LOOP2Parser from "../parsers/LOOP2Parser";
-import LOOPParser from "../parsers/LOOPParser";
-import { RichRealtimeRecord } from "../structures/RichRealtimeRecord";
-import VantInterface, {
-    MinimumVantInterfaceSettings,
-    OnCreate,
-} from "./VantInterface";
+import LOOP1Parser from "../parsers/LOOP1Parser";
+import RichRealtimeData from "../structures/RichRealtimeData";
+import VantInterface from "./VantInterface";
 import UnsupportedDeviceModelError from "../errors/UnsupportedDeviceModelError";
+import { LOOP1, LOOP2 } from "../structures";
+import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSettings";
+import flatMerge from "../util/flatMerge";
 
 /**
  * Interface to the _Vantage Pro 2_ weather station. Is built on top of the {@link VantInterface}.
  *
- * Offers station dependent features like {@link getRichRealtimeRecord}, {@link getLOOP}, {@link getLOOP2} and {@link getFirmwareVersion}.
+ * Offers station dependent features like {@link VantPro2Interface.getRichRealtimeData}, {@link VantPro2Interface.getLOOP1}, {@link VantPro2Interface.getLOOP2}, {@link VantPro2Interface.isSupportingLOOP2Packages} and {@link VantPro2Interface.getFirmwareVersion}.
  */
 export default class VantPro2Interface extends VantInterface {
     /**
      * Creates an interface to your vantage pro 2 weather station using the passed settings. The device should be connected
-     * serially. The passed path specifies the path to communicate with the weather station. On Windows paths
-     * like `COM1`, `COM2`, ... are common, on osx/linux devices common paths are `/dev/tty0`, `/dev/tty2`, ...
+     * serially.
      *
      * @example
-     * const device = await VantPro2Interface.create({ path: "COM3" });
+     * ```typescript
+     * const device = await VantPro2Interface.create({ path: "COM3", rainCollectorSize: "0.2mm" });
      *
-     * await device.open();
-     * await device.wakeUp();
+     * const richRealtimeData = await device.getRichRealtimeData();
+     * inspect(richRealtimeData);
      *
-     * const highsAndLows = await device.getHighsAndLows();
-     * inspect(highsAndLows);
+     * await device.close();
+     * ```
      * @param settings the settings
+     *
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     * @throws {@link FailedToWakeUpError} if the console doesn't wake up after trying three times
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
      */
     public static async create(settings: MinimumVantInterfaceSettings) {
         const device = new VantPro2Interface(settings);
 
-        await this.setupInterface(device);
+        await this.performOnCreateAction(device);
 
         return device;
     }
 
     /**
-     * Gets the console's firmware version.
+     * Checks whether the connected weather station is supporting {@link LOOP2} packages. This is done using the firmware's date code.
+     * @returns whether the connected weather station is supporting {@link LOOP2} packages
+     *
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link MalformedDataError} if the data received from the console is malformed
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     */
+    public async isSupportingLOOP2Packages(): Promise<boolean> {
+        const firmwareDateCode = await this.getFirmwareDateCode();
+        return Date.parse(firmwareDateCode) > Date.parse("Apr 24 2002");
+    }
+
+    /**
+     * Gets the console's firmware version in the `"vX.XX"` format (e.g. `"v3.80"`).
      * @returns the console's firmware version
+     *
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link MalformedDataError} if the data received from the console is malformed
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
     public async getFirmwareVersion() {
-        this.validatePort();
+        this.checkPortConnection();
         const data = await this.writeAndWaitForBuffer("NVER\n");
         try {
             const firmwareVersion = data
@@ -57,11 +77,16 @@ export default class VantPro2Interface extends VantInterface {
     }
 
     /**
-     * Gets the LOOP (version 1) package.
-     * @returns the LOOP (version 1) package
+     * Gets the {@link LOOP1} package.
+     * @returns the {@link LOOP1} package
+     *
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link MalformedDataError} if the data received from the console is malformed
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     * @throws {@link ParserError} if vantjs failed to parse the data received from the console, this shouldn't happen
      */
     public async getLOOP1() {
-        this.validatePort();
+        this.checkPortConnection();
         const data = await this.writeAndWaitForBuffer("LPS 1 1\n");
 
         // Check ack
@@ -74,7 +99,10 @@ export default class VantPro2Interface extends VantInterface {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOPParser().parse(splittedData.weatherData);
+            return new LOOP1Parser(
+                this.rainClicksToInchTransformer,
+                this.unitTransformers
+            ).parse(splittedData.weatherData);
         } else {
             throw new UnsupportedDeviceModelError(
                 "This weather station doesn't support explicitly querying LOOP (version 1) packages. Try getLOOP2() or getDefaultLOOP()."
@@ -83,11 +111,17 @@ export default class VantPro2Interface extends VantInterface {
     }
 
     /**
-     * Gets the LOOP (version 2) package.
-     * @returns the LOOP (version 2) package
+     * Gets the {@link LOOP2} package. Requires firmware dated after April 24, 2002 (v1.90 or above).
+     * To check if your weather station supports the {@link LOOP2} package call {@link isSupportingLOOP2Packages}.
+     * @returns the {@link LOOP2} package
+     *
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link MalformedDataError} if the data received from the console is malformed
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     * @throws {@link ParserError} if vantjs failed to parse the data received from the console, this shouldn't happen
      */
     public async getLOOP2() {
-        this.validatePort();
+        this.checkPortConnection();
         const data = await this.writeAndWaitForBuffer("LPS 2 1\n");
 
         // Check ack
@@ -110,7 +144,10 @@ export default class VantPro2Interface extends VantInterface {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOP2Parser().parse(splittedData.weatherData);
+            return new LOOP2Parser(
+                this.rainClicksToInchTransformer,
+                this.unitTransformers
+            ).parse(splittedData.weatherData);
         } else {
             throw new UnsupportedDeviceModelError(
                 "This weather station doesn't support LOOP2 packages. Try getLOOP() or getDefaultLOOP()."
@@ -119,87 +156,22 @@ export default class VantPro2Interface extends VantInterface {
     }
 
     /**
-     * Gets detailed weather information from all sensors (internally combining LOOP1 and LOOP2 packages).
+     * Gets detailed weather information from all sensors (internally combining {@link LOOP1} and {@link LOOP2} packages).
+     * Only works if your weather station supports {@link LOOP2} packages. This can be checked by calling {@link isSupportingLOOP2Packages}.
      * @returns detailed weather information
+     *
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link MalformedDataError} if the data received from the console is malformed
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     * @throws {@link ParserError} if vantjs failed to parse the data received from the console, this shouldn't happen
      */
-    public async getRichRealtimeRecord(): Promise<RichRealtimeRecord> {
-        this.validatePort();
-        const RichRealtimeRecord: RichRealtimeRecord = {
-            pressure: {
-                current: null,
-                currentRaw: null,
-                currentAbsolute: null,
-                trend: {
-                    value: null,
-                    text: null,
-                },
-                reductionMethod: { value: null, text: null },
-                userOffset: null,
-                calibrationOffset: null,
-            },
-            altimeter: null,
-            heat: null,
-            dewpoint: null,
-            temperature: {
-                in: null,
-                out: null,
-                extra: [null, null, null, null, null, null, null],
-            },
-            leafTemps: [null, null, null, null],
-            soilTemps: [null, null, null, null],
-            humidity: {
-                in: null,
-                out: null,
-                extra: [null, null, null, null, null, null, null],
-            },
-            wind: {
-                current: null,
-                avg: { tenMinutes: null, twoMinutes: null },
-                direction: null,
-                heaviestGust10min: { direction: null, speed: null },
-                chill: null,
-                thsw: null,
-            },
-            rain: {
-                rate: null,
-                storm: null,
-                stormStartDate: null,
-                day: null,
-                month: null,
-                year: null,
-                last15min: null,
-                lastHour: null,
-                last24h: null,
-            },
-            et: { day: null, month: null, year: null },
-            soilMoistures: [null, null, null, null],
-            leafWetnesses: [null, null, null, null],
-            uv: null,
-            solarRadiation: null,
-            transmitterBatteryStatus: null,
-            consoleBatteryVoltage: null,
-            forecast: { iconNumber: null, iconText: null, rule: null },
-            sunrise: null,
-            sunset: null,
-            time: new Date(),
-        };
+    public async getRichRealtimeData(): Promise<RichRealtimeData> {
+        this.checkPortConnection();
+        const richRealtimeRecord: RichRealtimeData = new RichRealtimeData();
 
-        const loopPackage = (await this.getLOOP1()) as any;
-        delete loopPackage["alarms"];
-        delete loopPackage["packageType"];
-        delete loopPackage["nextArchiveRecord"];
-        loopPackage.wind.avg = {
-            tenMinutes: loopPackage.wind.avg,
-            twoMinutes: null,
-        };
+        flatMerge(richRealtimeRecord, await this.getLOOP1());
+        flatMerge(richRealtimeRecord, await this.getLOOP2());
 
-        const loop2Package = (await this.getLOOP2()) as any;
-        delete loop2Package["packageType"];
-        delete loop2Package["graphPointers"];
-
-        merge(RichRealtimeRecord, loopPackage);
-        merge(RichRealtimeRecord, loop2Package);
-
-        return RichRealtimeRecord as RichRealtimeRecord;
+        return richRealtimeRecord;
     }
 }

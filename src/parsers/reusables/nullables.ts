@@ -1,6 +1,4 @@
-import { NullablesCollection } from "../../util/BinaryParser";
-
-const nullables: NullablesCollection = {
+const nullables = {
     uv: [255],
     pressure: [0],
     humidity: [0, 255],
@@ -16,7 +14,7 @@ const nullables: NullablesCollection = {
     leafWetness: [255],
     soilMoisture: [255],
     tempLow: [32767],
-    tempHigh: [-32768]
+    tempHigh: [-32768],
 };
 
 export default nullables;

@@ -1,0 +1,18 @@
+{
+    "entryPoints": [
+        "src/util/index.ts",
+        "src/structures/index.ts",
+        "src/structures/subtypes/index.ts",
+        "src/realtime-data-containers/index.ts",
+        "src/realtime-data-containers/settings/index.ts",
+        "src/realtime-data-containers/events/index.ts",
+        "src/interfaces/index.ts",
+        "src/interfaces/settings/index.ts",
+        "src/interfaces/events/index.ts",
+        "src/units/index.ts",
+        "src/errors/index.ts"
+    ],
+    "out": "docs",
+    "excludeProtected": true,
+    "excludePrivate": true
+}

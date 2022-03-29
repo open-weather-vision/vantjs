@@ -66,15 +66,8 @@ export default class BinaryParser<T extends ParsedObject> {
     }
 
     public parse(buffer: Buffer, offset = 0): T {
-        try {
-            this.offset = offset;
-            return this.parseRecursivly(buffer, this.struct);
-        } catch (err) {
-            throw new ParserError(
-                "Failed to parse data. If this error occurs please contact the developer on github: " +
-                    err
-            );
-        }
+        this.offset = offset;
+        return this.parseRecursivly(buffer, this.struct);
     }
 
     public byteLength(type: Type): number {
@@ -218,7 +211,9 @@ export default class BinaryParser<T extends ParsedObject> {
                 // Check dependency's value
                 if (!keys.includes(dependencyObject.dependsOn))
                     throw new ParserError(
-                        "Invalid parse structure. Property is dependend on unknown property."
+                        "Invalid parse structure. Property is dependent on unknown property: '" +
+                            dependencyObject.dependsOn +
+                            "'"
                     );
                 const dependency = data[dependencyObject.dependsOn];
                 const valueOfDependency = this.isDependencyObject(dependency)

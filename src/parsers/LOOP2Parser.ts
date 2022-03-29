@@ -15,108 +15,93 @@ export default class LOOP2Parser extends BinaryParser<LOOP2> {
         unitTransformers: UnitTransformers
     ) {
         super({
-            pressure: {
-                current: {
-                    type: Type.UINT16,
-                    position: 7,
-                    transform: [
-                        transformers.pressure,
-                        unitTransformers.pressure,
-                    ],
-                    nullables: nullables.pressure,
-                },
-                currentRaw: {
-                    type: Type.INT16,
-                    position: 65,
-                    transform: [
-                        transformers.pressure,
-                        unitTransformers.pressure,
-                    ],
-                },
-                currentAbsolute: {
-                    type: Type.INT16,
-                    position: 67,
-                    transform: [
-                        transformers.pressure,
-                        unitTransformers.pressure,
-                    ],
-                },
-                trend: {
-                    value: {
-                        type: Type.INT8,
-                        position: 3,
-                        transform: [
-                            (value) => {
-                                switch (value) {
-                                    case -60:
-                                    case -20:
-                                    case 0:
-                                    case 20:
-                                    case 60:
-                                        return value;
-                                    default:
-                                        return null;
-                                }
-                            },
-                        ],
+            press: {
+                type: Type.UINT16,
+                position: 7,
+                transform: [transformers.pressure, unitTransformers.pressure],
+                nullables: nullables.pressure,
+            },
+            pressRaw: {
+                type: Type.INT16,
+                position: 65,
+                transform: [transformers.pressure, unitTransformers.pressure],
+            },
+            pressAbs: {
+                type: Type.INT16,
+                position: 67,
+                transform: [transformers.pressure, unitTransformers.pressure],
+            },
+            pressTrendID: {
+                type: Type.INT8,
+                position: 3,
+                transform: [
+                    (value) => {
+                        switch (value) {
+                            case -60:
+                            case -20:
+                            case 0:
+                            case 20:
+                            case 60:
+                                return value;
+                            default:
+                                return null;
+                        }
                     },
-                    text: {
-                        copyof: "value",
-                        transform: [
-                            (value) => {
-                                switch (value) {
-                                    case -60:
-                                        return "Falling Rapidly";
-                                    case -20:
-                                        return "Falling Slowly";
-                                    case 0:
-                                        return "Steady";
-                                    case 20:
-                                        return "Rising Slowly";
-                                    case 60:
-                                        return "Rising Rapidly";
-                                    default:
-                                        return null;
-                                }
-                            },
-                        ],
+                ],
+            },
+            pressTrend: {
+                copyof: "pressTrendID",
+                transform: [
+                    (value) => {
+                        switch (value) {
+                            case -60:
+                                return "Falling Rapidly";
+                            case -20:
+                                return "Falling Slowly";
+                            case 0:
+                                return "Steady";
+                            case 20:
+                                return "Rising Slowly";
+                            case 60:
+                                return "Rising Rapidly";
+                            default:
+                                return null;
+                        }
                     },
-                },
-                reductionMethod: {
-                    value: { type: Type.UINT8, position: 60 },
-                    text: {
-                        copyof: "value",
-                        transform: [
-                            (val) => {
-                                switch (val) {
-                                    case 0:
-                                        return "user offset";
-                                    case 1:
-                                        return "altimeter setting";
-                                    case 2:
-                                        return "NOAA bar reduction";
-                                    default:
-                                        return null;
-                                }
-                            },
-                        ],
+                ],
+            },
+            pressReductionMethodID: { type: Type.UINT8, position: 60 },
+            pressReductionMethod: {
+                copyof: "pressReductionMethodID",
+                transform: [
+                    (val) => {
+                        switch (val) {
+                            case 0:
+                                return "user offset";
+                            case 1:
+                                return "altimeter setting";
+                            case 2:
+                                return "NOAA bar reduction";
+                            default:
+                                return null;
+                        }
                     },
-                },
-                userOffset: {
-                    type: Type.INT16,
-                    position: 61,
-                    transform: [(val) => val / 1000],
-                },
-                calibrationOffset: {
-                    type: Type.INT16,
-                    position: 63,
-                    transform: [(val) => val / 1000],
-                },
-                altimeter: {
-                    type: Type.INT16,
-                    position: 69,
-                    transform: [(val) => val / 1000, unitTransformers.pressure],
-                },
+                ],
+            },
+            pressUserOffset: {
+                type: Type.INT16,
+                position: 61,
+                transform: [(val) => val / 1000],
+            },
+            pressCalibrationOffset: {
+                type: Type.INT16,
+                position: 63,
+                transform: [(val) => val / 1000],
+            },
+            altimeter: {
+                type: Type.INT16,
+                position: 69,
+                transform: [(val) => val / 1000, unitTransformers.pressure],
             },
             heat: {
                 type: Type.INT16,
@@ -130,77 +115,75 @@ export default class LOOP2Parser extends BinaryParser<LOOP2> {
                 nullables: [255],
                 transform: [unitTransformers.temperature],
             },
-            temperature: {
-                in: {
-                    type: Type.INT16,
-                    position: 9,
-                    nullables: nullables.temperature,
-                    transform: [
-                        transformers.temperature,
-                        unitTransformers.temperature,
-                    ],
-                },
-                out: {
-                    type: Type.INT16,
-                    position: 12,
-                    nullables: nullables.temperature,
-                    transform: [
-                        transformers.temperature,
-                        unitTransformers.temperature,
-                    ],
-                },
+            tempIn: {
+                type: Type.INT16,
+                position: 9,
+                nullables: nullables.temperature,
+                transform: [
+                    transformers.temperature,
+                    unitTransformers.temperature,
+                ],
             },
-            humidity: {
-                in: {
-                    type: Type.UINT8,
-                    position: 11,
-                    nullables: nullables.humidity,
-                },
-                out: {
-                    type: Type.UINT8,
-                    position: 33,
-                    nullables: nullables.humidity,
-                },
+            tempOut: {
+                type: Type.INT16,
+                position: 12,
+                nullables: nullables.temperature,
+                transform: [
+                    transformers.temperature,
+                    unitTransformers.temperature,
+                ],
+            },
+            humIn: {
+                type: Type.UINT8,
+                position: 11,
+                nullables: nullables.humidity,
+            },
+            humOut: {
+                type: Type.UINT8,
+                position: 33,
+                nullables: nullables.humidity,
             },
             wind: {
-                current: {
-                    type: Type.UINT8,
-                    position: 14,
-                    transform: [unitTransformers.wind],
-                },
-                avg2min: {
-                    type: Type.UINT16,
-                    position: 20,
-                    transform: [(val) => val / 10, unitTransformers.wind],
-                },
-                avg10min: {
-                    type: Type.UINT16,
-                    position: 18,
-                    transform: [(val) => val / 10, unitTransformers.wind],
-                },
-                direction: {
-                    type: Type.UINT16,
-                    position: 16,
-                    transform: [transformers.windDirection],
-                },
-                heaviestGust10min: {
-                    direction: {
-                        type: Type.UINT16,
-                        position: 24,
-                        transform: [transformers.windDirection],
-                    },
-                    speed: {
-                        type: Type.UINT16,
-                        position: 22,
-                        transform: [unitTransformers.wind],
-                    },
-                },
-                chill: {
-                    type: Type.INT16,
-                    position: 37,
-                    nullables: [255],
-                    transform: [unitTransformers.temperature],
-                },
+                type: Type.UINT8,
+                position: 14,
+                transform: [unitTransformers.wind],
+            },
+            windAvg2m: {
+                type: Type.UINT16,
+                position: 20,
+                transform: [(val) => val / 10, unitTransformers.wind],
+            },
+            windAvg10m: {
+                type: Type.UINT16,
+                position: 18,
+                transform: [(val) => val / 10, unitTransformers.wind],
+            },
+            windDirDeg: {
+                type: Type.UINT16,
+                position: 16,
+            },
+            windDir: {
+                copyof: "windDirDeg",
+                transform: [transformers.windDir],
+            },
+            windGustDirDeg: {
+                type: Type.UINT16,
+                position: 24,
+            },
+            windGustDir: {
+                copyof: "windGustDirDeg",
+                transform: [transformers.windDir],
+            },
+            windGust: {
+                type: Type.UINT16,
+                position: 22,
+                transform: [unitTransformers.wind],
+            },
+            chill: {
+                type: Type.INT16,
+                position: 37,
+                nullables: [255],
+                transform: [unitTransformers.temperature],
             },
             thsw: {
                 type: Type.INT16,
@@ -208,69 +191,48 @@ export default class LOOP2Parser extends BinaryParser<LOOP2> {
                 nullables: [255],
                 transform: [unitTransformers.temperature],
             },
-            rain: {
-                rate: {
-                    type: Type.UINT16,
-                    position: 41,
-                    transform: [
-                        rainClicksToInchTransformer,
-                        unitTransformers.rain,
-                    ],
-                },
-                storm: {
-                    type: Type.UINT16,
-                    position: 46,
-                    transform: [
-                        rainClicksToInchTransformer,
-                        unitTransformers.rain,
-                    ],
-                },
-                stormStartDate: {
-                    type: Type.INT16,
-                    position: 48,
-                    nullables: [-1, 0xffff],
-                    transform: [transformers.stormStartDate],
-                },
-                day: {
-                    type: Type.UINT16,
-                    position: 50,
-                    transform: [
-                        rainClicksToInchTransformer,
-                        unitTransformers.rain,
-                    ],
-                },
-                last15min: {
-                    type: Type.UINT16,
-                    position: 52,
-                    transform: [
-                        rainClicksToInchTransformer,
-                        unitTransformers.rain,
-                    ],
-                },
-                lastHour: {
-                    type: Type.UINT16,
-                    position: 54,
-                    transform: [
-                        rainClicksToInchTransformer,
-                        unitTransformers.rain,
-                    ],
-                },
-                last24h: {
-                    type: Type.UINT16,
-                    position: 58,
-                    transform: [
-                        rainClicksToInchTransformer,
-                        unitTransformers.rain,
-                    ],
-                },
+            rainRate: {
+                type: Type.UINT16,
+                position: 41,
+                transform: [rainClicksToInchTransformer, unitTransformers.rain],
             },
-            et: {
-                day: {
-                    type: Type.UINT16,
-                    position: 56,
-                    nullables: [65535],
-                    transform: [transformers.dayET, unitTransformers.rain],
-                },
+            stormRain: {
+                type: Type.UINT16,
+                position: 46,
+                transform: [rainClicksToInchTransformer, unitTransformers.rain],
+                dependsOn: "stormStartDate",
+            },
+            stormStartDate: {
+                type: Type.INT16,
+                position: 48,
+                nullables: [-1, 0xffff],
+                transform: [transformers.stormStartDate],
+            },
+            rainDay: {
+                type: Type.UINT16,
+                position: 50,
+                transform: [rainClicksToInchTransformer, unitTransformers.rain],
+            },
+            rain15m: {
+                type: Type.UINT16,
+                position: 52,
+                transform: [rainClicksToInchTransformer, unitTransformers.rain],
+            },
+            rain1h: {
+                type: Type.UINT16,
+                position: 54,
+                transform: [rainClicksToInchTransformer, unitTransformers.rain],
+            },
+            rain24h: {
+                type: Type.UINT16,
+                position: 58,
+                transform: [rainClicksToInchTransformer, unitTransformers.rain],
+            },
+            etDay: {
+                type: Type.UINT16,
+                position: 56,
+                nullables: [65535],
+                transform: [transformers.dayET, unitTransformers.rain],
             },
             uv: { type: Type.UINT8, position: 43, nullables: nullables.uv },
             solarRadiation: {

@@ -1,26 +1,51 @@
 import { LOOPPackageType } from "./LOOPPackageType";
+import SimpleRealtimeData from "./SimpleRealtimeData";
 import GraphPointers from "./subtypes/GraphPointers";
-import RainData2 from "./subtypes/RainData2";
-import RichPressureData from "./subtypes/RichPressureData";
-import RichWindData from "./subtypes/RichWindData";
-import SimpleETData from "./subtypes/SimpleETData";
-import SimpleHumidityData from "./subtypes/SimpleHumidityData";
-import SimpleTemperatureData from "./subtypes/SimpleTemperatureData";
 
 /**
  * The newer LOOP2 package used by Rev "B" firmware (dated after April 24, 2002 / v1.90 or above).
  * Older weather stations don't support this package type. The Vantage Pro doesn't support this package at all.
  */
-export default class LOOP2 {
-    /**
-     * @hidden
-     */
-    constructor() {}
+export default class LOOP2 extends SimpleRealtimeData {
+    /** Barometric sensor raw reading */
+    public pressRaw: number | null = null;
+
+    /** Absolute barometric pressure. Equals to the raw sensor ({@link pressRaw}) reading plus user entered offset ({@link pressUserOffset}). */
+    public pressAbs: number | null = null;
 
     /**
-     * Currently measured pressure related weather data
+     * The used barometric reduction method to calculate the ground pressure.
+     * There are three different settings:
+     *  - user offset
+     *  - altimeter setting
+     *  - NOAA bar reduction
      */
-    public pressure = new RichPressureData();
+    public pressReductionMethod:
+        | "user offset"
+        | "altimeter setting"
+        | "NOAA bar reduction"
+        | null = null;
+
+    /**
+     * The used barometric reduction method encoded as number.
+     * `0` is user offset, `1` is altimeter setting and `2` is NOAA bar reduction.
+     */
+    public pressReductionMethodID: 0 | 1 | 2 | null = null;
+
+    /**
+     * The user-entered barometric offset
+     */
+    public pressUserOffset: number | null = null;
+
+    /**
+     * The barometer calibration number
+     */
+    public pressCalibrationOffset: number | null = null;
+
+    /**
+     * The altimeter setting
+     */
+    public altimeter: number | null = null;
 
     /**
      * The measured heat index
@@ -33,43 +58,89 @@ export default class LOOP2 {
     public dewpoint: number | null = null;
 
     /**
-     * Current inside and outside temperature
+     * Average wind speed in the recent two minutes
      */
-    public temperature = new SimpleTemperatureData();
-
-    /** Current inside and outside humidity (relative) in percent  */
-    public humidity = new SimpleHumidityData();
+    public windAvg2m: number | null = null;
 
     /**
-     * Wind related realtime data
+     * Speed of the heaviest gust in the recent 10 minutes
      */
-    public wind = new RichWindData();
+    public windGust: number | null = null;
+
+    /**
+     * The heaviest wind gust's ({@link windGust}) direction encoded as string. Possible values are:
+     * - NNE
+     * - NE
+     * - ENE
+     * - E
+     * - ESE
+     * - SE
+     * - SSE
+     * - S
+     * - SSW
+     * - SW
+     * - WSW
+     * - W
+     * - WNW
+     * - NW
+     * - NNW
+     * - N
+     */
+    public windGustDir:
+        | "NNE"
+        | "NE"
+        | "ENE"
+        | "E"
+        | "ESE"
+        | "SE"
+        | "SSE"
+        | "S"
+        | "SSW"
+        | "SW"
+        | "WSW"
+        | "W"
+        | "WNW"
+        | "NW"
+        | "NNW"
+        | "N"
+        | null
+        | null = null;
+
+    /**
+     * The heaviest wind gust's ({@link windGust}) direction in degrees (from `1` to `360`).
+     * `90°` is East, `180°` is South, `270°`is West and `360°` is North.
+     */
+    public windGustDirDeg: number | null = null;
+
+    /**
+     * The current wind chill
+     */
+    public chill: number | null = null;
 
     /**
      * The currently measured THSW index. Requires a solar radiation sensor.
      */
     public thsw: number | null = null;
-    /**
-     *  Curently measured rain related data
-     */
-    public rain = new RainData2();
 
     /**
-     * Evotranspiration (ET) related data
+     * The amount of rain that has fallen in the recent 15 minutes
      */
-    et = new SimpleETData();
+    public rain15m: number | null = null;
+
     /**
-     * The current UV index
+     * The amount of rain that has fallen in the recent hour
      */
-    uv: number | null = null;
+    public rain1h: number | null = null;
+
     /**
-     * The current solar radiation
+     * The amount of rain that has fallen in the recent 24 hours
      */
-    solarRadiation: number | null = null;
+    public rain24h: number | null = null;
+
     /**
      * The current graph's pointers
      */
-    graphPointers = new GraphPointers();
+    public graphPointers = new GraphPointers();
 
     /**
      * The package type (always "LOOP2")

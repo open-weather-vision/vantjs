@@ -23,7 +23,7 @@ async function main() {
             console.log(
                 weatherData.time.toLocaleString() +
                     ": " +
-                    weatherData.wind.avg10min
+                    weatherData.windAvg10m
             );
         }
     }

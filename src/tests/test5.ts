@@ -9,13 +9,16 @@ async function main() {
     // access data from your weather station
     const simpleRealtimeData = await device.getSimpleRealtimeData();
 
-    
-    console.log("Outside it's " + simpleRealtimeData.temperature.out + " °F");
-    console.log("The wind speed is " + simpleRealtimeData.wind.current + " mph");
-    console.log("The wind direction is " + simpleRealtimeData.wind.direction.abbrevation);
-    console.log("The current rain rate is " + simpleRealtimeData.rain.rate + " in/h");
-    console.log("The current pressure " + simpleRealtimeData.pressure.current + " inHg");
-    console.log("(measured at " + simpleRealtimeData.time.toLocaleString() + ")");
+    console.log("Outside it's " + simpleRealtimeData.tempOut + " °F");
+    console.log("The wind speed is " + simpleRealtimeData.wind + " mph");
+    console.log("The wind direction is " + simpleRealtimeData.windDir);
+    console.log(
+        "The current rain rate is " + simpleRealtimeData.rainRate + " in/h"
+    );
+    console.log("The current pressure " + simpleRealtimeData.press + " inHg");
+    console.log(
+        "(measured at " + simpleRealtimeData.time.toLocaleString() + ")"
+    );
 
     await device.close();
 }

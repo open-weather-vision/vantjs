@@ -15,91 +15,82 @@ export default class LOOP1Parser extends BinaryParser<LOOP1> {
         unitTransformers: UnitTransformers
     ) {
         super({
-            pressure: {
-                current: {
-                    type: Type.UINT16,
-                    position: 7,
-                    transform: [
-                        transformers.pressure,
-                        unitTransformers.pressure,
-                    ],
-                    nullables: nullables.pressure,
-                },
-                trend: {
-                    value: {
-                        type: Type.INT8,
-                        position: 3,
-                        transform: [
-                            (value) => {
-                                switch (value) {
-                                    case -60:
-                                    case -20:
-                                    case 0:
-                                    case 20:
-                                    case 60:
-                                        return value;
-                                    default:
-                                        return null;
-                                }
-                            },
-                        ],
-                    },
-                    text: {
-                        copyof: "value",
-                        transform: [
-                            (value) => {
-                                switch (value) {
-                                    case -60:
-                                        return "Falling Rapidly";
-                                    case -20:
-                                        return "Falling Slowly";
-                                    case 0:
-                                        return "Steady";
-                                    case 20:
-                                        return "Rising Slowly";
-                                    case 60:
-                                        return "Rising Rapidly";
-                                    default:
-                                        return null;
-                                }
-                            },
-                        ],
-                    },
-                },
+            press: {
+                type: Type.UINT16,
+                position: 7,
+                transform: [transformers.pressure, unitTransformers.pressure],
+                nullables: nullables.pressure,
             },
-            temperature: {
-                in: {
-                    type: Type.INT16,
-                    position: 9,
-                    nullables: nullables.temperature,
-                    transform: [
-                        transformers.temperature,
-                        unitTransformers.temperature,
-                    ],
-                },
-                out: {
-                    type: Type.INT16,
-                    position: 12,
-                    nullables: nullables.temperature,
-                    transform: [
-                        transformers.temperature,
-                        unitTransformers.temperature,
-                    ],
-                },
-                extra: [
-                    {
-                        type: Type.UINT8,
-                        position: 18,
-                        nullables: nullables.extraTemp,
-                        transform: [
-                            transformers.extraTemp,
-                            unitTransformers.temperature,
-                        ],
+            pressTrendID: {
+                type: Type.INT8,
+                position: 3,
+                transform: [
+                    (value) => {
+                        switch (value) {
+                            case -60:
+                            case -20:
+                            case 0:
+                            case 20:
+                            case 60:
+                                return value;
+                            default:
+                                return null;
+                        }
                     },
-                    7,
-                    ArrayType.PROPERTY_BASED,
                 ],
             },
+            pressTrend: {
+                copyof: "pressTrendID",
+                transform: [
+                    (value) => {
+                        switch (value) {
+                            case -60:
+                                return "Falling Rapidly";
+                            case -20:
+                                return "Falling Slowly";
+                            case 0:
+                                return "Steady";
+                            case 20:
+                                return "Rising Slowly";
+                            case 60:
+                                return "Rising Rapidly";
+                            default:
+                                return null;
+                        }
+                    },
+                ],
+            },
+            tempIn: {
+                type: Type.INT16,
+                position: 9,
+                nullables: nullables.temperature,
+                transform: [
+                    transformers.temperature,
+                    unitTransformers.temperature,
+                ],
+            },
+            tempOut: {
+                type: Type.INT16,
+                position: 12,
+                nullables: nullables.temperature,
+                transform: [
+                    transformers.temperature,
+                    unitTransformers.temperature,
+                ],
+            },
+            tempExtra: [
+                {
+                    type: Type.UINT8,
+                    position: 18,
+                    nullables: nullables.extraTemp,
+                    transform: [
+                        transformers.extraTemp,
+                        unitTransformers.temperature,
+                    ],
+                },
+                7,
+                ArrayType.PROPERTY_BASED,
+            ],
             leafTemps: [
                 {
                     type: Type.UINT8,
@@ -126,111 +117,92 @@ export default class LOOP1Parser extends BinaryParser<LOOP1> {
                 4,
                 ArrayType.PROPERTY_BASED,
             ],
-            humidity: {
-                in: {
-                    type: Type.UINT8,
-                    position: 11,
-                    nullables: nullables.humidity,
-                },
-                out: {
-                    type: Type.UINT8,
-                    position: 33,
-                    nullables: nullables.humidity,
-                },
-                extra: [
-                    {
-                        type: Type.UINT8,
-                        position: 34,
-                        nullables: nullables.humidity,
-                    },
-                    7,
-                    ArrayType.PROPERTY_BASED,
-                ],
+            humIn: {
+                type: Type.UINT8,
+                position: 11,
+                nullables: nullables.humidity,
             },
+            humOut: {
+                type: Type.UINT8,
+                position: 33,
+                nullables: nullables.humidity,
+            },
+            humExtra: [
+                {
+                    type: Type.UINT8,
+                    position: 34,
+                    nullables: nullables.humidity,
+                },
+                7,
+                ArrayType.PROPERTY_BASED,
+            ],
             wind: {
-                current: {
-                    type: Type.UINT8,
-                    position: 14,
-                    transform: [unitTransformers.wind],
-                },
-                avg10min: {
-                    type: Type.UINT8,
-                    position: 15,
-                    transform: [unitTransformers.wind],
-                },
-                direction: {
-                    type: Type.UINT16,
-                    position: 16,
-                    transform: [transformers.windDirection],
-                },
+                type: Type.UINT8,
+                position: 14,
+                transform: [unitTransformers.wind],
             },
-            rain: {
-                rate: {
-                    type: Type.UINT16,
-                    position: 41,
-                    transform: [
-                        rainClicksToInchTransformer,
-                        unitTransformers.rain,
-                    ],
-                },
-                storm: {
-                    type: Type.UINT16,
-                    position: 46,
-                    transform: [
-                        rainClicksToInchTransformer,
-                        unitTransformers.rain,
-                    ],
-                },
-                stormStartDate: {
-                    type: Type.INT16,
-                    position: 48,
-                    nullables: [-1, 0xffff],
-                    transform: [transformers.stormStartDate],
-                },
-                day: {
-                    type: Type.UINT16,
-                    position: 50,
-                    transform: [
-                        rainClicksToInchTransformer,
-                        unitTransformers.rain,
-                    ],
-                },
-                month: {
-                    type: Type.UINT16,
-                    position: 52,
-                    transform: [
-                        rainClicksToInchTransformer,
-                        unitTransformers.rain,
-                    ],
-                },
-                year: {
-                    type: Type.UINT16,
-                    position: 54,
-                    transform: [
-                        rainClicksToInchTransformer,
-                        unitTransformers.rain,
-                    ],
-                },
+            windAvg10m: {
+                type: Type.UINT8,
+                position: 15,
+                transform: [unitTransformers.wind],
             },
-            et: {
-                day: {
-                    type: Type.UINT16,
-                    position: 56,
-                    nullables: [65535],
-                    transform: [transformers.dayET, unitTransformers.rain],
-                },
-                month: {
-                    type: Type.UINT16,
-                    position: 58,
-                    nullables: [65535],
-                    transform: [transformers.monthET, unitTransformers.rain],
-                },
-                year: {
-                    type: Type.UINT16,
-                    position: 60,
-                    nullables: [255],
-                    transform: [transformers.yearET, unitTransformers.rain],
-                },
+            windDirDeg: {
+                type: Type.UINT16,
+                position: 16,
+            },
+            windDir: {
+                copyof: "windDirDeg",
+                transform: [transformers.windDir],
+            },
+            rainRate: {
+                type: Type.UINT16,
+                position: 41,
+                transform: [rainClicksToInchTransformer, unitTransformers.rain],
+            },
+            rainDay: {
+                type: Type.UINT16,
+                position: 50,
+                transform: [rainClicksToInchTransformer, unitTransformers.rain],
+            },
+            rainMonth: {
+                type: Type.UINT16,
+                position: 52,
+                transform: [rainClicksToInchTransformer, unitTransformers.rain],
+            },
+            rainYear: {
+                type: Type.UINT16,
+                position: 54,
+                transform: [rainClicksToInchTransformer, unitTransformers.rain],
+            },
+            stormRain: {
+                type: Type.UINT16,
+                position: 46,
+                transform: [rainClicksToInchTransformer, unitTransformers.rain],
+                dependsOn: "stormStartDate",
+            },
+            stormStartDate: {
+                type: Type.INT16,
+                position: 48,
+                nullables: [-1, 0xffff],
+                transform: [transformers.stormStartDate],
+            },
+            etDay: {
+                type: Type.UINT16,
+                position: 56,
+                nullables: [65535],
+                transform: [transformers.dayET, unitTransformers.rain],
+            },
+            etMonth: {
+                type: Type.UINT16,
+                position: 58,
+                nullables: [65535],
+                transform: [transformers.monthET, unitTransformers.rain],
+            },
+            etYear: {
+                type: Type.UINT16,
+                position: 60,
+                nullables: [255],
+                transform: [transformers.yearET, unitTransformers.rain],
             },
             soilMoistures: [
                 { type: Type.UINT8, position: 62, nullables: [255] },
@@ -513,63 +485,61 @@ export default class LOOP1Parser extends BinaryParser<LOOP1> {
                 position: 87,
                 transform: [(val) => (val * 300) / 512 / 100],
             },
+            forecastID: {
+                type: Type.INT8,
+                position: 89,
+                transform: [
+                    (val) => {
+                        switch (val) {
+                            case 8:
+                            case 6:
+                            case 2:
+                            case 3:
+                            case 18:
+                            case 19:
+                            case 7:
+                            case 22:
+                            case 23:
+                                return val;
+                            default:
+                                return null;
+                        }
+                    },
+                ],
+            },
             forecast: {
-                iconNumber: {
-                    type: Type.INT8,
-                    position: 89,
-                    transform: [
-                        (val) => {
-                            switch (val) {
-                                case 8:
-                                case 6:
-                                case 2:
-                                case 3:
-                                case 18:
-                                case 19:
-                                case 7:
-                                case 22:
-                                case 23:
-                                    return val;
-                                default:
-                                    return null;
-                            }
-                        },
-                    ],
-                },
-                iconText: {
-                    copyof: "iconNumber",
-                    transform: [
-                        (val) => {
-                            switch (val) {
-                                case 8:
-                                    return "Mostly Clear";
-                                case 6:
-                                    return "Partly Cloudy";
-                                case 2:
-                                    return "Mostly Cloudy";
-                                case 3:
-                                    return "Mostly Cloudy, Rain within 12 hours";
-                                case 18:
-                                    return "Mostly Cloudy, Snow within 12 hours";
-                                case 19:
-                                    return "Mostly Cloudy, Rain or Snow within 12 hours";
-                                case 7:
-                                    return "Partly Cloudy, Rain within 12 hours";
-                                case 22:
-                                    return "Partly Cloudy, Snow within 12 hours";
-                                case 23:
-                                    return "Partly Cloudy, Rain or Snow within 12 hours";
-                                default:
-                                    return null;
-                            }
-                        },
-                    ],
-                },
-                rule: {
-                    type: Type.UINT8,
-                    position: 90,
-                    dependsOn: "iconNumber",
-                },
+                copyof: "forecastID",
+                transform: [
+                    (val) => {
+                        switch (val) {
+                            case 8:
+                                return "Mostly Clear";
+                            case 6:
+                                return "Partly Cloudy";
+                            case 2:
+                                return "Mostly Cloudy";
+                            case 3:
+                                return "Mostly Cloudy, Rain within 12 hours";
+                            case 18:
+                                return "Mostly Cloudy, Snow within 12 hours";
+                            case 19:
+                                return "Mostly Cloudy, Rain or Snow within 12 hours";
+                            case 7:
+                                return "Partly Cloudy, Rain within 12 hours";
+                            case 22:
+                                return "Partly Cloudy, Snow within 12 hours";
+                            case 23:
+                                return "Partly Cloudy, Rain or Snow within 12 hours";
+                            default:
+                                return null;
+                        }
+                    },
+                ],
+            },
+            forecastRule: {
+                type: Type.UINT8,
+                position: 90,
+                dependsOn: "forecastID",
             },
             sunrise: {
                 type: Type.UINT16,

@@ -10,8 +10,7 @@
         "src/interfaces/settings/index.ts",
         "src/interfaces/events/index.ts",
         "src/units/index.ts",
-        "src/errors/index.ts",
-        "src/inherittest/index.ts"
+        "src/errors/index.ts"
     ],
     "out": "docs",
     "excludeProtected": true,

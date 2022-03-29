@@ -1,4 +1,3 @@
-import merge from "lodash.merge";
 import MalformedDataError from "../errors/MalformedDataError";
 import LOOP2Parser from "../parsers/LOOP2Parser";
 import LOOP1Parser from "../parsers/LOOP1Parser";
@@ -7,7 +6,7 @@ import VantInterface from "./VantInterface";
 import UnsupportedDeviceModelError from "../errors/UnsupportedDeviceModelError";
 import { LOOP1, LOOP2 } from "../structures";
 import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSettings";
-import { flatMerge } from "../util";
+import flatMerge from "../util/flatMerge";
 
 /**
  * Interface to the _Vantage Pro 2_ weather station. Is built on top of the {@link VantInterface}.
@@ -172,21 +171,6 @@ export default class VantPro2Interface extends VantInterface {
 
         flatMerge(richRealtimeRecord, await this.getLOOP1());
         flatMerge(richRealtimeRecord, await this.getLOOP2());
-
-        /*
-        const loop1Package = (await this.getLOOP1()) as Partial<LOOP1>;
-
-        delete loop1Package["alarms"];
-        delete loop1Package["packageType"];
-        delete loop1Package["nextArchiveRecord"];
-
-        const loop2Package = (await this.getLOOP2()) as Partial<LOOP2>;
-
-        delete loop2Package["packageType"];
-        delete loop2Package["graphPointers"];
-
-        merge(richRealtimeRecord, loop1Package);
-        merge(richRealtimeRecord, loop2Package);*/
 
         return richRealtimeRecord;
     }

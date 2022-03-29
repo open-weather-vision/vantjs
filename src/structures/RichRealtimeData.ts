@@ -153,12 +153,12 @@ export default class RichRealtimeData
     public consoleBatteryVoltage: number | null = null;
 
     /**
-     * The today's sunrise time (e.g. `06:35`)
+     * The today's sunrise time (e.g. `"06:35"`)
      */
     public sunrise: string | null = null;
 
     /**
-     * The today's sunset time (e.g. `19:35`)
+     * The today's sunset time (e.g. `"19:35"`)
      */
     public sunset: string | null = null;
 

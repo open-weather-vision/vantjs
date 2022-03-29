@@ -2,7 +2,57 @@
     "name": "vantjs",
     "version": "1.0.0",
     "description": "platform independent javascript/typescript interface to Davis Vantage Pro, Pro 2 and Vue",
-    "main": "dist/index.js",
+    "exports": {
+        ".": "./dist/index.js",
+        "./errors": "./dist/errors/index.js",
+        "./interfaces": "./dist/interfaces/index.js",
+        "./interfaces/settings": "./dist/interfaces/settings/index.js",
+        "./interfaces/events": "./dist/interfaces/events/index.js",
+        "./realtime-data-containers": "./dist/realtime-data-containers/index.js",
+        "./realtime-data-containers/settings": "./dist/realtime-data-containers/settings/index.js",
+        "./realtime-data-containers/events": "./dist/realtime-data-containers/events/index.js",
+        "./structures": "./dist/structures/index.js",
+        "./structures/subtypes": "./dist/structures/subtypes/index.js",
+        "./units": "./dist/units/index.js",
+        "./util": "./dist/util/index.js"
+    },
+    "typesVersions": {
+        "*": {
+            "errors": [
+                "dist/errors"
+            ],
+            "interfaces": [
+                "dist/interfaces"
+            ],
+            "interfaces/settings": [
+                "dist/interfaces/settings"
+            ],
+            "interfaces/events": [
+                "dist/interfaces/events"
+            ],
+            "realtime-data-containers": [
+                "dist/realtime-data-containers"
+            ],
+            "realtime-data-containers/settings/": [
+                "dist/realtime-data-containers/settings"
+            ],
+            "realtime-data-containers/events": [
+                "dist/realtime-data-containers/events"
+            ],
+            "structures": [
+                "dist/structures"
+            ],
+            "structures/subtypes": [
+                "dist/structures/subtypes"
+            ],
+            "units": [
+                "dist/units"
+            ],
+            "util": [
+                "dist/util"
+            ]
+        }
+    },
     "types": "dist/index.d.ts",
     "type": "commonjs",
     "scripts": {
@@ -42,7 +92,8 @@
         "serialport": "^10.4.0",
         "source-map-support": "^0.5.21",
         "sprintf-js": "^1.0.3",
-        "tiny-typed-emitter": "^2.1.0"
+        "tiny-typed-emitter": "^2.1.0",
+        "typescript-subpath-exports-workaround": "^1.0.1"
     },
     "devDependencies": {
         "@types/lodash.clonedeep": "^4.5.6",

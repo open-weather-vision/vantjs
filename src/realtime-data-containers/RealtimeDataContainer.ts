@@ -227,7 +227,7 @@ export default abstract class RealtimeDataContainer<
     /**
      * Whether the serial port connection to the console is open.
      */
-    public get isPortOpen() {
+    public isPortOpen() {
         if (!this.currentDevice) {
             return false;
         }
@@ -237,7 +237,7 @@ export default abstract class RealtimeDataContainer<
     /**
      * Whether the realtime data container is running.
      */
-    public get isRunning() {
+    public isRunning() {
         return this.currentUpdateInterval !== null;
     }
 

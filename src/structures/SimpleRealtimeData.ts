@@ -1,5 +1,5 @@
 /**
- * Contains basic realtime weather data. Works regardless of the weather station model (Vue, Pro, Pro 2) and it's firmware version.
+ * Contains basic realtime weather data. Works regardless of the weather station model (Vue, Pro, Pro 2) and its firmware version.
  */
 export default class SimpleRealtimeData {
     /**

@@ -37,6 +37,8 @@ This can be done using the `VantInterface.create()` method. As nearly all method
 
 ```ts
 import { VantInterface } from "vantjs/interfaces";
+// or
+const { VantInterface } = require("vantjs/interfaces");
 
 async function main() {
     const device = await VantInterface.create({
@@ -59,6 +61,7 @@ When creating an interface, specify:
 -   _optional_ `onCreate`: The action automatically to perform on creating the interface (learn more [here](https://harrydehix.github.io/vantjs/interfaces/interfaces_settings.MinimumVantInterfaceSettings.html#units))
 
 The most importing thing to specify is the serial port's path. This defines the channel used to communicate with the weather station.
+
 #### 2. Getting the realtime data
 
 After creating the interface you are ready to retrieve data from your weather station. Let's start simple by getting some `SimpleRealtimeData`.
@@ -71,7 +74,9 @@ const simpleRealtimeData = await device.getSimpleRealtimeData();
 console.log("Outside it's " + simpleRealtimeData.tempOut + " °F");
 console.log("The wind speed is " + simpleRealtimeData.wind + " mph");
 console.log("The wind direction is " + simpleRealtimeData.windDir);
-console.log("The current rain rate is " + simpleRealtimeData.rainRate + " in/h");
+console.log(
+    "The current rain rate is " + simpleRealtimeData.rainRate + " in/h"
+);
 console.log("The current pressure " + simpleRealtimeData.press + " inHg");
 console.log("(measured at " + simpleRealtimeData.time.toLocaleString() + ")");
 ```
@@ -109,9 +114,9 @@ _vantjs_ provides much more than just accessing some simple realtime data.
 
 For example:
 
-- getting daily, monthly and yearly highs and lows
-- getting more - station dependent - realtime weather data
-- repeatedly accessing realtime weather data in a steady interval using realtime data containers
-- and much more...
+-   getting daily, monthly and yearly highs and lows
+-   getting more - station dependent - realtime weather data
+-   repeatedly accessing realtime weather data in a steady interval using realtime data containers
+-   and much more...
 
 To learn more about these topics read its [official documentation](https://harrydehix.github.io/vantjs/).

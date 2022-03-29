@@ -23,8 +23,7 @@ import { OnInterfaceCreate } from "./settings/OnInterfaceCreate";
 import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSettings";
 import { FailedToWakeUpError } from "../errors";
 import SerialPortError from "../errors/SerialPortError";
-import mergeWith from "lodash.mergewith";
-import { flatMerge, inspect } from "../util";
+import flatMerge from "../util/flatMerge";
 
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). Provides useful methods to access realtime weather data from your weather station's
@@ -695,7 +694,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * Returns whether the serial port connection is currently open.
      * @returns whether the serial port connection is currently open
      */
-    public get isPortOpen() {
+    public isPortOpen() {
         return this.port.isOpen;
     }
 }

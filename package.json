@@ -86,6 +86,7 @@
     "dependencies": {
         "@types/serialport": "^8.0.2",
         "crc-full": "^1.1.0",
+        "deep-for-each": "^3.0.0",
         "lodash.clonedeep": "^4.5.0",
         "lodash.merge": "^4.6.2",
         "lodash.mergewith": "^4.6.2",

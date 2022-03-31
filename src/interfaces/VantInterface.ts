@@ -24,6 +24,7 @@ import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSet
 import { FailedToWakeUpError } from "../errors";
 import SerialPortError from "../errors/SerialPortError";
 import flatMerge from "../util/flatMerge";
+import parseLOOP1 from "../parsers/parseLOOP1";
 
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). Provides useful methods to access realtime weather data from your weather station's
@@ -649,10 +650,16 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
+            return parseLOOP1(
+                splittedData.weatherData,
+                this.rainClicksToInchTransformer,
+                this.unitTransformers
+            );
+            /*
             return new LOOP1Parser(
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
-            ).parse(splittedData.weatherData);
+            ).parse(splittedData.weatherData);*/
         } else {
             // LOOP 2 data is splitted (only tested on vantage pro 2)
             const firstPartOfLOOP2 = data;

@@ -32,7 +32,6 @@ const parsed = parse<LOOP2>(buffer, {
     temperature: [
         ArrayParseEntry.create({
             type: Types.INT16_LE,
-            offset: Length.BYTES(0),
             nullables: [3],
             transform: ArrayPipeline((val: number, index) => {
                 return val;
@@ -41,7 +40,6 @@ const parsed = parse<LOOP2>(buffer, {
         {
             length: 4,
             offset: Length.BYTES(0),
-            gap: Length.WORDS(1),
         },
     ],
 });

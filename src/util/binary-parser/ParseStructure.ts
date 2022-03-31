@@ -11,7 +11,6 @@ export class ArrayParseEntry<
     BaseType
 > {
     type?: Type<BaseType>;
-    offset?: Length;
     transform?: TransformFunction<BaseType, TransformResultType, true>;
     nullables?: [null] extends [ArrayType] ? BaseType[] : undefined;
     nullWith?: undefined;
@@ -21,18 +20,15 @@ export class ArrayParseEntry<
     private constructor(
         transform?: TransformFunction<BaseType, TransformResultType, true>,
         type?: Type<BaseType>,
-        offset?: Length,
         nullables?: [null] extends [ArrayType] ? BaseType[] : undefined
     ) {
         this.transform = transform;
         this.type = type;
-        this.offset = offset;
         this.nullables = nullables;
     }
 
     public static create<ArrayType, BaseType extends ArrayType>(options: {
         type: Type<BaseType>;
-        offset: Length;
         nullables?: [null] extends [ArrayType] ? BaseType[] : undefined;
         transform?: undefined;
     }): ArrayParseEntry<ArrayType, any, BaseType>;
@@ -43,7 +39,6 @@ export class ArrayParseEntry<
         BaseType
     >(options: {
         type: Type<BaseType>;
-        offset: Length;
         transform: TransformFunction<BaseType, TransformResultType, true>;
         nullables?: [null] extends [ArrayType] ? BaseType[] : undefined;
     }): ArrayParseEntry<ArrayType, TransformResultType, BaseType>;
@@ -54,14 +49,12 @@ export class ArrayParseEntry<
         BaseType
     >(options: {
         type: Type<BaseType>;
-        offset: Length;
         transform?: TransformFunction<BaseType, TransformResultType, true>;
         nullables?: [null] extends [ArrayType] ? BaseType[] : undefined;
     }) {
         return new ArrayParseEntry(
             options.transform,
             options.type,
-            options.offset,
             options.nullables
         );
     }
@@ -212,22 +205,28 @@ export type RecursiveParseStructure<
               ArrayWithLength<infer ArrayType, infer ArrayLength>
           ]
               ? [ArrayType] extends [Record<string | number | symbol, any>]
-                  ? [
-                        (
-                            | ArrayParseEntry<ArrayType, any, any>
-                            | RecursiveParseStructure<ArrayType, true, false>
-                        ),
-                        {
-                            length: ArrayLength;
-                            gap: Length;
-                            offset: Length;
-                        }
-                    ]
+                  ?
+                        | [
+                              ArrayParseEntry<ArrayType, ArrayType, any>,
+                              {
+                                  length: ArrayLength;
+                                  gap?: Length;
+                                  offset: Length;
+                              }
+                          ]
+                        | [
+                              RecursiveParseStructure<ArrayType, true, false>,
+                              {
+                                  length: ArrayLength;
+                                  gap: Length;
+                                  offset: Length;
+                              }
+                          ]
                   : [
-                        ArrayParseEntry<ArrayType, any, any>,
+                        ArrayParseEntry<ArrayType, ArrayType, any>,
                         {
                             length: ArrayLength;
-                            gap: Length;
+                            gap?: Length;
                             offset: Length;
                         }
                     ]
@@ -237,7 +236,7 @@ export type RecursiveParseStructure<
                     | RecursiveParseStructure<
                           Target[Property],
                           InsideArray,
-                          AllowConstant
+                          true // TODO: Check if this might cause errors
                       >
               : ParseEntry<Target, Property, any, InsideArray>);
 };

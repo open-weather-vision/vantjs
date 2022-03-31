@@ -7,6 +7,7 @@ import UnsupportedDeviceModelError from "../errors/UnsupportedDeviceModelError";
 import { LOOP1, LOOP2 } from "../structures";
 import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSettings";
 import flatMerge from "../util/flatMerge";
+import parseLOOP1 from "../parsers/parseLOOP1";
 
 /**
  * Interface to the _Vantage Pro 2_ weather station. Is built on top of the {@link VantInterface}.
@@ -99,10 +100,15 @@ export default class VantPro2Interface extends VantInterface {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
+            return parseLOOP1(
+                splittedData.weatherData,
+                this.rainClicksToInchTransformer,
+                this.unitTransformers
+            ); /*
             return new LOOP1Parser(
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
-            ).parse(splittedData.weatherData);
+            ).parse(splittedData.weatherData);*/
         } else {
             throw new UnsupportedDeviceModelError(
                 "This weather station doesn't support explicitly querying LOOP (version 1) packages. Try getLOOP2() or getDefaultLOOP()."

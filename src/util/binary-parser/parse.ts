@@ -56,7 +56,15 @@ function parseRecursively<Target extends Record<string | number | symbol, any>>(
                 // Handle ParseEntry.create/ArrayParseEntry.create
 
                 // Calculate byte offset
-                let byteOffset = parseEntry.offset!.bytes;
+                let byteOffset = 0;
+
+                // Add parse entry offset
+                if (propertyValue instanceof ParseEntry) {
+                    byteOffset +=
+                        (propertyValue as ParseEntry<Target, any, any, any>)
+                            .offset?.bytes || 0;
+                }
+
                 if (offset) {
                     byteOffset += offset.bytes;
                 }
@@ -65,31 +73,41 @@ function parseRecursively<Target extends Record<string | number | symbol, any>>(
                     let arrayOffset = arrayIndex;
                     if (arrayGap) {
                         arrayOffset *= arrayGap.bytes;
+                    } else {
+                        // Automatically calculate array gap if no gap is passed (ArrayParseEntry)
+                        arrayOffset *= parseEntry.type!.bytes;
                     }
                     byteOffset += arrayOffset;
                 }
                 resolvedValue = read(buffer, parseEntry.type!, byteOffset);
+            }
 
-                // Null resolved value if it matches a nullable
-                if (parseEntry.nullables) {
-                    for (const nullable of parseEntry.nullables as any[]) {
-                        if (nullable === resolvedValue) {
-                            resolvedValue = null;
-                            break;
-                        }
+            // Null resolved value if it matches a nullable
+            if (parseEntry.nullables) {
+                for (const nullable of parseEntry.nullables as any[]) {
+                    if (nullable === resolvedValue) {
+                        resolvedValue = null;
+                        break;
                     }
                 }
+            }
 
-                // Handle nullWith
-                if (resolvedValue !== null && parseEntry.nullWith) {
-                    resolvedValue = new UnresolvedDependency({
-                        resolvedValue: resolvedValue,
-                        nullWith: parseEntry.nullWith,
-                    });
-                }
+            // Handle nullWith
+            if (resolvedValue !== null && parseEntry.nullWith) {
+                resolvedValue = new UnresolvedDependency({
+                    resolvedValue: resolvedValue,
+                    nullWith: parseEntry.nullWith,
+                });
+            }
 
-                // Push resolved value through transform pipeline if it's not null (!)
-                if (resolvedValue !== null && parseEntry.transform) {
+            // Push resolved value through transform pipeline if it's not null (!)
+            if (resolvedValue !== null && parseEntry.transform) {
+                if (resolvedValue instanceof UnresolvedDependency) {
+                    resolvedValue.resolvedValue = parseEntry.transform(
+                        resolvedValue.resolvedValue,
+                        arrayIndex!
+                    );
+                } else {
                     resolvedValue = parseEntry.transform(
                         resolvedValue,
                         arrayIndex!
@@ -251,7 +269,7 @@ export class UnresolvedDependency<
     PropertyType
 > {
     public readonly nullWith: keyof Target;
-    public readonly resolvedValue: PropertyType;
+    public resolvedValue: PropertyType;
 
     constructor(settings: {
         nullWith: keyof Target;

@@ -22,7 +22,6 @@ export default function (
         tempExtra: [
             ArrayParseEntry.create({
                 type: Types.UINT8,
-                offset: Length.BYTES(0),
                 nullables: nullables.extraTemp,
                 transform: ArrayPipeline(
                     transformers.extraTemp,
@@ -31,14 +30,12 @@ export default function (
             }),
             {
                 length: 7,
-                gap: Length.BYTES(1),
                 offset: Length.BYTES(18),
             },
         ],
         leafTemps: [
             ArrayParseEntry.create({
                 type: Types.UINT8,
-                offset: Length.BYTES(0),
                 nullables: nullables.leafTemp,
                 transform: ArrayPipeline(
                     transformers.leafTemp,
@@ -47,14 +44,12 @@ export default function (
             }),
             {
                 length: 4,
-                gap: Length.BYTES(1),
                 offset: Length.BYTES(29),
             },
         ],
         soilTemps: [
             ArrayParseEntry.create({
                 type: Types.UINT8,
-                offset: Length.BYTES(0),
                 nullables: nullables.soilTemp,
                 transform: ArrayPipeline(
                     transformers.soilTemp,
@@ -63,19 +58,16 @@ export default function (
             }),
             {
                 length: 4,
-                gap: Length.BYTES(1),
                 offset: Length.BYTES(25),
             },
         ],
         humExtra: [
             ArrayParseEntry.create({
                 type: Types.UINT8,
-                offset: Length.BYTES(0),
                 nullables: nullables.humidity,
             }),
             {
                 length: 7,
-                gap: Length.BYTES(1),
                 offset: Length.BYTES(34),
             },
         ],
@@ -110,28 +102,50 @@ export default function (
         soilMoistures: [
             ArrayParseEntry.create({
                 type: Types.UINT8,
-                offset: Length.BYTES(0),
                 nullables: [255],
             }),
             {
                 length: 4,
-                gap: Length.BYTES(1),
                 offset: Length.BYTES(62),
             },
         ],
         leafWetnesses: [
             ArrayParseEntry.create({
                 type: Types.UINT8,
-                offset: Length.BYTES(0),
                 nullables: [255],
             }),
             {
                 length: 4,
-                gap: Length.BYTES(1),
                 offset: Length.BYTES(66),
             },
         ],
-        forecast: null,
+        forecast: ParseEntry.dependsOn({
+            dependsOn: "forecastID",
+            transform: (val) => {
+                switch (val) {
+                    case 8:
+                        return "Mostly Clear";
+                    case 6:
+                        return "Partly Cloudy";
+                    case 2:
+                        return "Mostly Cloudy";
+                    case 3:
+                        return "Mostly Cloudy, Rain within 12 hours";
+                    case 18:
+                        return "Mostly Cloudy, Snow within 12 hours";
+                    case 19:
+                        return "Mostly Cloudy, Rain or Snow within 12 hours";
+                    case 7:
+                        return "Partly Cloudy, Rain within 12 hours";
+                    case 22:
+                        return "Partly Cloudy, Snow within 12 hours";
+                    case 23:
+                        return "Partly Cloudy, Rain or Snow within 12 hours";
+                    default:
+                        return null;
+                }
+            },
+        }),
         forecastID: ParseEntry.create({
             type: Types.INT8,
             offset: Length.BYTES(89),
@@ -162,10 +176,27 @@ export default function (
             offset: Length.BYTES(5),
         }),
         alarms: new AlarmData(),
-        transmitterBatteryStatus: null,
-        consoleBatteryVoltage: null,
-        sunrise: null,
-        sunset: null,
+        transmitterBatteryStatus: ParseEntry.create({
+            type: Types.UINT8,
+            offset: Length.BYTES(86),
+        }),
+        consoleBatteryVoltage: ParseEntry.create({
+            type: Types.UINT16,
+            offset: Length.BYTES(87),
+            transform: (val) => (val * 300) / 512 / 100,
+        }),
+        sunrise: ParseEntry.create({
+            type: Types.UINT16,
+            offset: Length.BYTES(91),
+            nullables: nullables.time,
+            transform: transformers.time,
+        }),
+        sunset: ParseEntry.create({
+            type: Types.UINT16,
+            offset: Length.BYTES(93),
+            nullables: nullables.time,
+            transform: transformers.time,
+        }),
         packageType: LOOPPackageType.LOOP1,
         press: ParseEntry.create({
             type: Types.UINT16,

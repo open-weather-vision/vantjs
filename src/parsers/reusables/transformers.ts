@@ -101,7 +101,7 @@ const transformers = {
                     2
                 )}`;
         }
-        return value;
+        return null;
     },
     hex: (value: number) => `0x${value.toString(16)}`,
     uv: (value: number) => value / 10,

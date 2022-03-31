@@ -40,7 +40,7 @@ async function main() {
         // Getting basic weather data
         console.log("\nBasic weather data: ");
         const basicWeatherData = await device.getSimpleRealtimeData();
-        inspect(basicWeatherData);
+        //inspect(basicWeatherData);
 
         //console.log(await device.isSupportingLOOP2Packages());
 
@@ -52,7 +52,7 @@ async function main() {
         // Getting LOOP1 package
         console.log("\nLOOP1 package: ");
         const LOOP1 = await device.getLOOP1();
-        //inspect(LOOP1);
+        inspect(LOOP1);
 
         // Getting LOOP2 package
         console.log("\nLOOP2 package: ");
@@ -62,7 +62,7 @@ async function main() {
         // Getting a lot of weather data
         console.log("\nA lot of weather data: ");
         const richRealtimeRecord = await device.getRichRealtimeData();
-        inspect(richRealtimeRecord);
+        //inspect(richRealtimeRecord);
 
         await device.close();
     } catch (err) {

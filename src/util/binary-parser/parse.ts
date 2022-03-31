@@ -1,12 +1,18 @@
 import deepForEach from "deep-for-each";
 import numberToBinaryString from "../numberToBinaryString";
 import Length from "./Length";
-import { ArrayParseEntry, ParseEntry, ParseStructure } from "./ParseStructure";
+import {
+    ArrayParseEntry,
+    NotFinishedResult,
+    ParseEntry,
+    ParseStructure,
+    RecursiveParseStructure,
+} from "./ParseStructure";
 import Types, { StringType, Type } from "./Types";
 
 export default function parse<Target>(
     buffer: Buffer,
-    structure: ParseStructure<Target, false, true>,
+    structure: ParseStructure<Target>,
     offset?: Length
 ) {
     return parseRecursively(buffer, structure, undefined, undefined, offset);
@@ -14,12 +20,12 @@ export default function parse<Target>(
 
 function parseRecursively<Target extends Record<string | number | symbol, any>>(
     buffer: Buffer,
-    structure: ParseStructure<Target, any, any>,
+    structure: RecursiveParseStructure<Target, any, any>,
     arrayIndex?: number,
     arrayGap?: Length,
     offset?: Length
 ): Target {
-    const result: Partial<Target> = {};
+    const result: NotFinishedResult<Target> = {};
 
     const properties: (keyof Target)[] = Object.keys(structure);
 
@@ -36,26 +42,21 @@ function parseRecursively<Target extends Record<string | number | symbol, any>>(
         ) {
             const parseEntry = propertyValue as
                 | ParseEntry<Target, any, any, any>
-                | ArrayParseEntry<any, any>;
-            // Handle ParseEntry.copyof
-            if (parseEntry.copyof) {
-                if (result[parseEntry.copyof] === undefined) {
+                | ArrayParseEntry<Target, any, any>;
+
+            if (parseEntry.dependsOn) {
+                // Handle ParseEntry.dependsOn
+                if (result[parseEntry.dependsOn] === undefined) {
                     properties.push(propertyName);
                     continue;
                 } else {
-                    resolvedValue = result[parseEntry.copyof];
+                    resolvedValue = result[parseEntry.dependsOn];
                 }
-                // Handle ParseEntry.create
             } else {
-                // Check if required settings are there
-                if (!parseEntry.type) {
-                    throw new Error(`Missing type at '${propertyName}'!`);
-                }
-                if (!parseEntry.offset) {
-                    throw new Error(`Missing offset at '${propertyName}'!`);
-                }
+                // Handle ParseEntry.create/ArrayParseEntry.create
+
                 // Calculate byte offset
-                let byteOffset = parseEntry.offset.bytes;
+                let byteOffset = parseEntry.offset!.bytes;
                 if (offset) {
                     byteOffset += offset.bytes;
                 }
@@ -67,40 +68,52 @@ function parseRecursively<Target extends Record<string | number | symbol, any>>(
                     }
                     byteOffset += arrayOffset;
                 }
-                resolvedValue = read(buffer, parseEntry.type, byteOffset);
-                // TODO: Nullables (?)
-                // Push resolved value through transform pipeline
-                if (parseEntry.transform) {
-                    for (const transformer of parseEntry.transform) {
-                        resolvedValue = transformer(resolvedValue, arrayIndex!);
+                resolvedValue = read(buffer, parseEntry.type!, byteOffset);
+
+                // Null resolved value if it matches a nullable
+                if (parseEntry.nullables) {
+                    for (const nullable of parseEntry.nullables as any[]) {
+                        if (nullable === resolvedValue) {
+                            resolvedValue = null;
+                            break;
+                        }
                     }
                 }
-                // Mark dependency
-                if (parseEntry.dependsOn) {
+
+                // Handle nullWith
+                if (resolvedValue !== null && parseEntry.nullWith) {
                     resolvedValue = new UnresolvedDependency({
-                        value: resolvedValue,
-                        dependsOn: parseEntry.dependsOn,
+                        resolvedValue: resolvedValue,
+                        nullWith: parseEntry.nullWith,
                     });
                 }
+
+                // Push resolved value through transform pipeline if it's not null (!)
+                if (resolvedValue !== null && parseEntry.transform) {
+                    resolvedValue = parseEntry.transform(
+                        resolvedValue,
+                        arrayIndex!
+                    );
+                }
             }
-            // Handle []
         } else if (
+            // Handle []
             propertyValue instanceof Array &&
             propertyValue.length === 2 &&
             (propertyValue[0] instanceof ArrayParseEntry ||
                 containsParsableData(propertyValue[0]))
         ) {
             const elementStructure = propertyValue[0] as
-                | ArrayParseEntry<any, any>
-                | ParseStructure<any, true, false>;
+                | ArrayParseEntry<any, any, any>
+                | RecursiveParseStructure<any, true, false>;
             const length = propertyValue[1].length as number;
             const gap = propertyValue[1].gap as Length;
             const arrayOffset = propertyValue[1].offset as Length;
 
             resolvedValue = [];
             if (elementStructure instanceof ArrayParseEntry) {
+                // Handle ArrayParseEntry in array [ArrayParseEntry, {}]
                 for (let e = 0; e < length; e++) {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const elementValue = parseRecursively(
                         buffer,
                         { value: elementStructure },
@@ -111,6 +124,7 @@ function parseRecursively<Target extends Record<string | number | symbol, any>>(
                     resolvedValue.push(elementValue);
                 }
             } else {
+                // Handle parse structure in array [{...}, {}]
                 for (let e = 0; e < length; e++) {
                     const parsedEntry = parseRecursively(
                         buffer,
@@ -127,13 +141,12 @@ function parseRecursively<Target extends Record<string | number | symbol, any>>(
                 isPrimitive(propertyValue) ||
                 !containsParsableData(propertyValue)
             ) {
+                // Handle constant assignment
                 resolvedValue = propertyValue;
             } else {
-                const nestedStructure = propertyValue as ParseStructure<
-                    any,
-                    any,
-                    any
-                >;
+                // Handle nested structure {...}
+                const nestedStructure =
+                    propertyValue as RecursiveParseStructure<any, any, any>;
                 resolvedValue = parseRecursively(
                     buffer,
                     nestedStructure,
@@ -146,7 +159,44 @@ function parseRecursively<Target extends Record<string | number | symbol, any>>(
 
         result[propertyName] = resolvedValue;
     }
-    return result as Target;
+    return resolveDependencies(result);
+}
+
+function resolveDependencies<
+    Target extends Record<string | number | symbol, any>
+>(data: NotFinishedResult<Target>): Target {
+    deepForEach(data, (val, key, subject) => {
+        if (val instanceof UnresolvedDependency) {
+            let dependency = subject[val.nullWith];
+            const dependencyGroup = [key, val.nullWith];
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                if (dependency === null) {
+                    dependencyGroup.pop();
+                    for (const key of dependencyGroup) {
+                        subject[key] = null;
+                    }
+                    break;
+                } else if (dependency instanceof UnresolvedDependency) {
+                    if (dependency.nullWith === key) {
+                        for (const key of dependencyGroup) {
+                            subject[key] = subject[key].resolvedValue;
+                        }
+                        break;
+                    }
+                    dependencyGroup.push(dependency.nullWith);
+                    dependency = subject[dependency.nullWith];
+                } else {
+                    dependencyGroup.pop();
+                    for (const key of dependencyGroup) {
+                        subject[key] = subject[key].resolvedValue;
+                    }
+                    break;
+                }
+            }
+        }
+    });
+    return data as Target;
 }
 
 function read<T>(buffer: Buffer, type: Type<T>, byteOffset: number): T {
@@ -196,16 +246,19 @@ function read<T>(buffer: Buffer, type: Type<T>, byteOffset: number): T {
     }
 }
 
-class UnresolvedDependency<
+export class UnresolvedDependency<
     Target extends Record<string | number | symbol, any>,
-    T
+    PropertyType
 > {
-    public readonly dependsOn: keyof Target;
-    public readonly resolvedValue: T;
+    public readonly nullWith: keyof Target;
+    public readonly resolvedValue: PropertyType;
 
-    constructor(settings: { dependsOn: keyof Target; value: T }) {
-        this.dependsOn = settings.dependsOn;
-        this.resolvedValue = settings.value;
+    constructor(settings: {
+        nullWith: keyof Target;
+        resolvedValue: PropertyType;
+    }) {
+        this.nullWith = settings.nullWith;
+        this.resolvedValue = settings.resolvedValue;
     }
 }
 

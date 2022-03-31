@@ -1,55 +1,68 @@
 import { ArrayWithLength } from "./ArrayWithLength";
+import { TransformFunction } from "./BetterPipeline";
 import Length from "./Length";
-import { Pipeline } from "./Pipeline";
-import Types, { Type } from "./Types";
+import { UnresolvedDependency } from "./parse";
+//import { Pipeline } from "./Pipeline";
+import { Type } from "./Types";
 
-export class ArrayParseEntry<ArrayType, BaseType> {
+export class ArrayParseEntry<
+    ArrayType,
+    TransformResultType extends ArrayType,
+    BaseType
+> {
     type?: Type<BaseType>;
     offset?: Length;
-    transform?: Pipeline<BaseType, ArrayType, true>;
-    dependsOn?: keyof ArrayType;
-    copyof?: keyof ArrayType;
+    transform?: TransformFunction<BaseType, TransformResultType, true>;
+    nullables?: [null] extends [ArrayType] ? BaseType[] : undefined;
+    nullWith?: undefined;
+    dependsOn?: undefined;
     private readonly ENTRY_IDENTIFIER = Symbol();
 
     private constructor(
+        transform?: TransformFunction<BaseType, TransformResultType, true>,
         type?: Type<BaseType>,
         offset?: Length,
-        transform?: Pipeline<BaseType, ArrayType, true>,
-        dependsOn?: keyof ArrayType,
-        copyOf?: keyof ArrayType
+        nullables?: [null] extends [ArrayType] ? BaseType[] : undefined
     ) {
+        this.transform = transform;
         this.type = type;
         this.offset = offset;
-        this.transform = transform;
-        this.dependsOn = dependsOn;
-        this.copyof = copyOf;
+        this.nullables = nullables;
     }
 
-    public static create<ArrayType>(blueprint: {
-        type: Type<ArrayType>;
+    public static create<ArrayType, BaseType extends ArrayType>(options: {
+        type: Type<BaseType>;
         offset: Length;
+        nullables?: [null] extends [ArrayType] ? BaseType[] : undefined;
         transform?: undefined;
-    }): ArrayParseEntry<ArrayType, ArrayType>;
+    }): ArrayParseEntry<ArrayType, any, BaseType>;
 
-    public static create<ArrayType, BaseType>(blueprint: {
+    public static create<
+        ArrayType,
+        TransformResultType extends ArrayType,
+        BaseType
+    >(options: {
         type: Type<BaseType>;
         offset: Length;
-        transform: Pipeline<BaseType, ArrayType, true>;
-    }): ArrayParseEntry<ArrayType, BaseType>;
+        transform: TransformFunction<BaseType, TransformResultType, true>;
+        nullables?: [null] extends [ArrayType] ? BaseType[] : undefined;
+    }): ArrayParseEntry<ArrayType, TransformResultType, BaseType>;
 
-    public static create<ArrayType, BaseType>(blueprint: {
+    public static create<
+        ArrayType,
+        TransformResultType extends ArrayType,
+        BaseType
+    >(options: {
         type: Type<BaseType>;
         offset: Length;
-        transform?: Pipeline<BaseType, ArrayType, true>;
-        dependsOn?: keyof ArrayType;
-        copyof?: keyof ArrayType;
+        transform?: TransformFunction<BaseType, TransformResultType, true>;
+        nullables?: [null] extends [ArrayType] ? BaseType[] : undefined;
     }) {
         return new ArrayParseEntry(
-            blueprint.type,
-            blueprint.offset,
-            blueprint.transform,
-            blueprint.dependsOn,
-            blueprint.copyof
+            options.transform,
+            options.type,
+            options.offset,
+            options.nullables
         );
     }
 }
@@ -62,38 +75,68 @@ export class ParseEntry<
 > {
     type?: Type<BaseType>;
     offset?: Length;
-    transform?: Pipeline<BaseType, Target[Property], InsideArray>;
-    dependsOn?: keyof Target;
-    copyof?: keyof Target;
+    transform?: TransformFunction<BaseType, Target[Property], InsideArray>;
+    nullWith?: null extends Target[Property]
+        ? keyof Omit<Target, Property>
+        : undefined;
+    dependsOn?: keyof Omit<Target, Property>;
+    nullables?: null extends Target[Property]
+        ? Exclude<BaseType, null>[]
+        : undefined;
     private readonly ENTRY_IDENTIFIER = Symbol();
 
     private constructor(
         type?: Type<BaseType>,
         offset?: Length,
-        transform?: Pipeline<BaseType, Target[Property], InsideArray>,
-        dependsOn?: keyof Target,
-        copyof?: keyof Target
+        transform?: TransformFunction<BaseType, Target[Property], InsideArray>,
+        nullWith?: null extends Target[Property]
+            ? keyof Omit<Target, Property>
+            : undefined,
+        dependsOn?: keyof Omit<Target, Property>,
+        nullables?: null extends Target[Property]
+            ? Exclude<BaseType, null>[]
+            : undefined
     ) {
         this.type = type;
         this.offset = offset;
         this.transform = transform;
+        this.nullWith = nullWith;
         this.dependsOn = dependsOn;
-        this.copyof = copyof;
+        this.nullables = nullables;
     }
 
-    /**
-     *
-     * @param blueprint
-     */
+    public static create<
+        Target,
+        Property extends keyof Target,
+        BaseType,
+        InsideArray extends true | false
+    >(options: {
+        type: Type<BaseType>;
+        offset: Length;
+        transform: TransformFunction<BaseType, Target[Property], InsideArray>;
+        nullWith?: null extends Target[Property]
+            ? keyof Omit<Target, Property>
+            : undefined;
+        nullables?: null extends Target[Property]
+            ? Exclude<BaseType, null>[]
+            : undefined;
+    }): ParseEntry<Target, Property, BaseType, InsideArray>;
+
     public static create<
         Target,
         Property extends keyof Target,
         BaseType extends Target[Property],
         InsideArray extends true | false
-    >(blueprint: {
+    >(options: {
         type: Type<BaseType>;
         offset: Length;
         transform?: undefined;
+        nullWith?: null extends Target[Property]
+            ? keyof Omit<Target, Property>
+            : undefined;
+        nullables?: null extends Target[Property]
+            ? Exclude<BaseType, null>[]
+            : undefined;
     }): ParseEntry<Target, Property, Target[Property], InsideArray>;
 
     public static create<
@@ -101,71 +144,78 @@ export class ParseEntry<
         Property extends keyof Target,
         BaseType,
         InsideArray extends true | false
-    >(blueprint: {
+    >(options: {
         type: Type<BaseType>;
         offset: Length;
-        transform: Pipeline<BaseType, Target[Property], InsideArray>;
-    }): ParseEntry<Target, Property, BaseType, InsideArray>;
-
-    public static create<
-        Target,
-        Property extends keyof Target,
-        BaseType,
-        InsideArray extends true | false
-    >(blueprint: {
-        type: Type<BaseType>;
-        offset: Length;
-        transform?: Pipeline<BaseType, Target[Property], InsideArray>;
-        dependsOn?: keyof Omit<Target, Property>;
+        transform?: TransformFunction<BaseType, Target[Property], InsideArray>;
+        nullWith?: null extends Target[Property]
+            ? keyof Omit<Target, Property>
+            : undefined;
+        nullables?: null extends Target[Property]
+            ? Exclude<BaseType, null>[]
+            : undefined;
     }) {
         return new ParseEntry(
-            blueprint.type,
-            blueprint.offset,
-            blueprint.transform,
-            blueprint.dependsOn
+            options.type,
+            options.offset,
+            options.transform,
+            options.nullWith,
+            undefined,
+            options.nullables
         );
     }
 
-    public static copyof<
+    public static dependsOn<
         Target,
         Property extends keyof Target,
-        CopyProperty extends keyof Omit<Target, Property>,
+        DependencyProperty extends keyof Omit<Target, Property>,
         InsideArray extends true | false
-    >(blueprint: {
-        copyof: CopyProperty;
-        transform: Pipeline<
-            Target[CopyProperty],
+    >(options: {
+        dependsOn: DependencyProperty;
+        transform: TransformFunction<
+            Target[DependencyProperty],
             Target[Property],
             InsideArray
         >;
-        dependsOn?: keyof Omit<Target, Property>;
+        nullables?: null extends Target[Property]
+            ? Exclude<Target[DependencyProperty], null>[]
+            : undefined;
+        nullWith?: null extends Target[Property]
+            ? keyof Omit<Target, Property>
+            : undefined;
     }) {
         return new ParseEntry(
             undefined,
             undefined,
-            blueprint.transform,
-            blueprint.dependsOn,
-            blueprint.copyof
+            options.transform,
+            options.nullWith,
+            options.dependsOn,
+            options.nullables
         );
     }
 }
 
-export type ParseStructure<
+export type ParseStructure<Target> = RecursiveParseStructure<
+    Target,
+    false,
+    true
+>;
+
+export type RecursiveParseStructure<
     Target,
     InsideArray extends true | false,
     AllowConstant extends true | false
 > = {
     [Property in keyof Target]:
-        | (AllowConstant extends true ? Target[Property] : never)
-        | (Target[Property] extends ArrayWithLength<
-              infer ArraysType,
-              infer ArrayLength
-          >
-              ? ArraysType extends Record<string | number | symbol, any>
+        | ([AllowConstant] extends [true] ? Target[Property] : never)
+        | ([Target[Property]] extends [
+              ArrayWithLength<infer ArrayType, infer ArrayLength>
+          ]
+              ? [ArrayType] extends [Record<string | number | symbol, any>]
                   ? [
                         (
-                            | ArrayParseEntry<ArraysType, any>
-                            | ParseStructure<ArraysType, true, false>
+                            | ArrayParseEntry<ArrayType, any, any>
+                            | RecursiveParseStructure<ArrayType, true, false>
                         ),
                         {
                             length: ArrayLength;
@@ -174,20 +224,32 @@ export type ParseStructure<
                         }
                     ]
                   : [
-                        ArrayParseEntry<ArraysType, any>,
+                        ArrayParseEntry<ArrayType, any, any>,
                         {
                             length: ArrayLength;
                             gap: Length;
                             offset: Length;
                         }
                     ]
-              : Target[Property] extends Record<string, any>
+              : [Target[Property]] extends [Record<string, any>]
               ?
                     | ParseEntry<Target, Property, any, InsideArray>
-                    | ParseStructure<
+                    | RecursiveParseStructure<
                           Target[Property],
                           InsideArray,
                           AllowConstant
                       >
               : ParseEntry<Target, Property, any, InsideArray>);
+};
+
+export type NotFinishedResult<
+    Target extends Record<string | number | symbol, any>
+> = {
+    [Property in keyof Target]?:
+        | undefined
+        | Target[Property]
+        | ([Target[Property]] extends [null]
+              ? UnresolvedDependency<Target, Target[Property]>
+              : undefined)
+        | NotFinishedResult<Target[Property]>;
 };

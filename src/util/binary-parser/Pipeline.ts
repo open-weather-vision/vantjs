@@ -5,15 +5,13 @@ export type Pipeline<
 > = InsideArray extends true
     ?
           | [
-                (val: S, index: number) => unknown,
-                ...Array<(val: unknown, index: number) => unknown>,
-                (val: unknown, index: number) => R
+                (val: S, index: number) => any,
+                ...Array<(val: any, index: number) => any>,
+                (val: any, index: number) => R
             ]
+          | [(val: S, index: number) => any, (val: any, index: number) => R]
           | [(val: S, index: number) => R]
     :
-          | [
-                (val: S) => unknown,
-                ...Array<(val: unknown) => unknown>,
-                (val: unknown) => R
-            ]
+          | [(val: S) => any, ...Array<(val: any) => any>, (val: any) => R]
+          | [(val: S) => any, (val: any) => R]
           | [(val: S) => R];

@@ -63,12 +63,14 @@ const transformerCreators = {
     pressure(targetUnit: "hPa" | "inHg" | "mmHg" | "mb") {
         switch (targetUnit) {
             case "inHg":
-                return (val: number) => val;
+                return (val: number | null) => val;
             case "mb":
             case "hPa":
-                return (val: number) => val * 33.86389;
+                return (val: number | null) =>
+                    val === null ? null : val * 33.86389;
             case "mmHg":
-                return (val: number) => val * 25.4000003000246;
+                return (val: number | null) =>
+                    val === null ? null : val * 25.4000003000246;
         }
     },
 
@@ -84,7 +86,7 @@ export type UnitTransformers = {
     rain: (val: number) => number;
     wind: (val: number) => number;
     temperature: (val: number) => number;
-    pressure: (val: number) => number;
+    pressure: (val: number | null) => number | null;
     solarRadiation: (val: number) => number;
 };
 

@@ -1,1 +1,1 @@
-export type ArrayWithLength<T, L extends number> = Array<T> & { length: L };
+export type ArrayWithLength<T, L extends number> = T[] & { length: L };

@@ -88,6 +88,7 @@
         "crc-full": "^1.1.0",
         "deep-for-each": "^3.0.0",
         "lodash.clonedeep": "^4.5.0",
+        "lodash.flow": "^3.5.0",
         "lodash.merge": "^4.6.2",
         "lodash.mergewith": "^4.6.2",
         "serialport": "^10.4.0",
@@ -98,6 +99,7 @@
     },
     "devDependencies": {
         "@types/lodash.clonedeep": "^4.5.6",
+        "@types/lodash.flow": "^3.5.6",
         "@types/lodash.merge": "^4.6.6",
         "@types/lodash.mergewith": "^4.6.6",
         "@types/node": "^15.14.9",

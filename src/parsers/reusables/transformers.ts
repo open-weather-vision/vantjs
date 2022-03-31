@@ -121,8 +121,8 @@ const transformers = {
         const year = (0x007f & value) + 2000;
         return new Date(`${year}-${month}-${day}`);
     },
-    windDir: (value: number) => {
-        if (value === 0) {
+    windDir: (value: number | null) => {
+        if (value === null) {
             return null;
         }
         return convertWindDirectionDegreesToAbbrevation(value);

@@ -1,3 +1,4 @@
+import merge from "lodash.merge";
 import { LOOP1, LOOPPackageType } from "../structures";
 import { AlarmData } from "../structures/subtypes";
 import {
@@ -18,7 +19,7 @@ export default function (
     rainClicksToInchTransformer: (rainClicks: number) => number,
     unitTransformers: UnitTransformers
 ) {
-    return parse<LOOP1>(buffer, {
+    const parsed = parse<LOOP1>(buffer, {
         tempExtra: [
             ArrayParseEntry.create({
                 type: Types.UINT8,
@@ -175,7 +176,236 @@ export default function (
             type: Types.UINT16,
             offset: Length.BYTES(5),
         }),
-        alarms: new AlarmData(),
+        alarms: {
+            pressure: {
+                falling: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(70),
+                }),
+                rising: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(70).add(Length.BITS(1)),
+                }),
+            },
+            tempIn: {
+                low: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(70).add(Length.BITS(2)),
+                }),
+                high: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(70).add(Length.BITS(3)),
+                }),
+            },
+            humIn: {
+                low: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(70).add(Length.BITS(4)),
+                }),
+                high: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(70).add(Length.BITS(5)),
+                }),
+            },
+            time: ParseEntry.create({
+                type: Types.BOOLEAN,
+                offset: Length.BYTES(70).add(Length.BITS(6)),
+            }),
+            rain: {
+                rate: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(71),
+                }),
+                quarter: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(71).add(Length.BITS(1)),
+                }),
+                daily: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(71).add(Length.BITS(2)),
+                }),
+                stormTotal: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(71).add(Length.BITS(3)),
+                }),
+            },
+            dailyET: ParseEntry.create({
+                type: Types.BOOLEAN,
+                offset: Length.BYTES(71).add(Length.BITS(4)),
+            }),
+            tempOut: {
+                low: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(72),
+                }),
+                high: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(72).add(Length.BITS(1)),
+                }),
+            },
+            wind: {
+                speed: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(72).add(Length.BITS(2)),
+                }),
+                avg: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(72).add(Length.BITS(3)),
+                }),
+            },
+            dewpoint: {
+                low: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(72).add(Length.BITS(4)),
+                }),
+                high: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(72).add(Length.BITS(5)),
+                }),
+            },
+            heat: ParseEntry.create({
+                type: Types.BOOLEAN,
+                offset: Length.BYTES(72).add(Length.BITS(6)),
+            }),
+            chill: ParseEntry.create({
+                type: Types.BOOLEAN,
+                offset: Length.BYTES(72).add(Length.BITS(7)),
+            }),
+            thsw: ParseEntry.create({
+                type: Types.BOOLEAN,
+                offset: Length.BYTES(73),
+            }),
+            solarRadiation: ParseEntry.create({
+                type: Types.BOOLEAN,
+                offset: Length.BYTES(73).add(Length.BITS(1)),
+            }),
+            UV: {
+                dose: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(73).add(Length.BITS(3)),
+                }),
+                enabledAndCleared: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(73).add(Length.BITS(4)),
+                }),
+                high: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(73).add(Length.BITS(2)),
+                }),
+            },
+            humOut: {
+                low: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(74).add(Length.BITS(2)),
+                }),
+                high: ParseEntry.create({
+                    type: Types.BOOLEAN,
+                    offset: Length.BYTES(74).add(Length.BITS(3)),
+                }),
+            },
+            extraTemps: [
+                {
+                    low: ParseEntry.create({
+                        type: Types.BOOLEAN,
+                        offset: Length.BITS(0),
+                    }),
+                    high: ParseEntry.create({
+                        type: Types.BOOLEAN,
+                        offset: Length.BITS(1),
+                    }),
+                },
+                {
+                    gap: Length.BYTES(1),
+                    length: 7,
+                    offset: Length.BYTES(75),
+                },
+            ],
+            extraHums: [
+                {
+                    low: ParseEntry.create({
+                        type: Types.BOOLEAN,
+                        offset: Length.BITS(0),
+                    }),
+                    high: ParseEntry.create({
+                        type: Types.BOOLEAN,
+                        offset: Length.BITS(1),
+                    }),
+                },
+                {
+                    length: 7,
+                    gap: Length.BYTES(1),
+                    offset: Length.BYTES(75).add(Length.BITS(2)),
+                },
+            ],
+            leafWetnesses: [
+                {
+                    low: ParseEntry.create({
+                        type: Types.BOOLEAN,
+                        offset: Length.BITS(0),
+                    }),
+                    high: ParseEntry.create({
+                        type: Types.BOOLEAN,
+                        offset: Length.BITS(1),
+                    }),
+                },
+                {
+                    length: 4,
+                    gap: Length.BYTES(1),
+                    offset: Length.BYTES(82),
+                },
+            ],
+            soilMoistures: [
+                {
+                    low: ParseEntry.create({
+                        type: Types.BOOLEAN,
+                        offset: Length.BITS(0),
+                    }),
+                    high: ParseEntry.create({
+                        type: Types.BOOLEAN,
+                        offset: Length.BITS(1),
+                    }),
+                },
+                {
+                    length: 4,
+                    gap: Length.BYTES(1),
+                    offset: Length.BYTES(82).add(Length.BITS(2)),
+                },
+            ],
+            leafTemps: [
+                {
+                    low: ParseEntry.create({
+                        type: Types.BOOLEAN,
+                        offset: Length.BITS(0),
+                    }),
+                    high: ParseEntry.create({
+                        type: Types.BOOLEAN,
+                        offset: Length.BITS(1),
+                    }),
+                },
+                {
+                    length: 4,
+                    gap: Length.BYTES(1),
+                    offset: Length.BYTES(82).add(Length.BITS(4)),
+                },
+            ],
+            soilTemps: [
+                {
+                    low: ParseEntry.create({
+                        type: Types.BOOLEAN,
+                        offset: Length.BITS(0),
+                    }),
+                    high: ParseEntry.create({
+                        type: Types.BOOLEAN,
+                        offset: Length.BITS(1),
+                    }),
+                },
+                {
+                    length: 4,
+                    gap: Length.BYTES(1),
+                    offset: Length.BYTES(82),
+                },
+            ],
+        },
         transmitterBatteryStatus: ParseEntry.create({
             type: Types.UINT8,
             offset: Length.BYTES(86),
@@ -338,4 +568,5 @@ export default function (
         }),
         time: new Date(),
     });
+    return merge(new LOOP1(), parsed);
 }

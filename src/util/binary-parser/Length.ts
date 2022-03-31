@@ -1,8 +1,16 @@
 export default class Length {
-    public readonly bytes: number;
+    private bytes: number;
 
     private constructor(bytes: number) {
         this.bytes = bytes;
+    }
+
+    public static ZERO() {
+        return new Length(0);
+    }
+
+    public static BITS(bits: number) {
+        return new Length(bits === 0 ? 0 : bits / 8);
     }
 
     public static BYTES(bytes: number) {
@@ -19,5 +27,23 @@ export default class Length {
 
     public static QWORDS(qwords: number) {
         return new Length(qwords * 8);
+    }
+
+    public add(length: Length) {
+        this.bytes += length.bytes;
+        return this;
+    }
+
+    public multiply(factor: number) {
+        this.bytes *= factor;
+        return this;
+    }
+
+    public copy() {
+        return new Length(this.bytes);
+    }
+
+    public getBytes() {
+        return this.bytes;
     }
 }

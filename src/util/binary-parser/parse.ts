@@ -56,30 +56,32 @@ function parseRecursively<Target extends Record<string | number | symbol, any>>(
                 // Handle ParseEntry.create/ArrayParseEntry.create
 
                 // Calculate byte offset
-                let byteOffset = 0;
+                const entryOffset = Length.ZERO();
 
                 // Add parse entry offset
-                if (propertyValue instanceof ParseEntry) {
-                    byteOffset +=
-                        (propertyValue as ParseEntry<Target, any, any, any>)
-                            .offset?.bytes || 0;
+                if (
+                    propertyValue instanceof ParseEntry &&
+                    propertyValue.offset
+                ) {
+                    entryOffset.add(propertyValue.offset);
                 }
 
                 if (offset) {
-                    byteOffset += offset.bytes;
+                    entryOffset.add(offset);
                 }
                 // If inside array, add index * gap
                 if (arrayIndex) {
-                    let arrayOffset = arrayIndex;
+                    let arrayOffset: Length;
                     if (arrayGap) {
-                        arrayOffset *= arrayGap.bytes;
+                        arrayOffset = arrayGap.copy();
                     } else {
                         // Automatically calculate array gap if no gap is passed (ArrayParseEntry)
-                        arrayOffset *= parseEntry.type!.bytes;
+                        arrayOffset = parseEntry.type!.size.copy();
                     }
-                    byteOffset += arrayOffset;
+                    arrayOffset.multiply(arrayIndex);
+                    entryOffset.add(arrayOffset);
                 }
-                resolvedValue = read(buffer, parseEntry.type!, byteOffset);
+                resolvedValue = read(buffer, parseEntry.type!, entryOffset);
             }
 
             // Null resolved value if it matches a nullable
@@ -217,7 +219,7 @@ function resolveDependencies<
     return data as Target;
 }
 
-function read<T>(buffer: Buffer, type: Type<T>, byteOffset: number): T {
+function read<T>(buffer: Buffer, type: Type<T>, offset: Length): T {
     if (type instanceof StringType) {
         throw new Error("Strings are not supported yet!");
         /*return buffer
@@ -228,39 +230,46 @@ function read<T>(buffer: Buffer, type: Type<T>, byteOffset: number): T {
     switch (type.id) {
         case Types.INT8.id:
             // console.log(`Reading INT8 at ${position}`)
-            return buffer.readInt8(byteOffset) as unknown as T;
+            return buffer.readInt8(offset.getBytes()) as unknown as T;
         case Types.INT16_BE.id:
-            // console.log(`Reading INT16_BE at ${byteOffset}`)
-            return buffer.readInt16BE(byteOffset) as unknown as T;
+            // console.log(`Reading INT16_BE at ${offset.getBytes()}`)
+            return buffer.readInt16BE(offset.getBytes()) as unknown as T;
         case Types.INT16_LE.id:
-            // console.log(`Reading INT16_LE at ${byteOffset}`)
-            return buffer.readInt16LE(byteOffset) as unknown as T;
+            // console.log(`Reading INT16_LE at ${offset.getBytes()}`)
+            return buffer.readInt16LE(offset.getBytes()) as unknown as T;
         case Types.INT32_BE.id:
-            // console.log(`Reading INT32_BE at ${byteOffset}`)
-            return buffer.readInt32BE(byteOffset) as unknown as T;
+            // console.log(`Reading INT32_BE at ${offset.getBytes()}`)
+            return buffer.readInt32BE(offset.getBytes()) as unknown as T;
         case Types.INT32_LE.id:
-            // console.log(`Reading INT32_LE at ${byteOffset}`)
-            return buffer.readInt32LE(byteOffset) as unknown as T;
+            // console.log(`Reading INT32_LE at ${offset.getBytes()}`)
+            return buffer.readInt32LE(offset.getBytes()) as unknown as T;
         case Types.UINT8.id:
-            // console.log(`Reading UINT8 at ${byteOffset}`)
-            return buffer.readUInt8(byteOffset) as unknown as T;
+            // console.log(`Reading UINT8 at ${offset.getBytes()}`)
+            return buffer.readUInt8(offset.getBytes()) as unknown as T;
         case Types.UINT16_BE.id:
-            // console.log(`Reading UINT16_BE at ${byteOffset}`)
-            return buffer.readUInt16BE(byteOffset) as unknown as T;
+            // console.log(`Reading UINT16_BE at ${offset.getBytes()}`)
+            return buffer.readUInt16BE(offset.getBytes()) as unknown as T;
         case Types.UINT16_LE.id:
-            // console.log(`Reading UINT16_LE at ${byteOffset}`)
-            return buffer.readUInt16LE(byteOffset) as unknown as T;
+            // console.log(`Reading UINT16_LE at ${offset.getBytes()}`)
+            return buffer.readUInt16LE(offset.getBytes()) as unknown as T;
         case Types.UINT32_BE.id:
-            // console.log(`Reading UINT32_BE at ${byteOffset}`)
-            return buffer.readUInt32BE(byteOffset) as unknown as T;
+            // console.log(`Reading UINT32_BE at ${offset.getBytes()}`)
+            return buffer.readUInt32BE(offset.getBytes()) as unknown as T;
         case Types.UINT32_LE.id:
-            // console.log(`Reading UINT32_LE at ${byteOffset}`)
-            return buffer.readUInt32LE(byteOffset) as unknown as T;
-        default:
-            const bit = Math.round((byteOffset % 1) * 8);
-            const byte = Math.trunc(byteOffset);
-            const byteString = numberToBinaryString(buffer[byte], 8);
+            // console.log(`Reading UINT32_LE at ${offset.getBytes()}`)
+            return buffer.readUInt32LE(offset.getBytes()) as unknown as T;
+        case Types.BOOLEAN.id:
+            let bit = Math.round((offset.getBytes() % 1) * 8);
+            let byte = Math.trunc(offset.getBytes());
+            let byteString = numberToBinaryString(buffer[byte], 8);
+            return (Number(byteString[bit]) === 1) as unknown as T;
+        case Types.BIT.id:
+            bit = Math.round((offset.getBytes() % 1) * 8);
+            byte = Math.trunc(offset.getBytes());
+            byteString = numberToBinaryString(buffer[byte], 8);
             return Number(byteString[bit]) as unknown as T;
+        default:
+            throw new Array("Type not supported!");
     }
 }
 

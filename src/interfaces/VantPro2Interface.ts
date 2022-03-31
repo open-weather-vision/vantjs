@@ -1,6 +1,5 @@
 import MalformedDataError from "../errors/MalformedDataError";
 import LOOP2Parser from "../parsers/LOOP2Parser";
-import LOOP1Parser from "../parsers/LOOP1Parser";
 import RichRealtimeData from "../structures/RichRealtimeData";
 import VantInterface from "./VantInterface";
 import UnsupportedDeviceModelError from "../errors/UnsupportedDeviceModelError";
@@ -104,11 +103,7 @@ export default class VantPro2Interface extends VantInterface {
                 splittedData.weatherData,
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
-            ); /*
-            return new LOOP1Parser(
-                this.rainClicksToInchTransformer,
-                this.unitTransformers
-            ).parse(splittedData.weatherData);*/
+            );
         } else {
             throw new UnsupportedDeviceModelError(
                 "This weather station doesn't support explicitly querying LOOP (version 1) packages. Try getLOOP2() or getDefaultLOOP()."

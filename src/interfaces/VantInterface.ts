@@ -5,7 +5,6 @@ import cloneDeep from "lodash.clonedeep";
 import merge from "lodash.merge";
 
 import HighsAndLowsParser from "../parsers/HighsAndLowsParser";
-import LOOP1Parser from "../parsers/LOOP1Parser";
 import LOOP2Parser from "../parsers/LOOP2Parser";
 
 import MalformedDataError from "../errors/MalformedDataError";
@@ -655,11 +654,6 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
             );
-            /*
-            return new LOOP1Parser(
-                this.rainClicksToInchTransformer,
-                this.unitTransformers
-            ).parse(splittedData.weatherData);*/
         } else {
             // LOOP 2 data is splitted (only tested on vantage pro 2)
             const firstPartOfLOOP2 = data;

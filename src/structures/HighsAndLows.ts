@@ -69,7 +69,7 @@ export default class HighsAndLows {
     public solarRadiation = new ElementHighs();
 
     /**
-     * UV index's daily, monthly and yearly highs and lows
+     * UV index's daily, monthly and yearly highs
      */
     public uv = new ElementHighs();
 

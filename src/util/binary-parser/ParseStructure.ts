@@ -194,6 +194,12 @@ export type ParseStructure<Target> = RecursiveParseStructure<
     true
 >;
 
+export type ArraySettings<ArrayLength extends number> = {
+    length: ArrayLength;
+    gap?: Length;
+    offset: Length;
+};
+
 export type RecursiveParseStructure<
     Target,
     InsideArray extends true | false,
@@ -205,30 +211,16 @@ export type RecursiveParseStructure<
               ArrayWithLength<infer ArrayType, infer ArrayLength>
           ]
               ? [ArrayType] extends [Record<string | number | symbol, any>]
-                  ?
-                        | [
-                              ArrayParseEntry<ArrayType, ArrayType, any>,
-                              {
-                                  length: ArrayLength;
-                                  gap?: Length;
-                                  offset: Length;
-                              }
-                          ]
-                        | [
-                              RecursiveParseStructure<ArrayType, true, false>,
-                              {
-                                  length: ArrayLength;
-                                  gap: Length;
-                                  offset: Length;
-                              }
-                          ]
+                  ? [
+                        (
+                            | ArrayParseEntry<ArrayType, ArrayType, any>
+                            | RecursiveParseStructure<ArrayType, true, false>
+                        ),
+                        ArraySettings<ArrayLength>
+                    ]
                   : [
                         ArrayParseEntry<ArrayType, ArrayType, any>,
-                        {
-                            length: ArrayLength;
-                            gap?: Length;
-                            offset: Length;
-                        }
+                        ArraySettings<ArrayLength>
                     ]
               : [Target[Property]] extends [Record<string, any>]
               ?

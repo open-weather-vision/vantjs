@@ -4,7 +4,7 @@ import { Length, parse, ParseEntry, Types } from "../util/binary-parser";
 import { Pipeline } from "../util/binary-parser/BetterPipeline";
 import nullables from "./reusables/nullables";
 import transformers from "./reusables/transformers";
-import { UnitTransformers } from "./units/unitTransformers";
+import { UnitTransformers } from "./units/createUnitTransformers";
 
 export default function (
     buffer: Buffer,

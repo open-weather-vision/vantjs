@@ -71,7 +71,7 @@ export default class HighsAndLows {
     /**
      * UV index's daily, monthly and yearly highs and lows
      */
-    public uv = new ElementHighsAndLows();
+    public uv = new ElementHighs();
 
     /**
      * Rain rate's hourly, daily, monthly and yearly highs
@@ -81,7 +81,15 @@ export default class HighsAndLows {
     /**
      * Daily, monthly and yearly highs and lows for the extra temperature sensors (up to 7)
      */
-    public extraTemps = [
+    public extraTemps: [
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows
+    ] = [
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
@@ -89,32 +97,50 @@ export default class HighsAndLows {
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
-    ] as const;
+    ];
 
     /**
      * Daily, monthly and yearly highs and lows for the soil temperature sensors (up to 4)
      */
-    public soilTemps = [
+    public soilTemps: [
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows
+    ] = [
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
-    ] as const;
+    ];
 
     /**
      * Daily, monthly and yearly highs and lows for the leaf temperature sensors (up to 4)
      */
-    public leafTemps = [
+    public leafTemps: [
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows
+    ] = [
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
-    ] as const;
+    ];
 
     /**
      * Daily, monthly and yearly highs and lows for the extra humidity sensors (up to 7)
      */
-    public extraHums = [
+    public extraHums: [
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows
+    ] = [
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
@@ -122,25 +148,35 @@ export default class HighsAndLows {
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
-    ] as const;
+    ];
 
     /**
      * Daily, monthly and yearly highs and lows for the soil moisture sensors (up to 4)
      */
-    public soilMoistures = [
+    public soilMoistures: [
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows
+    ] = [
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
-    ] as const;
+    ];
 
     /**
      * Daily, monthly and yearly highs and lows for the leaf wetness sensors (up to 4)
      */
-    public leafWetnesses = [
+    public leafWetnesses: [
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows,
+        ElementHighsAndLows
+    ] = [
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
         new ElementHighsAndLows(),
-    ] as const;
+    ];
 }

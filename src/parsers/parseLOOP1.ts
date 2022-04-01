@@ -10,7 +10,7 @@ import {
 import { ArrayPipeline, Pipeline } from "../util/binary-parser/BetterPipeline";
 import nullables from "./reusables/nullables";
 import transformers from "./reusables/transformers";
-import { UnitTransformers } from "./units/unitTransformers";
+import { UnitTransformers } from "./units/createUnitTransformers";
 
 /**
  * Parses the passed data to LOOP1 package.

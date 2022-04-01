@@ -30,7 +30,7 @@ async function main() {
         // Getting highs and lows
         console.log("\n\nHighs and lows: ");
         const highsAndLows = await device.getHighsAndLows();
-        //inspect(highsAndLows);
+        inspect(highsAndLows);
 
         // Getting default LOOP package
         console.log("\n\nDefault LOOP: ");
@@ -62,7 +62,7 @@ async function main() {
         // Getting a lot of weather data
         console.log("\nA lot of weather data: ");
         const richRealtimeRecord = await device.getRichRealtimeData();
-        inspect(richRealtimeRecord);
+        //inspect(richRealtimeRecord);
 
         await device.close();
     } catch (err) {

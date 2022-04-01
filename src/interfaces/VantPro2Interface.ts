@@ -1,11 +1,10 @@
-import MalformedDataError from "../errors/MalformedDataError";
-import RichRealtimeData from "../structures/RichRealtimeData";
 import VantInterface from "./VantInterface";
-import UnsupportedDeviceModelError from "../errors/UnsupportedDeviceModelError";
-import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSettings";
+
+import { RichRealtimeData } from "../structures";
+import { UnsupportedDeviceModelError, MalformedDataError } from "../errors";
+import { MinimumVantInterfaceSettings } from "./settings";
+import { parseLOOP1, parseLOOP2 } from "../parsers";
 import flatMerge from "../util/flatMerge";
-import parseLOOP1 from "../parsers/parseLOOP1";
-import parseLOOP2 from "../parsers/parseLOOP2";
 
 /**
  * Interface to the _Vantage Pro 2_ weather station. Is built on top of the {@link VantInterface}.

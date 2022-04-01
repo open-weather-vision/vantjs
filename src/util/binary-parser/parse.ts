@@ -75,7 +75,7 @@ function parseRecursively<Target extends Record<string | number | symbol, any>>(
                     if (arrayGap) {
                         arrayOffset = arrayGap.copy();
                     } else {
-                        // Automatically calculate array gap if no gap is passed (ArrayParseEntry)
+                        // Automatically calculate array gap (based on entry type) if no gap is passed
                         arrayOffset = parseEntry.type!.size.copy();
                     }
                     arrayOffset.multiply(arrayIndex);

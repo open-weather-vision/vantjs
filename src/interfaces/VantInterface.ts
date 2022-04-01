@@ -4,26 +4,29 @@ import { TypedEmitter } from "tiny-typed-emitter";
 import cloneDeep from "lodash.clonedeep";
 import merge from "lodash.merge";
 
-import HighsAndLowsParser from "../parsers/HighsAndLowsParser";
-
-import MalformedDataError from "../errors/MalformedDataError";
-import ClosedConnectionError from "../errors/ClosedConnectionError";
 import { SimpleRealtimeData } from "../structures";
-import { createRainClicksToInchTransformer } from "../parsers/units/createRainClicksToInchTransformer";
+import { defaultUnitSettings } from "../units/defaultUnitSettings";
+import { VantInterfaceEvents } from "./events";
 import {
+    VantInterfaceSettings,
+    MinimumVantInterfaceSettings,
+    OnInterfaceCreate,
+} from "./settings";
+import {
+    FailedToWakeUpError,
+    SerialPortError,
+    MalformedDataError,
+    ClosedConnectionError,
+} from "../errors";
+import flatMerge from "../util/flatMerge";
+import {
+    parseHighsAndLows,
+    parseLOOP1,
+    parseLOOP2,
+    createRainClicksToInchTransformer,
     createUnitTransformers,
     UnitTransformers,
-} from "../parsers/units/unitTransformers";
-import { defaultUnitSettings } from "../units/defaultUnitSettings";
-import { VantInterfaceEvents } from "./events/VantInterfaceEvents";
-import { VantInterfaceSettings } from "./settings/VantInterfaceSettings";
-import { OnInterfaceCreate } from "./settings/OnInterfaceCreate";
-import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSettings";
-import { FailedToWakeUpError } from "../errors";
-import SerialPortError from "../errors/SerialPortError";
-import flatMerge from "../util/flatMerge";
-import parseLOOP1 from "../parsers/parseLOOP1";
-import parseLOOP2 from "../parsers/parseLOOP2";
+} from "../parsers";
 
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). Provides useful methods to access realtime weather data from your weather station's
@@ -618,12 +621,11 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
         this.validateCRC(splittedData.weatherData, splittedData.crc);
 
         // Parse data
-        const parsedWeatherData = new HighsAndLowsParser(
+        return parseHighsAndLows(
+            splittedData.weatherData,
             this.rainClicksToInchTransformer,
             this.unitTransformers
-        ).parse(splittedData.weatherData);
-
-        return parsedWeatherData;
+        );
     };
 
     /**

@@ -1,12 +1,11 @@
 import MalformedDataError from "../errors/MalformedDataError";
-import LOOP2Parser from "../parsers/LOOP2Parser";
 import RichRealtimeData from "../structures/RichRealtimeData";
 import VantInterface from "./VantInterface";
 import UnsupportedDeviceModelError from "../errors/UnsupportedDeviceModelError";
-import { LOOP1, LOOP2 } from "../structures";
 import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSettings";
 import flatMerge from "../util/flatMerge";
 import parseLOOP1 from "../parsers/parseLOOP1";
+import parseLOOP2 from "../parsers/parseLOOP2";
 
 /**
  * Interface to the _Vantage Pro 2_ weather station. Is built on top of the {@link VantInterface}.
@@ -145,10 +144,11 @@ export default class VantPro2Interface extends VantInterface {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOP2Parser(
+            return parseLOOP2(
+                splittedData.weatherData,
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
-            ).parse(splittedData.weatherData);
+            );
         } else {
             throw new UnsupportedDeviceModelError(
                 "This weather station doesn't support LOOP2 packages. Try getLOOP() or getDefaultLOOP()."

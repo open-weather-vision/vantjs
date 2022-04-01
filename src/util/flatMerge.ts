@@ -7,6 +7,9 @@
  */
 export default function <T>(target: T, source: any) {
     for (const propertyName in target) {
+        if (propertyName === "constructor") {
+            continue;
+        }
         if (propertyName in source) {
             target[propertyName] = source[propertyName];
         }

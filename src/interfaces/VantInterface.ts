@@ -5,7 +5,6 @@ import cloneDeep from "lodash.clonedeep";
 import merge from "lodash.merge";
 
 import HighsAndLowsParser from "../parsers/HighsAndLowsParser";
-import LOOP2Parser from "../parsers/LOOP2Parser";
 
 import MalformedDataError from "../errors/MalformedDataError";
 import ClosedConnectionError from "../errors/ClosedConnectionError";
@@ -24,6 +23,7 @@ import { FailedToWakeUpError } from "../errors";
 import SerialPortError from "../errors/SerialPortError";
 import flatMerge from "../util/flatMerge";
 import parseLOOP1 from "../parsers/parseLOOP1";
+import parseLOOP2 from "../parsers/parseLOOP2";
 
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). Provides useful methods to access realtime weather data from your weather station's
@@ -668,10 +668,11 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOP2Parser(
+            return parseLOOP2(
+                splittedData.weatherData,
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
-            ).parse(splittedData.weatherData);
+            );
         }
     };
 

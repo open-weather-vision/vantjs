@@ -1,8 +1,6 @@
 import merge from "lodash.merge";
 import { LOOP1, LOOPPackageType } from "../structures";
-import { AlarmData } from "../structures/subtypes";
 import {
-    ParseStructure,
     ArrayParseEntry,
     Types,
     Length,
@@ -14,6 +12,13 @@ import nullables from "./reusables/nullables";
 import transformers from "./reusables/transformers";
 import { UnitTransformers } from "./units/unitTransformers";
 
+/**
+ * Parses the passed data to LOOP1 package.
+ * @param buffer the buffer to parse
+ * @param rainClicksToInchTransformer the transformer used to convert the internally used rain clicks to inch/h
+ * @param unitTransformers the unit transformers to convert the weather data to any desired unit
+ * @returns a LOOP1 package
+ */
 export default function (
     buffer: Buffer,
     rainClicksToInchTransformer: (rainClicks: number) => number,

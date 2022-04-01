@@ -44,7 +44,7 @@ const device = await VantPro2Interface.create({
 
 const realtime = await device.getRichRealtimeData();
 console.log(`It's ${realtime.tempIn} °C`);
-// It's 23.1233 °C
+// Output: It's 23.1233 °C
 ```
 - and more (read the [docs](https://harrydehix.github.io/vantjs/index.html)!)
 

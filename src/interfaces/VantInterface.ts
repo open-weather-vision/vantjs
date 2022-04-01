@@ -701,4 +701,19 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     public isPortOpen() {
         return this.port.isOpen;
     }
+
+    /**
+     * Turns the console's background light off / on. Returns whether the command was executed successful.
+     * @param state whether the background light should be on
+     * @returns whether the command was executed successful
+     */
+    public setBackgroundLight = async (state: boolean): Promise<boolean> => {
+        this.checkPortConnection();
+
+        const answer = await (
+            await this.writeAndWaitForBuffer(`LAMPS ${state ? 1 : 0}\n`)
+        ).toString("utf-8");
+
+        return answer === "\n\rOK\n\r";
+    };
 }

@@ -1,11 +1,9 @@
-import MalformedDataError from "../errors/MalformedDataError";
-import LOOP2Parser from "../parsers/LOOP2Parser";
-import LOOP1Parser from "../parsers/LOOP1Parser";
-import RichRealtimeData from "../structures/RichRealtimeData";
 import VantInterface from "./VantInterface";
-import UnsupportedDeviceModelError from "../errors/UnsupportedDeviceModelError";
-import { LOOP1, LOOP2 } from "../structures";
-import { MinimumVantInterfaceSettings } from "./settings/MinimumVantInterfaceSettings";
+
+import { RichRealtimeData } from "../structures";
+import { UnsupportedDeviceModelError, MalformedDataError } from "../errors";
+import { MinimumVantInterfaceSettings } from "./settings";
+import { parseLOOP1, parseLOOP2 } from "../parsers";
 import flatMerge from "../util/flatMerge";
 
 /**
@@ -99,10 +97,11 @@ export default class VantPro2Interface extends VantInterface {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOP1Parser(
+            return parseLOOP1(
+                splittedData.weatherData,
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
-            ).parse(splittedData.weatherData);
+            );
         } else {
             throw new UnsupportedDeviceModelError(
                 "This weather station doesn't support explicitly querying LOOP (version 1) packages. Try getLOOP2() or getDefaultLOOP()."
@@ -144,10 +143,11 @@ export default class VantPro2Interface extends VantInterface {
             // Check data (crc check)
             this.validateCRC(splittedData.weatherData, splittedData.crc);
 
-            return new LOOP2Parser(
+            return parseLOOP2(
+                splittedData.weatherData,
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
-            ).parse(splittedData.weatherData);
+            );
         } else {
             throw new UnsupportedDeviceModelError(
                 "This weather station doesn't support LOOP2 packages. Try getLOOP() or getDefaultLOOP()."

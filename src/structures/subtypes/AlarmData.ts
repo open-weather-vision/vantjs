@@ -92,7 +92,15 @@ export default class AlarmData {
      * `extraTemps[i].low` is `true` when the low extra temperature alarm for sensor `i` is active,
      * `extraTemps[i].high` is `true` when the high extra temperature alarm for sensor `i` is active.
      */
-    public extraTemps = [
+    public extraTemps: [
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms
+    ] = [
         new HighLowAlarms(),
         new HighLowAlarms(),
         new HighLowAlarms(),
@@ -100,14 +108,22 @@ export default class AlarmData {
         new HighLowAlarms(),
         new HighLowAlarms(),
         new HighLowAlarms(),
-    ] as const;
+    ];
 
     /**
      * Extra humdity alarms (for up to 7 sensors)
      * `extraHums[i].low` is `true` when the low extra humidity alarm for sensor `i` is active,
      * `extraHums[i].high` is `true` when the high extra humidity alarm for sensor `i` is active.
      */
-    public extraHums = [
+    public extraHums: [
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms
+    ] = [
         new HighLowAlarms(),
         new HighLowAlarms(),
         new HighLowAlarms(),
@@ -115,53 +131,73 @@ export default class AlarmData {
         new HighLowAlarms(),
         new HighLowAlarms(),
         new HighLowAlarms(),
-    ] as const;
+    ];
 
     /**
      * Leaf wetness alarms (for up to 4 sensors)
      * `leafWetnesses[i].low` is `true` when the low leaf wetness alarm for sensor `i` is active,
      * `leafWetnesses[i].high` is `true` when the high leaf wetness alarm for sensor `i` is active.
      */
-    public leafWetnesses = [
+    public leafWetnesses: [
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms
+    ] = [
         new HighLowAlarms(),
         new HighLowAlarms(),
         new HighLowAlarms(),
         new HighLowAlarms(),
-    ] as const;
+    ];
 
     /**
      * Soil moisture alarms (for up to 4 sensors)
      * `soilMoistures[i].low` is `true` when the low soil moisture alarm for sensor `i` is active,
      * `soilMoistures[i].high` is `true` when the high soil moisture alarm for sensor `i` is active.
      */
-    public soilMoistures = [
+    public soilMoistures: [
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms
+    ] = [
         new HighLowAlarms(),
         new HighLowAlarms(),
         new HighLowAlarms(),
         new HighLowAlarms(),
-    ] as const;
+    ];
 
     /**
      * Leaf temperature alarms (for up to 4 sensors)
      * `leafTemps[i].low` is `true` when the low leaf temperature alarm for sensor `i` is active,
      * `leafTemps[i].high` is `true` when the high leaf temperature alarm for sensor `i` is active.
      */
-    public leafTemps = [
+    public leafTemps: [
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms
+    ] = [
         new HighLowAlarms(),
         new HighLowAlarms(),
         new HighLowAlarms(),
         new HighLowAlarms(),
-    ] as const;
+    ];
 
     /**
      * Soil temperature alarms (for up to 4 sensors)
      * `soilTemps[i].low` is `true` when the low soil temperature alarm for sensor `i` is active,
      * `soilTemps[i].high` is `true` when the high soil temperature alarm for sensor `i` is active.
      */
-    public soilTemps = [
+    public soilTemps: [
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms,
+        HighLowAlarms
+    ] = [
         new HighLowAlarms(),
         new HighLowAlarms(),
         new HighLowAlarms(),
         new HighLowAlarms(),
-    ] as const;
+    ];
 }

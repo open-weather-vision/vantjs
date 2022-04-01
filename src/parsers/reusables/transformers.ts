@@ -101,7 +101,7 @@ const transformers = {
                     2
                 )}`;
         }
-        return value;
+        return null;
     },
     hex: (value: number) => `0x${value.toString(16)}`,
     uv: (value: number) => value / 10,
@@ -121,8 +121,8 @@ const transformers = {
         const year = (0x007f & value) + 2000;
         return new Date(`${year}-${month}-${day}`);
     },
-    windDir: (value: number) => {
-        if (value === 0) {
+    windDir: (value: number | null) => {
+        if (value === null) {
             return null;
         }
         return convertWindDirectionDegreesToAbbrevation(value);

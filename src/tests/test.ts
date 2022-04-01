@@ -30,12 +30,12 @@ async function main() {
         // Getting highs and lows
         console.log("\n\nHighs and lows: ");
         const highsAndLows = await device.getHighsAndLows();
-        //inspect(highsAndLows);
+        inspect(highsAndLows);
 
         // Getting default LOOP package
         console.log("\n\nDefault LOOP: ");
         const defaultLOOP = await device.getDefaultLOOP();
-        //inspect(defaultLOOP);
+        inspect(defaultLOOP);
 
         // Getting basic weather data
         console.log("\nBasic weather data: ");
@@ -52,12 +52,12 @@ async function main() {
         // Getting LOOP1 package
         console.log("\nLOOP1 package: ");
         const LOOP1 = await device.getLOOP1();
-        //inspect(LOOP1);
+        inspect(LOOP1);
 
         // Getting LOOP2 package
         console.log("\nLOOP2 package: ");
         const LOOP2 = await device.getLOOP2();
-        //inspect(LOOP2);
+        inspect(LOOP2);
 
         // Getting a lot of weather data
         console.log("\nA lot of weather data: ");

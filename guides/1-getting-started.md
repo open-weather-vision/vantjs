@@ -55,9 +55,9 @@ main();
 When creating an interface, specify:
 
 -   **required** `path`: Path to serial port. Defines the channel used to communicate with the weather station.
--   **required** `rainCollectorSize`: You weather station's rain collector size. Possible sizes are `"0.1in"`, `"0.2mm"` and `"0.1mm"`.
+-   **required** `rainCollectorSize`: Your weather station's rain collector size. Possible sizes are `"0.1in"`, `"0.2mm"` and `"0.1mm"`.
 -   _optional_ `baudRate`: The used baud rate (learn more [here](https://harrydehix.github.io/vantjs/interfaces/interfaces_settings.MinimumVantInterfaceSettings.html#baudRate))
--   _optional_ `units`: Your desired unit settings (learn more [here]())
+-   _optional_ `units`: Your desired unit settings (learn more [here](https://harrydehix.github.io/vantjs/modules/units.html#UnitSettings))
 -   _optional_ `onCreate`: The action automatically to perform on creating the interface (learn more [here](https://harrydehix.github.io/vantjs/interfaces/interfaces_settings.MinimumVantInterfaceSettings.html#units))
 
 The most importing thing to specify is the serial port's path. This defines the channel used to communicate with the weather station.

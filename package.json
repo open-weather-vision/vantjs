@@ -1,6 +1,6 @@
 {
     "name": "vantjs",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "platform independent javascript/typescript interface to Davis Vantage Pro, Pro 2 and Vue",
     "exports": {
         ".": "./dist/index.js",
@@ -61,8 +61,7 @@
         "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
         "docs": "npx typedoc --options typedoc.json",
         "watch-docs": "npx typedoc --options typedoc.json --watch",
-        "clear-dist": "rmdir /s dist && npx tsc",
-        "test": "mocha --require ts-node/register --watch-exentsions ts 'test/**/*.ts'"
+        "clear-dist": "rmdir /s dist && npx tsc"
     },
     "repository": {
         "type": "git",

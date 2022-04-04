@@ -62,10 +62,10 @@ export default class VantPro2Interface extends VantInterface {
      */
     public async getFirmwareVersion() {
         this.checkPortConnection();
-        const data = await this.writeAndWaitForBuffer("NVER\n");
+        const data = await this.writeAndWaitForBuffer("NVER\n", 12);
         try {
             const firmwareVersion = data
-                .toString("utf-8")
+                .toString("ascii")
                 .split("OK")[1]
                 .trim();
             return `v${firmwareVersion}`;
@@ -83,31 +83,31 @@ export default class VantPro2Interface extends VantInterface {
      * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      * @throws {@link ParserError} if vantjs failed to parse the data received from the console, this shouldn't happen
      */
-    public async getLOOP1() {
+    public getLOOP1 = async () => {
         this.checkPortConnection();
-        const data = await this.writeAndWaitForBuffer("LPS 1 1\n");
+        const data = await this.writeAndWaitForBuffer("LPS 1 1\n", 100);
 
         // Check ack
         this.validateAcknowledgementByte(data);
 
         const packageType = data.readUInt8(5);
         if (packageType === 0) {
-            const splittedData = this.splitCRCAckDataPackage(data);
+            const splitData = this.splitCRCAckDataPackage(data);
 
             // Check data (crc check)
-            this.validateCRC(splittedData.weatherData, splittedData.crc);
+            this.validateCRC(splitData.data, splitData.crc);
 
             return parseLOOP1(
-                splittedData.weatherData,
+                splitData.data,
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
             );
         } else {
             throw new UnsupportedDeviceModelError(
-                "This weather station doesn't support explicitly querying LOOP (version 1) packages. Try getLOOP2() or getDefaultLOOP()."
+                "This weather station doesn't support explicitly querying LOOP1 packages. Try getDefaultLOOP()."
             );
         }
-    }
+    };
 
     /**
      * Gets the {@link LOOP2} package. Requires firmware dated after April 24, 2002 (v1.90 or above).
@@ -121,30 +121,20 @@ export default class VantPro2Interface extends VantInterface {
      */
     public async getLOOP2() {
         this.checkPortConnection();
-        const data = await this.writeAndWaitForBuffer("LPS 2 1\n");
+        const data = await this.writeAndWaitForBuffer("LPS 2 1\n", 100);
 
         // Check ack
         this.validateAcknowledgementByte(data);
 
         const packageType = data.readUInt8(5);
         if (packageType !== 0) {
-            // LOOP 2 data is splitted (only tested on vantage pro 2)
-            const firstPartOfLOOP2 = data;
-
-            const secondPartOfLOOP2 = await this.waitForBuffer();
-
-            const dataFull = Buffer.concat([
-                firstPartOfLOOP2,
-                secondPartOfLOOP2,
-            ]);
-
-            const splittedData = this.splitCRCAckDataPackage(dataFull);
+            const splitData = this.splitCRCAckDataPackage(data);
 
             // Check data (crc check)
-            this.validateCRC(splittedData.weatherData, splittedData.crc);
+            this.validateCRC(splitData.data, splitData.crc);
 
             return parseLOOP2(
-                splittedData.weatherData,
+                splitData.data,
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
             );

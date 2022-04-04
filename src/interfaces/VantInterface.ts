@@ -27,6 +27,7 @@ import {
     createUnitTransformers,
     UnitTransformers,
 } from "../parsers";
+import createBuffer, { TypedValue, Types } from "../util/buffer/BufferCreator";
 
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). Provides useful methods to access realtime weather data from your weather station's
@@ -338,69 +339,43 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     }
 
     /**
-     * Writes the passed data to the output stream ({@link port}) and waits for the passed event
-     * to occurr.
-     * @param chunk the data to write to the output stream
-     * @param event the event to wait for
-     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
-     * @hidden
+     * Write the passed data to the serialport and waits for a buffer with the passed byte size. If the data is received in split packages, the data gets concatenated.
+     * @param chunk the data to write to the serialport
+     * @param expectedBufferSize the expected byte size of the buffer
+     * @returns the buffer having the expected size
      */
-    protected writeAndWaitForEvent = (chunk: any, event: string) => {
-        return new Promise<void>((resolve, reject) => {
-            const listener = (err: Error) => {
-                reject(new SerialPortError(err));
-            };
-            this.port.once("error", listener);
-            this.port.write(chunk, (err) => {
-                if (err) {
-                    this.port.removeListener("error", listener);
-                    reject(new SerialPortError(err));
-                } else {
-                    this.port.once(event, () => {
-                        this.port.removeListener("error", listener);
-                        resolve();
-                    });
-                }
-            });
-        });
-    };
-
-    /**
-     * Writes the passed data to the output stream ({@link port}) and waits for an incoming buffer.
-     * @param chunk the data to write to the output stream
-     * @returns the incoming buffer
-     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
-     * @hidden
-     */
-    protected writeAndWaitForBuffer = (chunk: any) => {
+    protected writeAndWaitForBuffer = (
+        chunk: any,
+        expectedBufferSize: number
+    ) => {
         return new Promise<Buffer>((resolve, reject) => {
-            const listener = (err: Error) => {
+            let dataListener: (data: Buffer) => void;
+
+            const errorListener = (err: Error) => {
+                this.port.removeListener("data", dataListener);
                 reject(new SerialPortError(err));
             };
-            this.port.once("error", listener);
+
+            this.port.once("error", errorListener);
             this.port.write(chunk, (err) => {
                 if (err) {
-                    this.port.removeListener("error", listener);
+                    this.port.removeListener("error", errorListener);
                     reject(new SerialPortError(err));
                 } else {
-                    this.port.once("data", (data: Buffer) => {
-                        this.port.removeListener("error", listener);
-                        resolve(data);
-                    });
-                }
-            });
-        });
-    };
+                    let buffer: Buffer = Buffer.alloc(0);
 
-    /**
-     * Waits for an incoming buffer.
-     * @returns the incoming buffer
-     * @hidden
-     */
-    protected waitForBuffer = () => {
-        return new Promise<Buffer>((resolve) => {
-            this.port.once("data", (data: Buffer) => {
-                resolve(data);
+                    dataListener = (data: Buffer) => {
+                        buffer = Buffer.concat([buffer, data]);
+
+                        if (buffer.byteLength >= expectedBufferSize) {
+                            this.port.removeListener("error", errorListener);
+                            this.port.removeListener("data", dataListener);
+                            resolve(buffer);
+                        }
+                    };
+
+                    this.port.on("data", dataListener);
+                }
             });
         });
     };
@@ -418,12 +393,25 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
             buffer.copy(bufferCopy, 0, 1, buffer.length - 2);
             return {
                 ack: buffer.readUInt8(0),
-                weatherData: bufferCopy,
+                data: bufferCopy,
                 crc: buffer.readUInt16BE(buffer.length - 2),
             };
         } catch (err: any) {
             throw new MalformedDataError(
                 "Received malformed data! Failed to split the received buffer: " +
+                    err.message
+            );
+        }
+    };
+
+    protected removeAcknowledgementByte = (buffer: Buffer) => {
+        try {
+            const bufferCopy = Buffer.alloc(buffer.length - 1);
+            buffer.copy(bufferCopy, 0, 1, buffer.length);
+            return bufferCopy;
+        } catch (err: any) {
+            throw new MalformedDataError(
+                "Received malformed data! Failed to remove acknowledgement byte: " +
                     err.message
             );
         }
@@ -528,9 +516,8 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
         let succeeded = false;
         let tries = 0;
         do {
-            await this.writeAndWaitForEvent("\n", "readable");
-            const response = String.raw`${this.port.read()}`;
-            if (response === "\n\r") {
+            const data = await this.writeAndWaitForBuffer("\n", 2);
+            if (data.toString("ascii") === "\n\r") {
                 this.emit("awakening");
                 succeeded = true;
             } else {
@@ -552,8 +539,8 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      */
     public validateConnection = async () => {
         this.checkPortConnection();
-        const data = await this.writeAndWaitForBuffer("TEST\n");
-        return data.toString("utf-8", 2, 6) === "TEST";
+        const data = await this.writeAndWaitForBuffer("TEST\n", 8);
+        return data.toString("ascii").includes("TEST");
     };
 
     /**
@@ -566,9 +553,9 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      */
     public getFirmwareDateCode = async () => {
         this.checkPortConnection();
-        const data = await this.writeAndWaitForBuffer("VER\n");
+        const data = await this.writeAndWaitForBuffer("VER\n", 19);
         try {
-            return data.toString("utf-8").split("OK")[1].trim();
+            return data.toString("ascii").split("OK")[1].trim();
         } catch (err) {
             throw new MalformedDataError("Received malformed data");
         }
@@ -610,19 +597,19 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      */
     public getHighsAndLows = async () => {
         this.checkPortConnection();
-        const data = await this.writeAndWaitForBuffer("HILOWS\n");
+        const data = await this.writeAndWaitForBuffer("HILOWS\n", 439);
 
         // Check acknowledgment byte
         this.validateAcknowledgementByte(data);
 
-        const splittedData = this.splitCRCAckDataPackage(data);
+        const splitData = this.splitCRCAckDataPackage(data);
 
         // Check data (crc check)
-        this.validateCRC(splittedData.weatherData, splittedData.crc);
+        this.validateCRC(splitData.data, splitData.crc);
 
         // Parse data
         return parseHighsAndLows(
-            splittedData.weatherData,
+            splitData.data,
             this.rainClicksToInchTransformer,
             this.unitTransformers
         );
@@ -640,38 +627,30 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      */
     public getDefaultLOOP = async () => {
         this.checkPortConnection();
-        const data = await this.writeAndWaitForBuffer("LOOP 1\n");
+        const data = await this.writeAndWaitForBuffer("LOOP 1\n", 100);
         // Check ack
         this.validateAcknowledgementByte(data);
 
         const packageType = data.readUInt8(5);
         if (packageType === 0) {
-            const splittedData = this.splitCRCAckDataPackage(data);
+            const splitData = this.splitCRCAckDataPackage(data);
 
             // Check data (crc check)
-            this.validateCRC(splittedData.weatherData, splittedData.crc);
+            this.validateCRC(splitData.data, splitData.crc);
 
             return parseLOOP1(
-                splittedData.weatherData,
+                splitData.data,
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
             );
         } else {
-            // LOOP 2 data is splitted (only tested on vantage pro 2)
-            const firstPartOfLOOP2 = data;
-
-            const secondPartOfLOOP2 = await this.waitForBuffer();
-            const dataFull = Buffer.concat([
-                firstPartOfLOOP2,
-                secondPartOfLOOP2,
-            ]);
-            const splittedData = this.splitCRCAckDataPackage(dataFull);
+            const splitData = this.splitCRCAckDataPackage(data);
 
             // Check data (crc check)
-            this.validateCRC(splittedData.weatherData, splittedData.crc);
+            this.validateCRC(splitData.data, splitData.crc);
 
             return parseLOOP2(
-                splittedData.weatherData,
+                splitData.data,
                 this.rainClicksToInchTransformer,
                 this.unitTransformers
             );
@@ -706,14 +685,114 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * Turns the console's background light off / on. Returns whether the command was executed successful.
      * @param state whether the background light should be on
      * @returns whether the command was executed successful
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link MalformedDataError} if the data received from the console is malformed
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
     public setBackgroundLight = async (state: boolean): Promise<boolean> => {
         this.checkPortConnection();
 
-        const answer = await (
-            await this.writeAndWaitForBuffer(`LAMPS ${state ? 1 : 0}\n`)
-        ).toString("utf-8");
+        const data = await this.writeAndWaitForBuffer(
+            `LAMPS ${state ? 1 : 0}\n`,
+            6
+        );
 
-        return answer === "\n\rOK\n\r";
+        return data.toString("ascii") === "\n\rOK\n\r";
+    };
+
+    /**
+     *
+     * @returns
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link MalformedDataError} if the data received from the console is malformed
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     */
+    public getWeatherstationType = async (): Promise<
+        | "Wizard III"
+        | "Wizard II"
+        | "Monitor"
+        | "Perception"
+        | "GroWeather"
+        | "Energy Enviromontor"
+        | "Health Enviromonitor"
+        | "Vantage Pro / Pro 2"
+        | "Vantage Vue"
+    > => {
+        const typeID = await this.getWeatherstationTypeID();
+
+        switch (typeID) {
+            case 0:
+                return "Wizard III";
+            case 1:
+                return "Wizard II";
+            case 2:
+                return "Monitor";
+            case 3:
+                return "Perception";
+            case 4:
+                return "GroWeather";
+            case 5:
+                return "Energy Enviromontor";
+            case 6:
+                return "Health Enviromonitor";
+            case 16:
+                return "Vantage Pro / Pro 2";
+            case 17:
+                return "Vantage Vue";
+        }
+    };
+
+    /**
+     * Gets the backward compatible weather station type. Use {@link getWeatherstationType} to get the type as string.
+     * - `0` => Wizard III
+     * - `1` => Wizard II
+     * - `2` => Monitor
+     * - `3` => Perception
+     * - `4` => GroWeather
+     * - `5` => Energy Enviromontor
+     * - `6` => Health Enviromonitor
+     * - `16` => Vantage Pro / Pro 2
+     * - `17` => Vantage Vue
+     * @returns the backward compatible weather station type
+     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * @throws {@link MalformedDataError} if the data received from the console is malformed
+     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     */
+    public getWeatherstationTypeID = async (): Promise<
+        0 | 1 | 2 | 3 | 4 | 5 | 6 | 16 | 17
+    > => {
+        this.checkPortConnection();
+
+        const data = await this.writeAndWaitForBuffer(
+            createBuffer(
+                new TypedValue("WRD", Types.STRING_ASCII),
+                new TypedValue(0x12, Types.UINT8),
+                new TypedValue(0x4d, Types.UINT8),
+                new TypedValue("\n", Types.STRING_ASCII)
+            ),
+            2
+        );
+
+        this.validateAcknowledgementByte(data);
+
+        const dataWithoutAck = this.removeAcknowledgementByte(data);
+        const typeID = dataWithoutAck.readUInt8();
+
+        switch (typeID) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 16:
+            case 17:
+                return typeID;
+            default:
+                throw new MalformedDataError(
+                    "Received unknown weather station type!"
+                );
+        }
     };
 }

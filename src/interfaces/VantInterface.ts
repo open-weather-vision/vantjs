@@ -701,8 +701,17 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     };
 
     /**
-     *
-     * @returns
+     * Gets the backwards compatible weather station type as string.
+     * - Wizard III
+     * - Wizard II
+     * - Monitor
+     * - Perception
+     * - GroWeather
+     * - Energy Enviromontor
+     * - Health Enviromonitor
+     * - Vantage Pro / Pro 2
+     * - Vantage Vue
+     * @returns the backwards compatible weather station type
      * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
      * @throws {@link MalformedDataError} if the data received from the console is malformed
      * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
@@ -743,7 +752,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     };
 
     /**
-     * Gets the backward compatible weather station type. Use {@link getWeatherstationType} to get the type as string.
+     * Gets the backwards compatible weather station type. Use {@link getWeatherstationType} to get the type as string.
      * - `0` => Wizard III
      * - `1` => Wizard II
      * - `2` => Monitor
@@ -753,7 +762,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
      * - `6` => Health Enviromonitor
      * - `16` => Vantage Pro / Pro 2
      * - `17` => Vantage Vue
-     * @returns the backward compatible weather station type
+     * @returns the backwards compatible weather station type
      * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
      * @throws {@link MalformedDataError} if the data received from the console is malformed
      * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)

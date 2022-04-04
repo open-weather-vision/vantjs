@@ -137,57 +137,66 @@
                         </p>
 
                         <a
+                            href="#features"
+                            id="features"
+                            style="color: inherit; text-decoration: none"
+                        >
+                            <h1>Features</h1>
+                        </a>
+                        <ul>
+                            <li>
+                                Getting
+                                <strong>hourly, daily, monthly</strong> and
+                                <strong>yearly highs and lows</strong> (read
+                                more
+                                <a
+                                    href="https://harrydehix.github.io/vantjs/classes/structures.HighsAndLows.html"
+                                    >here</a
+                                >)
+                            </li>
+                        </ul>
+                        <pre><code class="language-ts"><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">highsAndLows</span><span class="hl-1"> = </span><span class="hl-3">await</span><span class="hl-1"> </span><span class="hl-4">device</span><span class="hl-1">.</span><span class="hl-5">getHighsAndLows</span><span class="hl-1">();</span><br/><br/><span class="hl-4">console</span><span class="hl-1">.</span><span class="hl-5">log</span><span class="hl-1">(</span><br/><span class="hl-1">    </span><span class="hl-6">`Todays minimum temperature was </span><span class="hl-0">${</span><span class="hl-4">highsAndLows</span><span class="hl-7">.</span><span class="hl-4">tempOut</span><span class="hl-7">.</span><span class="hl-4">day</span><span class="hl-7">.</span><span class="hl-4">low</span><span class="hl-0">}</span><span class="hl-6"> °F!`</span><br/><span class="hl-1">);</span><br/><span class="hl-8">// Output: Today&#39;s minimum temperature was 25.3 °F!</span><br/><br/><span class="hl-4">console</span><span class="hl-1">.</span><span class="hl-5">log</span><span class="hl-1">(</span><br/><span class="hl-1">    </span><span class="hl-6">`The maximum rain rate in the current hour was </span><span class="hl-0">${</span><span class="hl-4">highsAndLows</span><span class="hl-7">.</span><span class="hl-4">rainRate</span><span class="hl-7">.</span><span class="hl-4">hour</span><span class="hl-0">}</span><span class="hl-6"> in/h!`</span><br/><span class="hl-1">);</span><br/><span class="hl-8">// Output: The maximum rain rate in the current hour was 0.2 in/h!</span>
+</code></pre>
+                        <ul>
+                            <li>
+                                Getting
+                                <strong>realtime weather data</strong> (read
+                                more
+                                <a
+                                    href="https://harrydehix.github.io/vantjs/classes/structures.RichRealtimeData.html"
+                                    >here</a
+                                >)
+                            </li>
+                        </ul>
+                        <pre><code class="language-ts"><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">realtime</span><span class="hl-1"> = </span><span class="hl-3">await</span><span class="hl-1"> </span><span class="hl-4">device</span><span class="hl-1">.</span><span class="hl-5">getRichRealtimeData</span><span class="hl-1">();</span><br/><br/><span class="hl-4">console</span><span class="hl-1">.</span><span class="hl-5">log</span><span class="hl-1">(</span><span class="hl-6">`Currently it&#39;s </span><span class="hl-0">${</span><span class="hl-4">realtime</span><span class="hl-7">.</span><span class="hl-4">tempOut</span><span class="hl-0">}</span><span class="hl-6"> °F!`</span><span class="hl-1">);</span><br/><span class="hl-8">// Output: Currently it&#39;s 45.2 °F!</span><br/><br/><span class="hl-4">console</span><span class="hl-1">.</span><span class="hl-5">log</span><span class="hl-1">(</span><br/><span class="hl-1">    </span><span class="hl-6">`The wind blows from </span><span class="hl-0">${</span><span class="hl-4">realtime</span><span class="hl-7">.</span><span class="hl-4">windDir</span><span class="hl-0">}</span><span class="hl-6"> with an average speed of </span><span class="hl-0">${</span><span class="hl-4">realtime</span><span class="hl-7">.</span><span class="hl-4">windAvg10m</span><span class="hl-0">}</span><span class="hl-6"> mph!`</span><br/><span class="hl-1">);</span><br/><span class="hl-8">// Output: The wind blows from SW with an average speed of 23.12 mph!</span>
+</code></pre>
+                        <ul>
+                            <li>
+                                <strong>Converting</strong> the weather data
+                                automatically to the
+                                <strong>desired units</strong>
+                            </li>
+                        </ul>
+                        <pre><code class="language-ts"><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">device</span><span class="hl-1"> = </span><span class="hl-3">await</span><span class="hl-1"> </span><span class="hl-4">VantPro2Interface</span><span class="hl-1">.</span><span class="hl-5">create</span><span class="hl-1">({</span><br/><span class="hl-1">    </span><span class="hl-4">units:</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-4">temperature:</span><span class="hl-1"> </span><span class="hl-6">&quot;°C&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">        </span><span class="hl-4">wind:</span><span class="hl-1"> </span><span class="hl-6">&quot;km/h&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">        </span><span class="hl-4">rain:</span><span class="hl-1"> </span><span class="hl-6">&quot;mm&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">        ...</span><br/><span class="hl-1">    },</span><br/><span class="hl-1">    ....</span><br/><span class="hl-1">});</span><br/><br/><span class="hl-0">const</span><span class="hl-1"> </span><span class="hl-2">realtime</span><span class="hl-1"> = </span><span class="hl-3">await</span><span class="hl-1"> </span><span class="hl-4">device</span><span class="hl-1">.</span><span class="hl-5">getRichRealtimeData</span><span class="hl-1">();</span><br/><span class="hl-4">console</span><span class="hl-1">.</span><span class="hl-5">log</span><span class="hl-1">(</span><span class="hl-6">`It&#39;s </span><span class="hl-0">${</span><span class="hl-4">realtime</span><span class="hl-7">.</span><span class="hl-4">tempIn</span><span class="hl-0">}</span><span class="hl-6"> °C`</span><span class="hl-1">);</span><br/><span class="hl-8">// Output: It&#39;s 23.1233 °C</span>
+</code></pre>
+                        <ul>
+                            <li>
+                                and more (read the
+                                <a
+                                    href="https://harrydehix.github.io/vantjs/index.html"
+                                    >docs</a
+                                >!)
+                            </li>
+                        </ul>
+
+                        <a
                             href="#installation"
                             id="installation"
                             style="color: inherit; text-decoration: none"
                         >
                             <h1>Installation</h1>
                         </a>
-                        <pre><code><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-0">install</span><span class="hl-1"> </span><span class="hl-0">vantjs</span>
-</code></pre>
-
-                        <a
-                            href="#usage"
-                            id="usage"
-                            style="color: inherit; text-decoration: none"
-                        >
-                            <h1>Usage</h1>
-                        </a>
-
-                        <a
-                            href="#interfaces"
-                            id="interfaces"
-                            style="color: inherit; text-decoration: none"
-                        >
-                            <h3>Interfaces</h3>
-                        </a>
-                        <p>
-                            The <code>VantInterface</code> is the most
-                            straightforward way to connect with your weather
-                            station and retrieve realtime weather data.
-                        </p>
-                        <pre><code class="language-typescript"><span class="hl-2">import</span><span class="hl-1"> { </span><span class="hl-0">VantInterface</span><span class="hl-1"> } </span><span class="hl-2">from</span><span class="hl-1"> </span><span class="hl-3">&quot;vantjs/interfaces&quot;</span><span class="hl-1">;</span><br/><span class="hl-4">// or</span><br/><span class="hl-5">const</span><span class="hl-1"> { </span><span class="hl-6">VantInterface</span><span class="hl-1"> } = </span><span class="hl-7">require</span><span class="hl-1">(</span><span class="hl-3">&quot;vantjs/interfaces&quot;</span><span class="hl-1">);</span><br/><br/><span class="hl-5">async</span><span class="hl-1"> </span><span class="hl-5">function</span><span class="hl-1"> </span><span class="hl-7">main</span><span class="hl-1">() {</span><br/><span class="hl-1">    </span><span class="hl-4">// Connecting to the weather station</span><br/><span class="hl-1">    </span><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">device</span><span class="hl-1"> = </span><span class="hl-2">await</span><span class="hl-1"> </span><span class="hl-0">VantInterface</span><span class="hl-1">.</span><span class="hl-7">create</span><span class="hl-1">({</span><br/><span class="hl-1">        </span><span class="hl-0">path:</span><span class="hl-1"> </span><span class="hl-3">&quot;COM4&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">        </span><span class="hl-0">rainCollectorSize:</span><span class="hl-1"> </span><span class="hl-3">&quot;0.2mm&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">    });</span><br/><br/><span class="hl-1">    </span><span class="hl-4">// Getting highs and lows</span><br/><span class="hl-1">    </span><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">highsAndLows</span><span class="hl-1"> = </span><span class="hl-2">await</span><span class="hl-1"> </span><span class="hl-0">device</span><span class="hl-1">.</span><span class="hl-7">getHighsAndLows</span><span class="hl-1">();</span><br/><span class="hl-1">    </span><span class="hl-0">console</span><span class="hl-1">.</span><span class="hl-7">log</span><span class="hl-1">(</span><br/><span class="hl-1">        </span><span class="hl-3">`The maximum rain rate measured today was </span><span class="hl-5">${</span><span class="hl-0">highsAndLows</span><span class="hl-8">.</span><span class="hl-0">rainRate</span><span class="hl-8">.</span><span class="hl-0">day</span><span class="hl-5">}</span><span class="hl-3"> in/h`</span><br/><span class="hl-1">    );</span><br/><br/><span class="hl-1">    </span><span class="hl-4">// Getting realtime weather data</span><br/><span class="hl-1">    </span><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">realtimeWeatherData</span><span class="hl-1"> = </span><span class="hl-2">await</span><span class="hl-1"> </span><span class="hl-0">device</span><span class="hl-1">.</span><span class="hl-7">getSimpleRealtimeData</span><span class="hl-1">();</span><br/><span class="hl-1">    </span><span class="hl-0">console</span><span class="hl-1">.</span><span class="hl-7">log</span><span class="hl-1">(</span><span class="hl-3">`It&#39;s </span><span class="hl-5">${</span><span class="hl-0">realtimeWeatherData</span><span class="hl-8">.</span><span class="hl-0">tempOut</span><span class="hl-5">}</span><span class="hl-3"> °F outside!`</span><span class="hl-1">);</span><br/><br/><span class="hl-1">    </span><span class="hl-4">// Closing the connection to the device</span><br/><span class="hl-1">    </span><span class="hl-2">await</span><span class="hl-1"> </span><span class="hl-0">device</span><span class="hl-1">.</span><span class="hl-7">close</span><span class="hl-1">();</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-7">main</span><span class="hl-1">();</span>
-</code></pre>
-                        <p>
-                            The <code>VantVueInterface</code>,
-                            <code>VantProInterface</code> and the
-                            <code>VantPro2Interface</code> offer
-                            station-dependent additional features.
-                        </p>
-
-                        <a
-                            href="#realtime-data-containers"
-                            id="realtime-data-containers"
-                            style="color: inherit; text-decoration: none"
-                        >
-                            <h3>Realtime Data Containers</h3>
-                        </a>
-                        <p>
-                            Realtime data containers are another level of
-                            abstraction hiding all the complex details from you.
-                            They are self updating.
-                        </p>
-                        <pre><code class="language-ts"><span class="hl-2">import</span><span class="hl-1"> { </span><span class="hl-0">BigRealtimeDataContainer</span><span class="hl-1"> } </span><span class="hl-2">from</span><span class="hl-1"> </span><span class="hl-3">&quot;vantjs/realtime-containers&quot;</span><span class="hl-1">;</span><br/><span class="hl-2">import</span><span class="hl-1"> { </span><span class="hl-0">DeviceModel</span><span class="hl-1"> } </span><span class="hl-2">from</span><span class="hl-1"> </span><span class="hl-3">&quot;vantjs/realtime-containers/settings&quot;</span><span class="hl-1">;</span><br/><span class="hl-4">// or</span><br/><span class="hl-5">const</span><span class="hl-1"> { </span><span class="hl-6">BigRealtimeDataContainer</span><span class="hl-1"> } = </span><span class="hl-7">require</span><span class="hl-1">(</span><span class="hl-3">&quot;vantjs/realtime-containers&quot;</span><span class="hl-1">);</span><br/><span class="hl-5">const</span><span class="hl-1"> { </span><span class="hl-6">DeviceModel</span><span class="hl-1"> } = </span><span class="hl-7">require</span><span class="hl-1">(</span><span class="hl-3">&quot;vantjs/realtime-containers/settings&quot;</span><span class="hl-1">);</span><br/><br/><span class="hl-5">async</span><span class="hl-1"> </span><span class="hl-5">function</span><span class="hl-1"> </span><span class="hl-7">main</span><span class="hl-1">() {</span><br/><span class="hl-1">    </span><span class="hl-4">// Connecting to the weather station</span><br/><span class="hl-1">    </span><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">container</span><span class="hl-1"> = </span><span class="hl-2">await</span><span class="hl-1"> </span><span class="hl-0">BigRealtimeDataContainer</span><span class="hl-1">.</span><span class="hl-7">create</span><span class="hl-1">({</span><br/><span class="hl-1">        </span><span class="hl-0">path:</span><span class="hl-1"> </span><span class="hl-3">&quot;COM4&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">        </span><span class="hl-0">model:</span><span class="hl-1"> </span><span class="hl-0">DeviceModel</span><span class="hl-1">.</span><span class="hl-0">VantagePro2</span><span class="hl-1">,</span><br/><span class="hl-1">        </span><span class="hl-0">rainCollectorSize:</span><span class="hl-1"> </span><span class="hl-3">&quot;0.2mm&quot;</span><span class="hl-1">,</span><br/><span class="hl-1">        </span><span class="hl-4">// the interval (in seconds) the realtime data container is updated</span><br/><span class="hl-1">        </span><span class="hl-0">updateInterval:</span><span class="hl-1"> </span><span class="hl-9">10</span><span class="hl-1">,</span><br/><span class="hl-1">    });</span><br/><br/><span class="hl-1">    </span><span class="hl-7">setTimeout</span><span class="hl-1">(</span><span class="hl-5">async</span><span class="hl-1"> () </span><span class="hl-5">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">        </span><span class="hl-4">// This data is still up-to-date, because the container updates itself automatically</span><br/><span class="hl-1">        </span><span class="hl-0">console</span><span class="hl-1">.</span><span class="hl-7">log</span><span class="hl-1">(</span><span class="hl-3">`It&#39;s </span><span class="hl-5">${</span><span class="hl-0">container</span><span class="hl-8">.</span><span class="hl-0">tempOut</span><span class="hl-5">}</span><span class="hl-3"> °F outside!`</span><span class="hl-1">);</span><br/><span class="hl-1">        </span><span class="hl-2">await</span><span class="hl-1"> </span><span class="hl-0">container</span><span class="hl-1">.</span><span class="hl-7">stop</span><span class="hl-1">();</span><br/><span class="hl-1">    }, </span><span class="hl-9">1000</span><span class="hl-1"> * </span><span class="hl-9">60</span><span class="hl-1">);</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-7">main</span><span class="hl-1">();</span>
+                        <pre><code class="language-bash"><span class="hl-1">npm install vantjs</span>
 </code></pre>
                     </div>
                 </div>

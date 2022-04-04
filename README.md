@@ -10,29 +10,40 @@ vantjs is a platform-independent javascript and typescript interface to the Davi
 
 # Features
 
-- Getting **hourly, daily, monthly** and **yearly highs and lows** (read more [here](https://harrydehix.github.io/vantjs/classes/structures.HighsAndLows.html))
+-   Getting **hourly, daily, monthly** and **yearly highs and lows** (read more [here](https://harrydehix.github.io/vantjs/classes/structures.HighsAndLows.html))
+
 ```ts
 const highsAndLows = await device.getHighsAndLows();
 
-console.log(`Todays minimum temperature was ${highsAndLows.tempOut.day.low} °F!`);
+console.log(
+    `Todays minimum temperature was ${highsAndLows.tempOut.day.low} °F!`
+);
 // Output: Today's minimum temperature was 25.3 °F!
 
-console.log(`The maximum rain rate in the current hour was ${highsAndLows.rainRate.hour} in/h!`);
+console.log(
+    `The maximum rain rate in the current hour was ${highsAndLows.rainRate.hour} in/h!`
+);
 // Output: The maximum rain rate in the current hour was 0.2 in/h!
 ```
-- Getting **realtime weather data** (read more [here](https://harrydehix.github.io/vantjs/classes/structures.RichRealtimeData.html#windAvg10m))
+
+-   Getting **realtime weather data** (read more [here](https://harrydehix.github.io/vantjs/classes/structures.RichRealtimeData.html))
+
 ```ts
 const realtime = await device.getRichRealtimeData();
 
 console.log(`Currently it's ${realtime.tempOut} °F!`);
 // Output: Currently it's 45.2 °F!
 
-console.log(`The wind blows from ${realtime.windDir} with an average speed of ${realtime.windAvg10m} mph!`);
+console.log(
+    `The wind blows from ${realtime.windDir} with an average speed of ${realtime.windAvg10m} mph!`
+);
 // Output: The wind blows from SW with an average speed of 23.12 mph!
 ```
-- **Converting** the weather data automatically to the **desired units**
+
+-   **Converting** the weather data automatically to the **desired units**
+
 ```ts
-const device = await VantPro2Interface.create({ 
+const device = await VantPro2Interface.create({
     units: {
         temperature: "°C",
         wind: "km/h",
@@ -46,15 +57,14 @@ const realtime = await device.getRichRealtimeData();
 console.log(`It's ${realtime.tempIn} °C`);
 // Output: It's 23.1233 °C
 ```
-- and more (read the [docs](https://harrydehix.github.io/vantjs/index.html)!)
+
+-   and more (read the [docs](https://harrydehix.github.io/vantjs/index.html)!)
 
 # Installation
 
-```
+```bash
 npm install vantjs
 ```
-
-
 
 # Getting Started
 

@@ -73,3 +73,7 @@ Read an introductory guide [here](/guides/1-getting-started.md).
 # Documentation
 
 Read the full documentation [here](https://harrydehix.github.io/vantjs/).
+
+# Community
+
+This project is updated continuously. If you have discovered a bug or want to suggest a feature🚀, please create an issue [here](https://github.com/harrydehix/vantjs/issues/new/choose).

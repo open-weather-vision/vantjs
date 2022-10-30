@@ -76,4 +76,4 @@ Read the full documentation [here](https://harrydehix.github.io/vantjs/).
 
 # Community
 
-This project is updated continuously. If you have discovered a bug or want to suggest a feature🚀, please create an issue [here](https://github.com/harrydehix/vantjs/issues/new/choose).
+This project is updated on demand. New features are currently not planned. If you have discovered a bug or want to suggest a feature🚀, please create an issue [here](https://github.com/harrydehix/vantjs/issues/new/choose).

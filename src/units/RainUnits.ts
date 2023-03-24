@@ -1,4 +1,4 @@
 /**
- * The supported rain units. The default wind unit is `"in"`.
+ * The supported rain units. The default rain unit is `"in"`.
  */
 export type RainUnits = "in" | "mm";

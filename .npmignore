@@ -3,3 +3,5 @@ src
 .eslintrc.js
 .gitignore
 tsconfig.json
+docs
+guides

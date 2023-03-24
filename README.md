@@ -69,6 +69,7 @@ npm install vantjs
 # Getting Started
 
 Read an introductory guide [here](/guides/1-getting-started.md).
+Read a guide about realtime data containers [here](/guides/2-realtime-data-containers.md).
 
 # Documentation
 

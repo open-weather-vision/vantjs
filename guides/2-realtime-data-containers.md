@@ -89,7 +89,7 @@ These events are fired when the realtime data container is started or stopped.
 
 These events are fired when the realtime data container loses the connection to the weather station or reconnecting succeeds.
 
-*Yes, if you unplug your weather station the realtime data container stays alives and waits for the console to be plugged back in! The realtime data container never kills itself.*
+*Yes, if you unplug your weather station the realtime data container stays alive and waits for the console to be plugged back in! The realtime data container never kills itself.*
 
 #### `"update"` and `"valid-update"`
 

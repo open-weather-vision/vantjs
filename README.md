@@ -79,10 +79,10 @@ Read the full documentation [here](https://harrydehix.github.io/vantjs/).
 
 This project is updated on demand. If you have discovered a bug or want to suggest a feature🚀, please create an issue [here](https://github.com/harrydehix/vantjs/issues/new/choose).
 
-# Roadmap
+# Beyond vantjs
 
-#### Recorder
-Currently I'm working on a recorder class. Once the recorder has been started it repeatedly generates weather records and stores them in a (local or online) database.
+_vantjs_ is only a small part of the **Vantage Environment**.
 
-#### React Hooks
-Currently I'm working on custom react hooks that allow you to focus on creating beautiful interfaces.
+While _vantjs_ provides the direct serial connection to the weather station, the [vant-api](https://github.com/harrydehix/vant-api) provides a convenient interface for this data in the form of a RESTful API for any kind of application. In the background it utilizes [vant-db](https://github.com/harrydehix/vant-db) that manages a database that allows long-term storage and archiving of weather data. The [vant-api](https://github.com/harrydehix/vant-api) package also includes a _recorder_ that utilizes _vantjs_ to repeatedly send weather data to the running REST API. These programs together form a robust platform that allows you to use your weather data pretty much anywhere.
+
+⚠️ The **Vantage Environment** is still in active development. Once it is finished multiple _guides_ will guide you through the process of setting up your very own vantage environment.

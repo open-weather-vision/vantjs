@@ -68,6 +68,11 @@ export default class RichRealtimeData
     public rainYear: number | null = null;
 
     /**
+     * Measured evapotranspiration (ET) of the day
+     */
+    public etDay: number | null = null;
+
+    /**
      * Measured evapotranspiration (ET) in the current month
      */
     public etMonth: number | null = null;

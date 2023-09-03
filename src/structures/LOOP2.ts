@@ -143,6 +143,11 @@ export default class LOOP2 extends SimpleRealtimeData {
     public graphPointers = new GraphPointers();
 
     /**
+     * Measured evapotranspiration (ET) of the day
+     */
+    public etDay: number | null = null;
+
+    /**
      * The package type (always "LOOP2")
      */
     public packageType = LOOPPackageType.LOOP2 as const;

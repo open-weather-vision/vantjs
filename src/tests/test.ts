@@ -1,10 +1,10 @@
 import VantPro2Interface from "../interfaces/VantPro2Interface";
-import inspect from "../util/inspect";
+import inspect from "./inspect";
 
 async function main() {
     try {
         const device = await VantPro2Interface.create({
-            path: "COM4",
+            path: "COM5",
             rainCollectorSize: "0.2mm",
             units: {
                 pressure: "hPa",

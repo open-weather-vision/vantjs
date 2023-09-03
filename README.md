@@ -83,3 +83,6 @@ This project is updated on demand. If you have discovered a bug or want to sugge
 
 #### Recorder
 Currently I'm working on a recorder class. Once the recorder has been started it repeatedly generates weather records and stores them in a (local or online) database.
+
+#### React Hooks
+Currently I'm working on custom react hooks that allow you to focus on creating beautiful interfaces.

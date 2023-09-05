@@ -1,6 +1,6 @@
 import { OnInterfaceCreate } from "./OnInterfaceCreate";
-import { RainCollectorSize } from "./RainCollectorSize";
-import { UnitSettings } from "../../units/UnitSettings";
+import { BaudRate, RainCollectorSize } from "vant-environment";
+import { UnitSettings } from "vant-environment/units";
 
 /**
  * The minimum required settings for any vant interface.
@@ -16,7 +16,7 @@ export interface MinimumVantInterfaceSettings {
      * **Optional**. The used baud rate. Adjustable in the vantage console. Default is `19200`, other
      * options are `1200`, `2400`, `4800`, `9600` and `14400`.
      */
-    readonly baudRate?: number;
+    readonly baudRate?: BaudRate;
 
     /**
      * **Optional**. The action to perform automatically on creating the interface. See {@link OnInterfaceCreate}.
@@ -30,7 +30,7 @@ export interface MinimumVantInterfaceSettings {
     readonly rainCollectorSize: RainCollectorSize;
 
     /**
-     * **Optional**. Configures the units to use. Doesn't have to match the units displayed on your console. See {@link UnitSettings}.
+     * **Optional**. Configures the units to use. Doesn't have to match the units displayed on your console. Your weather data gets converted automatically.
      */
     readonly units?: Partial<UnitSettings>;
 }

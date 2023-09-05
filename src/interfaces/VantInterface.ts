@@ -4,8 +4,8 @@ import { TypedEmitter } from "tiny-typed-emitter";
 import cloneDeep from "lodash.clonedeep";
 import merge from "lodash.merge";
 
-import { SimpleRealtimeData } from "../structures";
-import { defaultUnitSettings } from "../units/defaultUnitSettings";
+import { SimpleRealtimeData, HighsAndLows } from "vant-environment/structures";
+import { defaultUnitSettings } from "vant-environment/units";
 import { VantInterfaceEvents } from "./events";
 import {
     VantInterfaceSettings,
@@ -588,7 +588,7 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
 
     /**
      * Gets the highs and lows from the console.
-     * @returns the highs and lows
+     * @returns the highs and lows {@link HighsAndLows}
      *
      * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
      * @throws {@link MalformedDataError} if the data received from the console is malformed

@@ -1,4 +1,4 @@
-import { UnitSettings } from "../../units/UnitSettings";
+import { UnitSettings } from "vant-environment/units";
 
 const transformerCreators = {
     rain(targetUnit: "mm" | "in") {

@@ -1,5 +1,5 @@
 import merge from "lodash.merge";
-import { LOOP1, LOOPPackageType } from "../structures";
+import { LOOP1, LOOPPackageType } from "vant-environment/structures";
 import {
     ArrayParseEntry,
     Types,

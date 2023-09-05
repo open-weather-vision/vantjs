@@ -1,6 +1,6 @@
 import { OnInterfaceCreate } from "./OnInterfaceCreate";
-import { RainCollectorSize } from "./RainCollectorSize";
-import { UnitSettings } from "../../units/UnitSettings";
+import { UnitSettings } from "vant-environment/units";
+import { BaudRate, RainCollectorSize } from "vant-environment";
 
 /**
  * Settings for the {@link VantInterface}. {@link MinimumVantInterfaceSettings} describes the minimum required settings to be configured when creating a {@link VantInterface}.
@@ -16,7 +16,7 @@ export interface VantInterfaceSettings {
      * The used baud rate. Adjustable in the vantage console. Default is `19200` other
      * options are `1200`, `2400`, `4800`, `9600` and `14400`.
      */
-    readonly baudRate: number;
+    readonly baudRate: BaudRate;
 
     /**
      * The action to perform automatically on creating an interface. See {@link OnCreate}.

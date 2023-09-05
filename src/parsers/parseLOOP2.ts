@@ -1,5 +1,5 @@
 import merge from "lodash.merge";
-import { LOOP2, LOOPPackageType } from "../structures";
+import { LOOP2, LOOPPackageType } from "vant-environment/structures";
 import { Length, parse, ParseEntry, Types } from "../util/binary-parser";
 import { Pipeline } from "../util/binary-parser/BetterPipeline";
 import nullables from "./reusables/nullables";

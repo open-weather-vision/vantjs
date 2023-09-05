@@ -1,9 +1,8 @@
 import merge from "lodash.merge";
 import VantInterface from "../interfaces/VantInterface";
-import HighsAndLows from "../structures/HighsAndLows";
+import { HighsAndLows, SimpleRealtimeData } from "vant-environment/structures";
 import { DeviceModel } from "./settings/DeviceModel";
 import RealtimeDataContainer from "./RealtimeDataContainer";
-import { SimpleRealtimeData } from "../structures";
 import { MinimumRealtimeDataContainerSettings } from "./settings/MinimumRealtimeDataContainerSettings";
 
 /**
@@ -18,7 +17,7 @@ import { MinimumRealtimeDataContainerSettings } from "./settings/MinimumRealtime
  *
  * Internally this works via an update cycle. Every `container.settings.updateInterval` seconds the container uses an {@link VantInterface} to update its properties.
  * As the realtime data container is an [EventEmitter](https://nodejs.org/api/events.html#class-eventemitter), you can listen to the `"update"` event. Additionally
- * there is the `"valid-update"` event which only fires if no error occurrs. To get an overview of all fired events take a look at {@link RealtimeDataContainerEvents this}.
+ * there is the `"valid-update"` event which only fires if no error occurrs. To get an overview of all fired events take a look at {@link RealtimeDataContainerEvents}.
  *
  * Realtime data containers provide **another level of stability**. If the console disconnects from your computer the realtime data container stays alive waiting
  * for the console to reconnect.

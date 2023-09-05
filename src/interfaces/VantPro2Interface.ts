@@ -1,6 +1,6 @@
 import VantInterface from "./VantInterface";
 
-import { RichRealtimeData } from "../structures";
+import { RichRealtimeData } from "vant-environment/structures";
 import { UnsupportedDeviceModelError, MalformedDataError } from "../errors";
 import { MinimumVantInterfaceSettings } from "./settings";
 import { parseLOOP1, parseLOOP2 } from "../parsers";

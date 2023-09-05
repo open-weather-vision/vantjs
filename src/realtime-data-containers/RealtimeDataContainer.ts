@@ -8,7 +8,7 @@ import {
     VantVueInterface,
     VantProInterface,
 } from "../interfaces";
-import { defaultUnitSettings } from "../units/defaultUnitSettings";
+import { defaultUnitSettings } from "vant-environment/units";
 import {
     RealtimeDataContainerSettings,
     MinimumRealtimeDataContainerSettings,

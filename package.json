@@ -1,6 +1,6 @@
 {
     "name": "vantjs",
-    "version": "1.0.6",
+    "version": "1.0.8",
     "description": "platform independent javascript/typescript interface to Davis Vantage Pro, Pro 2 and Vue",
     "exports": {
         ".": "./dist/index.js",
@@ -56,11 +56,12 @@
     "types": "dist/index.d.ts",
     "type": "commonjs",
     "scripts": {
+        "build": "npx tsc",
         "watch": "npx tsc --watch",
         "start": "cd ./dist && node ",
         "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
-        "docs": "npx typedoc --options typedoc.json",
-        "watch-docs": "npx typedoc --options typedoc.json --watch",
+        "docs": "typedoc --options typedoc.json",
+        "watch-docs": "typedoc --options typedoc.json --watch",
         "clear-dist": "rmdir /s dist && npx tsc"
     },
     "repository": {
@@ -92,7 +93,8 @@
         "serialport": "^10.4.0",
         "source-map-support": "^0.5.21",
         "sprintf-js": "^1.0.3",
-        "tiny-typed-emitter": "^2.1.0"
+        "tiny-typed-emitter": "^2.1.0",
+        "vant-environment": "^1.0.6"
     },
     "devDependencies": {
         "@types/lodash.clonedeep": "^4.5.6",
@@ -106,9 +108,8 @@
         "@typescript-eslint/parser": "^4.28.1",
         "eslint": "^7.29.0",
         "ts-node": "^10.0.0",
-        "typedoc": "^0.22.13",
-        "typedoc-plugin-no-inherit": "^1.3.1",
-        "typescript": "^4.6.2"
+        "typedoc": "^0.25.1",
+        "typescript": "^5.2.2"
     },
     "eslintConfig": {
         "rules": {

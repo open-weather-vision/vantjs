@@ -1,10 +1,9 @@
 import merge from "lodash.merge";
 import VantPro2Interface from "../interfaces/VantPro2Interface";
 import VantVueInterface from "../interfaces/VantVueInterface";
-import HighsAndLows from "../structures/HighsAndLows";
+import { HighsAndLows, RichRealtimeData } from "vant-environment/structures";
 import { DeviceModel } from "./settings/DeviceModel";
 import RealtimeDataContainer from "./RealtimeDataContainer";
-import RichRealtimeData from "../structures/RichRealtimeData";
 import { MinimumRealtimeDataContainerSettings } from "./settings/MinimumRealtimeDataContainerSettings";
 
 /**

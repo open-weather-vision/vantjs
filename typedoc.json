@@ -12,7 +12,8 @@
         "src/errors/index.ts",
         "src/index.ts",
         "src/structures/index.ts",
-        "src/structures/subtypes/index.ts"
+        "src/structures/subtypes/index.ts",
+        "src/units/index.ts"
     ],
     "out": "docs",
     "excludeProtected": true,

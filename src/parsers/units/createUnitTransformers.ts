@@ -1,38 +1,57 @@
-import { UnitSettings } from "vant-environment/units";
+import {
+    ElevationUnit,
+    HumidityUnit,
+    PressureUnit,
+    RainUnit,
+    SoilMoistureUnit,
+    SoilMoistureUnits,
+    SolarRadiationUnit,
+    TemperatureUnit,
+    UnitConfiguration,
+    UnitSettings,
+    WindUnit,
+} from "vant-environment/units";
 
 const transformerCreators = {
-    rain(targetUnit: "mm" | "in") {
+    rain(targetUnit: RainUnit) {
         switch (targetUnit) {
             case "in":
-                return (val: number) => val;
+                return (val: number | null) => val;
             case "mm":
-                return (val: number) => val * 25.4;
+                return (val: number | null) =>
+                    val !== null ? val * 25.4 : null;
         }
     },
 
-    altimeter(targetUnit: "m" | "in") {
+    elevation(targetUnit: ElevationUnit) {
         switch (targetUnit) {
             case "in":
-                return (val: number) => val;
+                return (val: number | null) => val;
             case "m":
-                return (val: number) => val * 0.0254;
+                return (val: number | null) =>
+                    val !== null ? val * 0.0254 : null;
         }
     },
 
-    wind(targetUnit: "km/h" | "mph" | "ft/s" | "knots" | "Bft" | "m/s") {
+    wind(targetUnit: WindUnit) {
         switch (targetUnit) {
             case "mph":
-                return (val: number) => val;
+                return (val: number | null) => val;
             case "km/h":
-                return (val: number) => val * 1.609344;
+                return (val: number | null) =>
+                    val !== null ? val * 1.609344 : null;
             case "ft/s":
-                return (val: number) => val * 1.4666666666666666;
+                return (val: number | null) =>
+                    val !== null ? val * 1.4666666666666666 : null;
             case "knots":
-                return (val: number) => val * 0.8689762419006478;
+                return (val: number | null) =>
+                    val !== null ? val * 0.8689762419006478 : null;
             case "m/s":
-                return (val: number) => val * 0.44704;
+                return (val: number | null) =>
+                    val !== null ? val * 0.44704 : null;
             case "Bft":
-                return (val: number) => {
+                return (val: number | null) => {
+                    if (val === null) return null;
                     val = val * 0.44704;
                     if (val < 0.5) return 0;
                     if (val <= 1.5) return 1;
@@ -51,55 +70,68 @@ const transformerCreators = {
         }
     },
 
-    temperature(targetUnit: "°C" | "°F") {
+    temperature(targetUnit: TemperatureUnit) {
         switch (targetUnit) {
             case "°F":
-                return (val: number) => val;
+                return (val: number | null) => val;
             case "°C":
-                return (val: number) => (val - 32) * (5 / 9);
+                return (val: number | null) =>
+                    val !== null ? (val - 32) * (5 / 9) : null;
         }
     },
 
-    pressure(targetUnit: "hPa" | "inHg" | "mmHg" | "mb") {
+    pressure(targetUnit: PressureUnit) {
         switch (targetUnit) {
             case "inHg":
                 return (val: number | null) => val;
             case "mb":
             case "hPa":
                 return (val: number | null) =>
-                    val === null ? null : val * 33.86389;
+                    val !== null ? val * 33.86389 : null;
             case "mmHg":
                 return (val: number | null) =>
-                    val === null ? null : val * 25.4000003000246;
+                    val !== null ? val * 25.4000003000246 : null;
         }
     },
 
-    solarRadiation(targetUnit: "W/m²") {
+    solarRadiation(targetUnit: SolarRadiationUnit) {
         switch (targetUnit) {
             case "W/m²":
-                return (val: number) => val;
+                return (val: number | null) => val;
         }
+    },
+
+    humidity(targetUnit: HumidityUnit) {
+        return (val: number | null) => val;
+    },
+
+    soilMoisture(targetUnit: SoilMoistureUnit) {
+        return (val: number | null) => val;
     },
 };
 
 export type UnitTransformers = {
-    rain: (val: number) => number;
-    wind: (val: number) => number;
-    temperature: (val: number) => number;
-    pressure: (val: number | null) => number | null;
-    solarRadiation: (val: number) => number;
+    [K in keyof UnitConfiguration]: (val: number | null) => number | null;
 };
 
-export function createUnitTransformers(
-    unitSettings: UnitSettings
-): UnitTransformers {
+export default function (settings: UnitSettings): UnitTransformers {
     return {
-        rain: transformerCreators.rain(unitSettings.rain),
-        wind: transformerCreators.wind(unitSettings.wind),
-        temperature: transformerCreators.temperature(unitSettings.temperature),
-        pressure: transformerCreators.pressure(unitSettings.pressure),
-        solarRadiation: transformerCreators.solarRadiation(
-            unitSettings.solarRadiation
+        elevation: transformerCreators.elevation(settings.elevation),
+        evoTranspiration: transformerCreators.rain(settings.rain),
+        humidity: transformerCreators.humidity(settings.humidity),
+        leafTemperature: transformerCreators.temperature(
+            settings.leafTemperature
         ),
+        pressure: transformerCreators.pressure(settings.pressure),
+        rain: transformerCreators.rain(settings.rain),
+        soilMoisture: transformerCreators.soilMoisture(settings.soilMoisture),
+        soilTemperature: transformerCreators.temperature(
+            settings.soilTemperature
+        ),
+        solarRadiation: transformerCreators.solarRadiation(
+            settings.solarRadiation
+        ),
+        temperature: transformerCreators.temperature(settings.temperature),
+        wind: transformerCreators.wind(settings.wind),
     };
 }

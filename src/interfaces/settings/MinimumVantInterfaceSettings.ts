@@ -1,5 +1,5 @@
 import { OnInterfaceCreate } from "./OnInterfaceCreate";
-import { BaudRate, RainCollectorSize } from "vant-environment";
+import { BaudRate, RainCollectorSize } from "vant-environment/structures";
 import { UnitSettings } from "vant-environment/units";
 
 /**

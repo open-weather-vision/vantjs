@@ -1,4 +1,4 @@
-import { RainCollectorSize } from "vant-environment";
+import { RainCollectorSize } from "vant-environment/structures";
 
 /**
  * Converts the passed number of rain clicks to inch using the interface's configured rain collector size.

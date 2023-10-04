@@ -85,37 +85,49 @@ function convertWindDirectionDegreesToAbbrevation(
 }
 
 const transformers = {
-    alarm: (value: number) => value === 1,
-    temperature: (value: number) => value / 10,
-    time: (value: number) => {
+    alarm: (value: number | null) => (value !== null ? value === 1 : null),
+    temperature: (value: number | null) => (value !== null ? value / 10 : null),
+    time: (value: number | null) => {
+        if (value === null) return null;
         const stringValue = value.toString();
+        let hours: number, minutes: number;
         switch (stringValue.length) {
             case 1:
-                return `00:0${stringValue}`;
             case 2:
-                return `00:${stringValue}`;
+                hours = 0;
+                minutes = parseInt(stringValue);
+                break;
             case 3:
-                return `0${stringValue.charAt(0)}:${stringValue.substring(1)}`;
+                hours = parseInt(stringValue.charAt(0));
+                minutes = parseInt(stringValue.substring(1));
+                break;
             case 4:
-                return `${stringValue.substring(0, 2)}:${stringValue.substring(
-                    2
-                )}`;
+                hours = parseInt(stringValue.substring(0, 2));
+                minutes = parseInt(stringValue.substring(2));
+                break;
+            default:
+                return null;
         }
-        return null;
+        const date = new Date();
+        date.setHours(hours);
+        date.setMinutes(minutes);
+        return date;
     },
-    hex: (value: number) => `0x${value.toString(16)}`,
-    uv: (value: number) => value / 10,
-    extraTemp: (value: number) => value - 90,
-    soilTemp: (value: number) => value - 90,
-    leafTemp: (value: number) => value - 90,
-    dayET: (value: number) => value / 1000,
-    monthET: (value: number) => value / 100,
-    yearET: (value: number) => value / 100,
-    pressure: (value: number) => {
-        if (value < 20_000 || value > 32_500) return null;
+    hex: (value: number | null) =>
+        value !== null ? `0x${value.toString(16)}` : null,
+    uv: (value: number | null) => (value !== null ? value / 10 : null),
+    extraTemp: (value: number | null) => (value !== null ? value - 90 : null),
+    soilTemp: (value: number | null) => (value !== null ? value - 90 : null),
+    leafTemp: (value: number | null) => (value !== null ? value - 90 : null),
+    dayET: (value: number | null) => (value !== null ? value / 1000 : null),
+    monthET: (value: number | null) => (value !== null ? value / 100 : null),
+    yearET: (value: number | null) => (value !== null ? value / 100 : null),
+    pressure: (value: number | null) => {
+        if (value === null || value < 20_000 || value > 32_500) return null;
         else return value / 1000;
     },
-    stormStartDate: (value: number) => {
+    stormStartDate: (value: number | null) => {
+        if (value === null) return null;
         const day = (0x0f80 & value) >> 7;
         const month = (0xf000 & value) >> 12;
         const year = (0x007f & value) + 2000;
@@ -126,6 +138,96 @@ const transformers = {
             return null;
         }
         return convertWindDirectionDegreesToAbbrevation(value);
+    },
+    forecastID: (val: number) => {
+        switch (val) {
+            case 8:
+            case 6:
+            case 2:
+            case 3:
+            case 18:
+            case 19:
+            case 7:
+            case 22:
+            case 23:
+                return val;
+            default:
+                return null;
+        }
+    },
+    forecast: (val: number | null) => {
+        switch (val) {
+            case 8:
+                return "Mostly Clear";
+            case 6:
+                return "Partly Cloudy";
+            case 2:
+                return "Mostly Cloudy";
+            case 3:
+                return "Mostly Cloudy, Rain within 12 hours";
+            case 18:
+                return "Mostly Cloudy, Snow within 12 hours";
+            case 19:
+                return "Mostly Cloudy, Rain or Snow within 12 hours";
+            case 7:
+                return "Partly Cloudy, Rain within 12 hours";
+            case 22:
+                return "Partly Cloudy, Snow within 12 hours";
+            case 23:
+                return "Partly Cloudy, Rain or Snow within 12 hours";
+            default:
+                return null;
+        }
+    },
+    pressTrend: (value: number | null) => {
+        switch (value) {
+            case -60:
+                return "Falling Rapidly";
+            case -20:
+                return "Falling Slowly";
+            case 0:
+                return "Steady";
+            case 20:
+                return "Rising Slowly";
+            case 60:
+                return "Rising Rapidly";
+            default:
+                return null;
+        }
+    },
+    pressTrendID: (value: number) => {
+        switch (value) {
+            case -60:
+            case -20:
+            case 0:
+            case 20:
+            case 60:
+                return value;
+            default:
+                return null;
+        }
+    },
+    pressReductionMethodID: (val: number) => {
+        switch (val) {
+            case 0:
+            case 1:
+            case 2:
+                return val;
+            default:
+                return null;
+        }
+    },
+    pressReductionMethod: (val: number | null) => {
+        switch (val) {
+            case 0:
+                return "user offset";
+            case 1:
+                return "altimeter setting";
+            case 2:
+                return "NOAA bar reduction";
+            default:
+                return null;
+        }
     },
 };
 

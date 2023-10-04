@@ -1,16 +1,9 @@
 import merge from "lodash.merge";
 import { LOOP1, LOOPPackageType } from "vant-environment/structures";
-import {
-    ArrayParseEntry,
-    Types,
-    Length,
-    ParseEntry,
-    parse,
-} from "../util/binary-parser";
-import { ArrayPipeline, Pipeline } from "../util/binary-parser/BetterPipeline";
 import nullables from "./reusables/nullables";
 import transformers from "./reusables/transformers";
 import { UnitTransformers } from "./units/createUnitTransformers";
+import { EasyBuffer, Type } from "@harrydehix/easy-buffer";
 
 /**
  * Parses the passed data to LOOP1 package.
@@ -24,554 +17,585 @@ export default function (
     rainClicksToInchTransformer: (rainClicks: number) => number,
     unitTransformers: UnitTransformers
 ) {
-    const parsed = parse<LOOP1>(buffer, {
-        tempExtra: [
-            ArrayParseEntry.create({
-                type: Types.UINT8,
-                nullables: nullables.extraTemp,
-                transform: ArrayPipeline(
-                    transformers.extraTemp,
-                    unitTransformers.temperature
+    const easy = new EasyBuffer(buffer);
+
+    const forecastID = easy
+        .read({
+            type: Type.INT8,
+            offset: 89,
+        })
+        .transform(transformers.forecastID);
+
+    const pressTrendID = easy
+        .read({
+            type: Type.INT8,
+            offset: 3,
+        })
+        .transform(transformers.pressTrendID);
+
+    const windDirDeg = easy
+        .read({
+            type: Type.UINT16_LE,
+            offset: 16,
+        })
+        .nullIfEquals(0);
+
+    const result: LOOP1 = {
+        tempExtra: easy
+            .read({
+                type: Type.TUPLE_7(
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8
                 ),
-            }),
-            {
-                length: 7,
-                offset: Length.BYTES(18),
-            },
-        ],
-        leafTemps: [
-            ArrayParseEntry.create({
-                type: Types.UINT8,
-                nullables: nullables.leafTemp,
-                transform: ArrayPipeline(
-                    transformers.leafTemp,
-                    unitTransformers.temperature
+                offset: 18,
+            })
+            .nullIfItemEquals(...nullables.extraTemp)
+            .transformTupleItem(transformers.extraTemp)
+            .transformTupleItem(unitTransformers.temperature)
+            .end(),
+        leafTemps: easy
+            .read({
+                type: Type.TUPLE_4(
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8
                 ),
-            }),
-            {
-                length: 4,
-                offset: Length.BYTES(29),
-            },
-        ],
-        soilTemps: [
-            ArrayParseEntry.create({
-                type: Types.UINT8,
-                nullables: nullables.soilTemp,
-                transform: ArrayPipeline(
-                    transformers.soilTemp,
-                    unitTransformers.temperature
+                offset: 29,
+            })
+            .nullIfItemEquals(...nullables.leafTemp)
+            .transformTupleItem(transformers.leafTemp)
+            .transformTupleItem(unitTransformers.leafTemperature)
+            .end(),
+        soilTemps: easy
+            .read({
+                type: Type.TUPLE_4(
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8
                 ),
-            }),
-            {
-                length: 4,
-                offset: Length.BYTES(25),
-            },
-        ],
-        humExtra: [
-            ArrayParseEntry.create({
-                type: Types.UINT8,
-                nullables: nullables.humidity,
-            }),
-            {
-                length: 7,
-                offset: Length.BYTES(34),
-            },
-        ],
-        rainMonth: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(52),
-            transform: Pipeline(
-                rainClicksToInchTransformer,
-                unitTransformers.rain
-            ),
-        }),
-        rainYear: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(54),
-            transform: Pipeline(
-                rainClicksToInchTransformer,
-                unitTransformers.rain
-            ),
-        }),
-        etMonth: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(58),
-            nullables: [65535],
-            transform: Pipeline(transformers.monthET, unitTransformers.rain),
-        }),
-        etYear: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(60),
-            nullables: [255],
-            transform: Pipeline(transformers.yearET, unitTransformers.rain),
-        }),
-        soilMoistures: [
-            ArrayParseEntry.create({
-                type: Types.UINT8,
-                nullables: [255],
-            }),
-            {
-                length: 4,
-                offset: Length.BYTES(62),
-            },
-        ],
-        leafWetnesses: [
-            ArrayParseEntry.create({
-                type: Types.UINT8,
-                nullables: [255],
-            }),
-            {
-                length: 4,
-                offset: Length.BYTES(66),
-            },
-        ],
-        forecast: ParseEntry.dependsOn({
-            dependsOn: "forecastID",
-            transform: (val) => {
-                switch (val) {
-                    case 8:
-                        return "Mostly Clear";
-                    case 6:
-                        return "Partly Cloudy";
-                    case 2:
-                        return "Mostly Cloudy";
-                    case 3:
-                        return "Mostly Cloudy, Rain within 12 hours";
-                    case 18:
-                        return "Mostly Cloudy, Snow within 12 hours";
-                    case 19:
-                        return "Mostly Cloudy, Rain or Snow within 12 hours";
-                    case 7:
-                        return "Partly Cloudy, Rain within 12 hours";
-                    case 22:
-                        return "Partly Cloudy, Snow within 12 hours";
-                    case 23:
-                        return "Partly Cloudy, Rain or Snow within 12 hours";
-                    default:
-                        return null;
-                }
-            },
-        }),
-        forecastID: ParseEntry.create({
-            type: Types.INT8,
-            offset: Length.BYTES(89),
-            transform: (val) => {
-                switch (val) {
-                    case 8:
-                    case 6:
-                    case 2:
-                    case 3:
-                    case 18:
-                    case 19:
-                    case 7:
-                    case 22:
-                    case 23:
-                        return val;
-                    default:
-                        return null;
-                }
-            },
-        }),
-        forecastRule: ParseEntry.create({
-            type: Types.UINT8,
-            offset: Length.BYTES(90),
-            nullWith: "forecastID",
-        }),
-        nextArchiveRecord: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(5),
-        }),
+                offset: 25,
+            })
+            .nullIfItemEquals(...nullables.soilTemp)
+            .transformTupleItem(transformers.soilTemp)
+            .transformTupleItem(unitTransformers.soilTemperature)
+            .end(),
+        humExtra: easy
+            .read({
+                type: Type.TUPLE_7(
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8
+                ),
+                offset: 34,
+            })
+            .nullIfItemEquals(...nullables.humidity)
+            .transformTupleItem(unitTransformers.humidity)
+            .end(),
+        rainMonth: easy
+            .read({
+                type: Type.UINT16_LE,
+                offset: 52,
+            })
+            .transform(rainClicksToInchTransformer)
+            .transform(unitTransformers.rain)
+            .end(),
+        rainYear: easy
+            .read({
+                type: Type.UINT16_LE,
+                offset: 54,
+            })
+            .transform(rainClicksToInchTransformer)
+            .transform(unitTransformers.rain)
+            .end(),
+        etMonth: easy
+            .read({
+                type: Type.UINT16_LE,
+                offset: 58,
+            })
+            .nullIfEquals(65535)
+            .transform(transformers.monthET)
+            .transform(unitTransformers.evoTranspiration)
+            .end(),
+        etYear: easy
+            .read({
+                type: Type.UINT16_LE,
+                offset: 60,
+            })
+            .nullIfEquals(255)
+            .transform(transformers.yearET)
+            .transform(unitTransformers.evoTranspiration)
+            .end(),
+        soilMoistures: easy
+            .read({
+                type: Type.TUPLE_4(
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8
+                ),
+                offset: 62,
+            })
+            .nullIfItemEquals(255)
+            .transformTupleItem(unitTransformers.soilMoisture)
+            .end(),
+        leafWetnesses: easy
+            .read({
+                type: Type.TUPLE_4(
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8,
+                    Type.UINT8
+                ),
+                offset: 66,
+            })
+            .nullIfItemEquals(255)
+            .end(),
+        forecastID: forecastID.end(),
+        forecast: forecastID.transform(transformers.forecast).end(),
+        forecastRule:
+            forecastID !== null
+                ? easy
+                      .read({
+                          type: Type.UINT8,
+                          offset: 90,
+                      })
+                      .end()
+                : null,
+        nextArchiveRecord: easy
+            .read({
+                type: Type.UINT16_LE,
+                offset: 5,
+            })
+            .end(),
         alarms: {
-            pressure: {
-                falling: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(70),
-                }),
-                rising: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(70).add(Length.BITS(1)),
-                }),
+            press: {
+                falling: easy
+                    .read({
+                        type: Type.BIT(0),
+                        offset: 70,
+                    })
+                    .end(),
+                rising: easy
+                    .read({
+                        type: Type.BIT(1),
+                        offset: 70,
+                    })
+                    .end(),
             },
             tempIn: {
-                low: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(70).add(Length.BITS(2)),
-                }),
-                high: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(70).add(Length.BITS(3)),
-                }),
+                low: easy
+                    .read({
+                        type: Type.BIT(2),
+                        offset: 70,
+                    })
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.BIT(3),
+                        offset: 70,
+                    })
+                    .end(),
             },
             humIn: {
-                low: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(70).add(Length.BITS(4)),
-                }),
-                high: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(70).add(Length.BITS(5)),
-                }),
+                low: easy
+                    .read({
+                        type: Type.BIT(4),
+                        offset: 70,
+                    })
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.BIT(5),
+                        offset: 70,
+                    })
+                    .end(),
             },
-            time: ParseEntry.create({
-                type: Types.BOOLEAN,
-                offset: Length.BYTES(70).add(Length.BITS(6)),
-            }),
+            time: easy
+                .read({
+                    type: Type.BIT(6),
+                    offset: 70,
+                })
+                .end(),
             rain: {
-                rate: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(71),
-                }),
-                quarter: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(71).add(Length.BITS(1)),
-                }),
-                daily: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(71).add(Length.BITS(2)),
-                }),
-                stormTotal: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(71).add(Length.BITS(3)),
-                }),
+                rate: easy
+                    .read({
+                        type: Type.BIT(0),
+                        offset: 71,
+                    })
+                    .end(),
+                quarter: easy
+                    .read({
+                        type: Type.BIT(1),
+                        offset: 71,
+                    })
+                    .end(),
+                daily: easy
+                    .read({
+                        type: Type.BIT(2),
+                        offset: 71,
+                    })
+                    .end(),
+                stormTotal: easy
+                    .read({
+                        type: Type.BIT(3),
+                        offset: 71,
+                    })
+                    .end(),
             },
-            dailyET: ParseEntry.create({
-                type: Types.BOOLEAN,
-                offset: Length.BYTES(71).add(Length.BITS(4)),
-            }),
+            etDay: easy
+                .read({
+                    type: Type.BIT(4),
+                    offset: 71,
+                })
+                .end(),
             tempOut: {
-                low: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(72),
-                }),
-                high: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(72).add(Length.BITS(1)),
-                }),
+                low: easy
+                    .read({
+                        type: Type.BIT(0),
+                        offset: 72,
+                    })
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.BIT(1),
+                        offset: 72,
+                    })
+                    .end(),
             },
             wind: {
-                speed: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(72).add(Length.BITS(2)),
-                }),
-                avg: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(72).add(Length.BITS(3)),
-                }),
+                speed: easy
+                    .read({
+                        type: Type.BIT(2),
+                        offset: 72,
+                    })
+                    .end(),
+                avg: easy
+                    .read({
+                        type: Type.BIT(3),
+                        offset: 72,
+                    })
+                    .end(),
             },
-            dewpoint: {
-                low: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(72).add(Length.BITS(4)),
-                }),
-                high: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(72).add(Length.BITS(5)),
-                }),
+            dew: {
+                low: easy
+                    .read({
+                        type: Type.BIT(4),
+                        offset: 72,
+                    })
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.BIT(5),
+                        offset: 72,
+                    })
+                    .end(),
             },
-            heat: ParseEntry.create({
-                type: Types.BOOLEAN,
-                offset: Length.BYTES(72).add(Length.BITS(6)),
-            }),
-            chill: ParseEntry.create({
-                type: Types.BOOLEAN,
-                offset: Length.BYTES(72).add(Length.BITS(7)),
-            }),
-            thsw: ParseEntry.create({
-                type: Types.BOOLEAN,
-                offset: Length.BYTES(73),
-            }),
-            solarRadiation: ParseEntry.create({
-                type: Types.BOOLEAN,
-                offset: Length.BYTES(73).add(Length.BITS(1)),
-            }),
-            UV: {
-                dose: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(73).add(Length.BITS(3)),
-                }),
-                enabledAndCleared: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(73).add(Length.BITS(4)),
-                }),
-                high: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(73).add(Length.BITS(2)),
-                }),
+            heat: easy
+                .read({
+                    type: Type.BIT(6),
+                    offset: 72,
+                })
+                .end(),
+            chill: easy
+                .read({
+                    type: Type.BIT(7),
+                    offset: 72,
+                })
+                .end(),
+            thsw: easy
+                .read({
+                    type: Type.BIT(0),
+                    offset: 73,
+                })
+                .end(),
+            solarRadiation: easy
+                .read({
+                    type: Type.BIT(1),
+                    offset: 73,
+                })
+                .end(),
+            uv: {
+                high: easy
+                    .read({
+                        type: Type.BIT(2),
+                        offset: 73,
+                    })
+                    .end(),
+                dose: easy
+                    .read({
+                        type: Type.BIT(3),
+                        offset: 73,
+                    })
+                    .end(),
+                enabledAndCleared: easy
+                    .read({
+                        type: Type.BIT(4),
+                        offset: 73,
+                    })
+                    .end(),
             },
             humOut: {
-                low: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(74).add(Length.BITS(2)),
-                }),
-                high: ParseEntry.create({
-                    type: Types.BOOLEAN,
-                    offset: Length.BYTES(74).add(Length.BITS(3)),
-                }),
+                low: easy
+                    .read({
+                        type: Type.BIT(2),
+                        offset: 74,
+                    })
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.BIT(3),
+                        offset: 74,
+                    })
+                    .end(),
             },
-            extraTemps: [
-                {
-                    low: ParseEntry.create({
-                        type: Types.BOOLEAN,
-                        offset: Length.BITS(0),
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.BOOLEAN,
-                        offset: Length.BITS(1),
-                    }),
-                },
-                {
-                    gap: Length.BYTES(1),
-                    length: 7,
-                    offset: Length.BYTES(75),
-                },
-            ],
-            extraHums: [
-                {
-                    low: ParseEntry.create({
-                        type: Types.BOOLEAN,
-                        offset: Length.BITS(0),
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.BOOLEAN,
-                        offset: Length.BITS(1),
-                    }),
-                },
-                {
-                    length: 7,
-                    gap: Length.BYTES(1),
-                    offset: Length.BYTES(75).add(Length.BITS(2)),
-                },
-            ],
-            leafWetnesses: [
-                {
-                    low: ParseEntry.create({
-                        type: Types.BOOLEAN,
-                        offset: Length.BITS(0),
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.BOOLEAN,
-                        offset: Length.BITS(1),
-                    }),
-                },
-                {
-                    length: 4,
-                    gap: Length.BYTES(1),
-                    offset: Length.BYTES(82),
-                },
-            ],
-            soilMoistures: [
-                {
-                    low: ParseEntry.create({
-                        type: Types.BOOLEAN,
-                        offset: Length.BITS(0),
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.BOOLEAN,
-                        offset: Length.BITS(1),
-                    }),
-                },
-                {
-                    length: 4,
-                    gap: Length.BYTES(1),
-                    offset: Length.BYTES(82).add(Length.BITS(2)),
-                },
-            ],
-            leafTemps: [
-                {
-                    low: ParseEntry.create({
-                        type: Types.BOOLEAN,
-                        offset: Length.BITS(0),
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.BOOLEAN,
-                        offset: Length.BITS(1),
-                    }),
-                },
-                {
-                    length: 4,
-                    gap: Length.BYTES(1),
-                    offset: Length.BYTES(82).add(Length.BITS(4)),
-                },
-            ],
-            soilTemps: [
-                {
-                    low: ParseEntry.create({
-                        type: Types.BOOLEAN,
-                        offset: Length.BITS(0),
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.BOOLEAN,
-                        offset: Length.BITS(1),
-                    }),
-                },
-                {
-                    length: 4,
-                    gap: Length.BYTES(1),
-                    offset: Length.BYTES(82),
-                },
-            ],
+            tempExtra: easy
+                .read({
+                    offset: 75,
+                    type: Type.TUPLE_7(
+                        Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
+                        Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
+                        Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
+                        Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
+                        Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
+                        Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
+                        Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
+                        1
+                    ),
+                })
+                .transformTupleItem((item) => ({ low: item[0], high: item[1] }))
+                .end(),
+            humExtra: easy
+                .read({
+                    offset: 75,
+                    type: Type.TUPLE_7(
+                        Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
+                        Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
+                        Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
+                        Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
+                        Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
+                        Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
+                        Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
+                        1
+                    ),
+                })
+                .transformTupleItem((item) => ({ low: item[0], high: item[1] }))
+                .end(),
+            leafWetnesses: easy
+                .read({
+                    offset: 82,
+                    type: Type.TUPLE_4(
+                        Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
+                        Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
+                        Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
+                        Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
+                        1
+                    ),
+                })
+                .transformTupleItem((item) => ({ low: item[0], high: item[1] }))
+                .end(),
+            soilMoistures: easy
+                .read({
+                    offset: 82,
+                    type: Type.TUPLE_4(
+                        Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
+                        Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
+                        Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
+                        Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
+                        1
+                    ),
+                })
+                .transformTupleItem((item) => ({ low: item[0], high: item[1] }))
+                .end(),
+            leafTemps: easy
+                .read({
+                    offset: 82,
+                    type: Type.TUPLE_4(
+                        Type.TUPLE_2(Type.BIT(4), Type.BIT(5)),
+                        Type.TUPLE_2(Type.BIT(4), Type.BIT(5)),
+                        Type.TUPLE_2(Type.BIT(4), Type.BIT(5)),
+                        Type.TUPLE_2(Type.BIT(4), Type.BIT(5)),
+                        1
+                    ),
+                })
+                .transformTupleItem((item) => ({ low: item[0], high: item[1] }))
+                .end(),
+            soilTemps: easy
+                .read({
+                    offset: 82,
+                    type: Type.TUPLE_4(
+                        Type.TUPLE_2(Type.BIT(6), Type.BIT(7)),
+                        Type.TUPLE_2(Type.BIT(6), Type.BIT(7)),
+                        Type.TUPLE_2(Type.BIT(6), Type.BIT(7)),
+                        Type.TUPLE_2(Type.BIT(6), Type.BIT(7)),
+                        1
+                    ),
+                })
+                .transformTupleItem((item) => ({ low: item[0], high: item[1] }))
+                .end(),
         },
-        transmitterBatteryStatus: ParseEntry.create({
-            type: Types.UINT8,
-            offset: Length.BYTES(86),
-        }),
-        consoleBatteryVoltage: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(87),
-            transform: (val) => (val * 300) / 512 / 100,
-        }),
-        sunrise: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(91),
-            nullables: nullables.time,
-            transform: transformers.time,
-        }),
-        sunset: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(93),
-            nullables: nullables.time,
-            transform: transformers.time,
-        }),
+        transmitterBatteryStatus: easy
+            .read({
+                type: Type.UINT8,
+                offset: 86,
+            })
+            .end(),
+        consoleBatteryVoltage: easy
+            .read({
+                type: Type.UINT16_LE,
+                offset: 87,
+            })
+            .transform((val) => (val * 300) / 512 / 100)
+            .end(),
+        sunrise: easy
+            .read({
+                type: Type.UINT16_LE,
+                offset: 91,
+            })
+            .nullIfEquals(...nullables.time)
+            .transform(transformers.time)
+            .end(),
+        sunset: easy
+            .read({
+                type: Type.UINT16_LE,
+                offset: 93,
+            })
+            .nullIfEquals(...nullables.time)
+            .transform(transformers.time)
+            .end(),
         packageType: LOOPPackageType.LOOP1,
-        press: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(7),
-            transform: Pipeline(
-                transformers.pressure,
-                unitTransformers.pressure
-            ),
-            nullables: nullables.pressure,
-        }),
-        pressTrend: ParseEntry.dependsOn({
-            dependsOn: "pressTrendID",
-            transform: (value) => {
-                switch (value) {
-                    case -60:
-                        return "Falling Rapidly";
-                    case -20:
-                        return "Falling Slowly";
-                    case 0:
-                        return "Steady";
-                    case 20:
-                        return "Rising Slowly";
-                    case 60:
-                        return "Rising Rapidly";
-                    default:
-                        return null;
-                }
-            },
-        }),
-        pressTrendID: ParseEntry.create({
-            type: Types.INT8,
-            offset: Length.BYTES(3),
-            transform: (value) => {
-                switch (value) {
-                    case -60:
-                    case -20:
-                    case 0:
-                    case 20:
-                    case 60:
-                        return value;
-                    default:
-                        return null;
-                }
-            },
-        }),
-        tempOut: ParseEntry.create({
-            type: Types.INT16,
-            offset: Length.BYTES(12),
-            nullables: nullables.temperature,
-            transform: Pipeline(
-                transformers.temperature,
-                unitTransformers.temperature
-            ),
-        }),
-        tempIn: ParseEntry.create({
-            type: Types.INT16,
-            offset: Length.BYTES(9),
-            nullables: nullables.temperature,
-            transform: Pipeline(
-                transformers.temperature,
-                unitTransformers.temperature
-            ),
-        }),
-        humIn: ParseEntry.create({
-            type: Types.UINT8,
-            offset: Length.BYTES(11),
-            nullables: nullables.humidity,
-        }),
-        humOut: ParseEntry.create({
-            type: Types.UINT8,
-            offset: Length.BYTES(33),
-            nullables: nullables.humidity,
-        }),
-        wind: ParseEntry.create({
-            type: Types.UINT8,
-            offset: Length.BYTES(14),
-            transform: unitTransformers.wind,
-        }),
-        windAvg10m: ParseEntry.create({
-            type: Types.UINT8,
-            offset: Length.BYTES(15),
-            transform: unitTransformers.wind,
-        }),
-        windDir: ParseEntry.dependsOn({
-            dependsOn: "windDirDeg",
-            transform: transformers.windDir,
-        }),
-        windDirDeg: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(16),
-            nullables: [0],
-        }),
-        rainRate: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(41),
-            transform: Pipeline(
-                rainClicksToInchTransformer,
-                unitTransformers.rain
-            ),
-        }),
-        rainDay: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(50),
-            transform: Pipeline(
-                rainClicksToInchTransformer,
-                unitTransformers.rain
-            ),
-        }),
-        stormRain: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(46),
-            transform: Pipeline(
-                rainClicksToInchTransformer,
-                unitTransformers.rain
-            ),
-            nullWith: "stormStartDate",
-        }),
-        stormStartDate: ParseEntry.create({
-            type: Types.INT16,
-            offset: Length.BYTES(48),
-            nullables: [-1, 0xffff],
-            transform: transformers.stormStartDate,
-        }),
-        etDay: ParseEntry.create({
-            type: Types.UINT16,
-            offset: Length.BYTES(56),
-            nullables: [65535],
-            transform: Pipeline(transformers.dayET, unitTransformers.rain),
-        }),
-        uv: ParseEntry.create({
-            type: Types.UINT8,
-            offset: Length.BYTES(14),
-            transform: unitTransformers.wind,
-        }),
-        solarRadiation: ParseEntry.create({
-            type: Types.UINT8,
-            offset: Length.BYTES(14),
-            transform: unitTransformers.wind,
-        }),
+        press: easy
+            .read({
+                type: Type.UINT16_LE,
+                offset: 7,
+            })
+            .nullIfEquals(...nullables.pressure)
+            .transform(transformers.pressure)
+            .transform(unitTransformers.pressure)
+            .end(),
+        pressTrendID: pressTrendID.end(),
+        pressTrend: pressTrendID.transform(transformers.pressTrend).end(),
+        tempOut: easy
+            .read({
+                type: Type.INT16_LE,
+                offset: 12,
+            })
+            .nullIfEquals(...nullables.temperature)
+            .transform(transformers.temperature)
+            .transform(unitTransformers.temperature)
+            .end(),
+        tempIn: easy
+            .read({
+                type: Type.INT16_LE,
+                offset: 9,
+            })
+            .nullIfEquals(...nullables.temperature)
+            .transform(transformers.temperature)
+            .transform(unitTransformers.temperature)
+            .end(),
+        humIn: easy
+            .read({
+                type: Type.UINT8,
+                offset: 11,
+            })
+            .nullIfEquals(...nullables.humidity)
+            .transform(unitTransformers.humidity)
+            .end(),
+        humOut: easy
+            .read({
+                type: Type.UINT8,
+                offset: 33,
+            })
+            .nullIfEquals(...nullables.humidity)
+            .transform(unitTransformers.humidity)
+            .end(),
+        wind: easy
+            .read({
+                type: Type.UINT8,
+                offset: 14,
+            })
+            .transform(unitTransformers.wind)
+            .end(),
+        windAvg10m: easy
+            .read({
+                type: Type.UINT8,
+                offset: 15,
+            })
+            .transform(unitTransformers.wind)
+            .end(),
+        windDirDeg: windDirDeg.end(),
+        windDir: windDirDeg.transform(transformers.windDir).end(),
+        rainRate: easy
+            .read({
+                type: Type.UINT16_LE,
+                offset: 41,
+            })
+            .transform(rainClicksToInchTransformer)
+            .transform(unitTransformers.rain)
+            .end(),
+        rainDay: easy
+            .read({
+                type: Type.UINT16_LE,
+                offset: 50,
+            })
+            .transform(rainClicksToInchTransformer)
+            .transform(unitTransformers.rain)
+            .end(),
+        stormStartDate: easy
+            .read({
+                type: Type.INT16_LE,
+                offset: 48,
+            })
+            .nullIfEquals(-1, 0xffff)
+            .transform(transformers.stormStartDate)
+            .end(),
+        stormRain: easy
+            .read({
+                type: Type.UINT16_LE,
+                offset: 46,
+            })
+            .transform(rainClicksToInchTransformer)
+            .transform(unitTransformers.rain)
+            .end(),
+        etDay: easy
+            .read({
+                type: Type.UINT16_LE,
+                offset: 56,
+            })
+            .nullIfEquals(65535)
+            .transform(transformers.dayET)
+            .transform(unitTransformers.evoTranspiration)
+            .end(),
+        uv: easy
+            .read({
+                type: Type.UINT8,
+                offset: 43,
+            })
+            .nullIfEquals(65535)
+            .transform(transformers.uv)
+            .end(),
+        solarRadiation: easy
+            .read({
+                type: Type.INT16_LE,
+                offset: 44,
+            })
+            .nullIfEquals(65535)
+            .transform(unitTransformers.solarRadiation)
+            .end(),
         time: new Date(),
-    });
-    return merge(new LOOP1(), parsed);
+    };
+
+    if (result.stormStartDate === null) result.stormRain = null;
+
+    return result;
 }

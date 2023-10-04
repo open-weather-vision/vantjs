@@ -1,6 +1,6 @@
 import { OnInterfaceCreate } from "./OnInterfaceCreate";
 import { UnitSettings } from "vant-environment/units";
-import { BaudRate, RainCollectorSize } from "vant-environment";
+import { BaudRate, RainCollectorSize } from "vant-environment/structures";
 
 /**
  * Settings for the {@link VantInterface}. {@link MinimumVantInterfaceSettings} describes the minimum required settings to be configured when creating a {@link VantInterface}.

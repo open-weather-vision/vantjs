@@ -1,1053 +1,1425 @@
-import merge from "lodash.merge";
 import { HighsAndLows } from "vant-environment/structures";
-import { Length, parse, ParseEntry, Types } from "../util/binary-parser";
-import { Pipeline } from "../util/binary-parser/BetterPipeline";
 import nullables from "./reusables/nullables";
 import transformers from "./reusables/transformers";
 import { UnitTransformers } from "./units/createUnitTransformers";
+import { EasyBuffer, Type } from "@harrydehix/easy-buffer";
 
 export default function (
     buffer: Buffer,
     rainClicksToInchTransformer: (rainClicks: number) => number,
     unitTransformers: UnitTransformers
 ): HighsAndLows {
-    const parsed = parse<HighsAndLows>(buffer, {
-        pressure: {
+    const easy = new EasyBuffer(buffer);
+
+    const result: HighsAndLows = {
+        press: {
             day: {
-                low: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(0),
-                    nullables: nullables.pressure,
-                    transform: Pipeline(
-                        transformers.pressure,
-                        unitTransformers.pressure
-                    ),
-                    nullWith: "lowTime",
-                }),
-                high: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(2),
-                    nullables: nullables.pressure,
-                    transform: Pipeline(
-                        transformers.pressure,
-                        unitTransformers.pressure
-                    ),
-                    nullWith: "highTime",
-                }),
-                lowTime: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(12),
-                    nullables: nullables.time,
-                    transform: Pipeline(transformers.time),
-                    nullWith: "low",
-                }),
-                highTime: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(14),
-                    nullables: nullables.time,
-                    transform: Pipeline(transformers.time),
-                    nullWith: "high",
-                }),
+                low: easy
+                    .read({ type: Type.UINT16_LE, offset: 0 })
+                    .nullIfEquals(...nullables.pressure)
+                    .transform(transformers.pressure)
+                    .transform(unitTransformers.pressure)
+                    .end(),
+                high: easy
+                    .read({ type: Type.UINT16_LE, offset: 2 })
+                    .nullIfEquals(...nullables.pressure)
+                    .transform(transformers.pressure)
+                    .transform(unitTransformers.pressure)
+                    .end(),
+                lowTime: easy
+                    .read({
+                        type: Type.UINT16_LE,
+                        offset: 12,
+                    })
+                    .nullIfEquals(...nullables.time)
+                    .transform(transformers.time)
+                    .end(),
+                highTime: easy
+                    .read({
+                        type: Type.UINT16_LE,
+                        offset: 14,
+                    })
+                    .nullIfEquals(...nullables.time)
+                    .transform(transformers.time)
+                    .end(),
             },
             month: {
-                low: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(4),
-                    nullables: nullables.pressure,
-                    transform: Pipeline(
-                        transformers.pressure,
-                        unitTransformers.pressure
-                    ),
-                }),
-                high: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(6),
-                    nullables: nullables.pressure,
-                    transform: Pipeline(
-                        transformers.pressure,
-                        unitTransformers.pressure
-                    ),
-                }),
+                low: easy
+                    .read({ type: Type.UINT16_LE, offset: 4 })
+                    .nullIfEquals(...nullables.pressure)
+                    .transform(transformers.pressure)
+                    .transform(unitTransformers.pressure)
+                    .end(),
+                high: easy
+                    .read({ type: Type.UINT16_LE, offset: 6 })
+                    .nullIfEquals(...nullables.pressure)
+                    .transform(transformers.pressure)
+                    .transform(unitTransformers.pressure)
+                    .end(),
             },
             year: {
-                low: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(8),
-                    nullables: nullables.pressure,
-                    transform: Pipeline(
-                        transformers.pressure,
-                        unitTransformers.pressure
-                    ),
-                }),
-                high: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(10),
-                    nullables: nullables.pressure,
-                    transform: Pipeline(
-                        transformers.pressure,
-                        unitTransformers.pressure
-                    ),
-                }),
+                low: easy
+                    .read({ type: Type.UINT16_LE, offset: 8 })
+                    .nullIfEquals(...nullables.pressure)
+                    .transform(transformers.pressure)
+                    .transform(unitTransformers.pressure)
+                    .end(),
+                high: easy
+                    .read({ type: Type.UINT16_LE, offset: 10 })
+                    .nullIfEquals(...nullables.pressure)
+                    .transform(transformers.pressure)
+                    .transform(unitTransformers.pressure)
+                    .end(),
             },
         },
         wind: {
-            day: ParseEntry.create({
-                type: Types.UINT8,
-                offset: Length.BYTES(16),
-                nullWith: "dayTime",
-                transform: Pipeline(unitTransformers.wind),
-            }),
-            dayTime: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(17),
-                nullables: nullables.time,
-                transform: Pipeline(transformers.time),
-                nullWith: "day",
-            }),
-            month: ParseEntry.create({
-                type: Types.UINT8,
-                offset: Length.BYTES(19),
-                transform: Pipeline(unitTransformers.wind),
-            }),
-            year: ParseEntry.create({
-                type: Types.UINT8,
-                offset: Length.BYTES(20),
-                transform: Pipeline(unitTransformers.wind),
-            }),
+            day: easy
+                .read({ type: Type.UINT8, offset: 16 })
+                .transform(unitTransformers.wind)
+                .end(),
+            dayTime: easy
+                .read({ type: Type.UINT16_LE, offset: 17 })
+                .nullIfEquals(...nullables.time)
+                .transform(transformers.time)
+                .end(),
+            month: easy
+                .read({ type: Type.UINT8, offset: 19 })
+                .transform(unitTransformers.wind)
+                .end(),
+            year: easy
+                .read({ type: Type.UINT8, offset: 20 })
+                .transform(unitTransformers.wind)
+                .end(),
         },
         tempIn: {
             day: {
-                low: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(23),
-                    nullables: nullables.tempLow,
-                    transform: Pipeline(
-                        transformers.temperature,
-                        unitTransformers.temperature
-                    ),
-                    nullWith: "lowTime",
-                }),
-                high: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(21),
-                    nullables: nullables.tempHigh,
-                    transform: Pipeline(
-                        transformers.temperature,
-                        unitTransformers.temperature
-                    ),
-                    nullWith: "highTime",
-                }),
-                lowTime: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(27),
-                    nullables: nullables.time,
-                    transform: Pipeline(transformers.time),
-                    nullWith: "low",
-                }),
-                highTime: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(25),
-                    nullables: nullables.time,
-                    transform: Pipeline(transformers.time),
-                    nullWith: "high",
-                }),
+                low: easy
+                    .read({ type: Type.INT16_LE, offset: 23 })
+                    .nullIfEquals(...nullables.tempLow)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({ type: Type.INT16_LE, offset: 21 })
+                    .nullIfEquals(...nullables.tempHigh)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
+                lowTime: easy
+                    .read({
+                        type: Type.UINT16_LE,
+                        offset: 27,
+                    })
+                    .nullIfEquals(...nullables.time)
+                    .transform(transformers.time)
+                    .end(),
+                highTime: easy
+                    .read({
+                        type: Type.UINT16_LE,
+                        offset: 25,
+                    })
+                    .nullIfEquals(...nullables.time)
+                    .transform(transformers.time)
+                    .end(),
             },
             month: {
-                low: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(29),
-                    nullables: nullables.tempLow,
-                    transform: Pipeline(
-                        transformers.temperature,
-                        unitTransformers.temperature
-                    ),
-                }),
-                high: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(31),
-                    nullables: nullables.tempHigh,
-                    transform: Pipeline(
-                        transformers.temperature,
-                        unitTransformers.temperature
-                    ),
-                }),
+                low: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 29,
+                    })
+                    .nullIfEquals(...nullables.tempLow)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 31,
+                    })
+                    .nullIfEquals(...nullables.tempHigh)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
             },
             year: {
-                low: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(33),
-                    nullables: nullables.tempLow,
-                    transform: Pipeline(
-                        transformers.temperature,
-                        unitTransformers.temperature
-                    ),
-                }),
-                high: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(35),
-                    nullables: nullables.tempHigh,
-                    transform: Pipeline(
-                        transformers.temperature,
-                        unitTransformers.temperature
-                    ),
-                }),
+                low: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 33,
+                    })
+                    .nullIfEquals(...nullables.tempLow)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 35,
+                    })
+                    .nullIfEquals(...nullables.tempHigh)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
             },
         },
         humIn: {
             day: {
-                low: ParseEntry.create({
-                    type: Types.UINT8,
-                    offset: Length.BYTES(38),
-                    nullables: nullables.humidity,
-                    nullWith: "lowTime",
-                }),
-                high: ParseEntry.create({
-                    type: Types.UINT8,
-                    offset: Length.BYTES(37),
-                    nullables: nullables.humidity,
-                    nullWith: "highTime",
-                }),
-                lowTime: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(41),
-                    nullables: nullables.time,
-                    transform: Pipeline(transformers.time),
-                    nullWith: "low",
-                }),
-                highTime: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(39),
-                    nullables: nullables.time,
-                    transform: Pipeline(transformers.time),
-                    nullWith: "high",
-                }),
+                low: easy
+                    .read({
+                        type: Type.UINT8,
+                        offset: 38,
+                    })
+                    .nullIfEquals(...nullables.humidity)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.UINT8,
+                        offset: 37,
+                    })
+                    .nullIfEquals(...nullables.humidity)
+                    .end(),
+                lowTime: easy
+                    .read({
+                        type: Type.UINT16_LE,
+                        offset: 41,
+                    })
+                    .nullIfEquals(...nullables.time)
+                    .transform(transformers.time)
+                    .end(),
+                highTime: easy
+                    .read({
+                        type: Type.UINT16_LE,
+                        offset: 39,
+                    })
+                    .nullIfEquals(...nullables.time)
+                    .transform(transformers.time)
+                    .end(),
             },
             month: {
-                low: ParseEntry.create({
-                    type: Types.UINT8,
-                    offset: Length.BYTES(44),
-                    nullables: nullables.humidity,
-                }),
-                high: ParseEntry.create({
-                    type: Types.UINT8,
-                    offset: Length.BYTES(43),
-                    nullables: nullables.humidity,
-                }),
+                low: easy
+                    .read({
+                        type: Type.UINT8,
+                        offset: 44,
+                    })
+                    .nullIfEquals(...nullables.humidity)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.UINT8,
+                        offset: 43,
+                    })
+                    .nullIfEquals(...nullables.humidity)
+                    .end(),
             },
             year: {
-                low: ParseEntry.create({
-                    type: Types.UINT8,
-                    offset: Length.BYTES(46),
-                    nullables: nullables.humidity,
-                }),
-                high: ParseEntry.create({
-                    type: Types.UINT8,
-                    offset: Length.BYTES(45),
-                    nullables: nullables.humidity,
-                }),
+                low: easy
+                    .read({
+                        type: Type.UINT8,
+                        offset: 46,
+                    })
+                    .nullIfEquals(...nullables.humidity)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.UINT8,
+                        offset: 45,
+                    })
+                    .nullIfEquals(...nullables.humidity)
+                    .end(),
             },
         },
         tempOut: {
             day: {
-                low: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(47),
-                    nullables: nullables.tempLow,
-                    transform: Pipeline(
-                        transformers.temperature,
-                        unitTransformers.temperature
-                    ),
-                    nullWith: "lowTime",
-                }),
-                high: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(49),
-                    nullables: nullables.tempHigh,
-                    transform: Pipeline(
-                        transformers.temperature,
-                        unitTransformers.temperature
-                    ),
-                    nullWith: "highTime",
-                }),
-                lowTime: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(51),
-                    nullables: nullables.time,
-                    transform: Pipeline(transformers.time),
-                    nullWith: "low",
-                }),
-                highTime: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(53),
-                    nullables: nullables.time,
-                    transform: Pipeline(transformers.time),
-                    nullWith: "high",
-                }),
+                low: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 47,
+                    })
+                    .nullIfEquals(...nullables.tempLow)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 49,
+                    })
+                    .nullIfEquals(...nullables.tempHigh)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
+                lowTime: easy
+                    .read({
+                        type: Type.UINT16_LE,
+                        offset: 51,
+                    })
+                    .nullIfEquals(...nullables.time)
+                    .transform(transformers.time)
+                    .end(),
+                highTime: easy
+                    .read({
+                        type: Type.UINT16_LE,
+                        offset: 53,
+                    })
+                    .nullIfEquals(...nullables.time)
+                    .transform(transformers.time)
+                    .end(),
             },
             month: {
-                low: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(57),
-                    nullables: nullables.tempLow,
-                    transform: Pipeline(
-                        transformers.temperature,
-                        unitTransformers.temperature
-                    ),
-                }),
-                high: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(55),
-                    nullables: nullables.tempHigh,
-                    transform: Pipeline(
-                        transformers.temperature,
-                        unitTransformers.temperature
-                    ),
-                }),
+                low: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 57,
+                    })
+                    .nullIfEquals(...nullables.tempLow)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 55,
+                    })
+                    .nullIfEquals(...nullables.tempHigh)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
             },
             year: {
-                low: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(61),
-                    nullables: nullables.tempLow,
-                    transform: Pipeline(
-                        transformers.temperature,
-                        unitTransformers.temperature
-                    ),
-                }),
-                high: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(59),
-                    nullables: nullables.tempHigh,
-                    transform: Pipeline(
-                        transformers.temperature,
-                        unitTransformers.temperature
-                    ),
-                }),
+                low: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 61,
+                    })
+                    .nullIfEquals(...nullables.tempLow)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 59,
+                    })
+                    .nullIfEquals(...nullables.tempHigh)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
             },
         },
         dew: {
             day: {
-                low: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(63),
-                    nullables: nullables.tempLow,
-                    nullWith: "lowTime",
-                    transform: Pipeline(unitTransformers.temperature),
-                }),
-                high: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(65),
-                    nullables: nullables.tempHigh,
-                    nullWith: "highTime",
-                    transform: Pipeline(unitTransformers.temperature),
-                }),
-                lowTime: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(67),
-                    nullables: nullables.time,
-                    transform: Pipeline(transformers.time),
-                    nullWith: "low",
-                }),
-                highTime: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(69),
-                    nullables: nullables.time,
-                    transform: Pipeline(transformers.time),
-                    nullWith: "high",
-                }),
+                low: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 63,
+                    })
+                    .nullIfEquals(...nullables.tempLow)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 65,
+                    })
+                    .nullIfEquals(...nullables.tempHigh)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
+                lowTime: easy
+                    .read({
+                        type: Type.UINT16_LE,
+                        offset: 67,
+                    })
+                    .nullIfEquals(...nullables.time)
+                    .transform(transformers.time)
+                    .end(),
+                highTime: easy
+                    .read({
+                        type: Type.UINT16_LE,
+                        offset: 69,
+                    })
+                    .nullIfEquals(...nullables.time)
+                    .transform(transformers.time)
+                    .end(),
             },
             month: {
-                low: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(73),
-                    nullables: nullables.tempLow,
-                    transform: Pipeline(unitTransformers.temperature),
-                }),
-                high: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(71),
-                    nullables: nullables.tempHigh,
-                    transform: Pipeline(unitTransformers.temperature),
-                }),
+                low: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 73,
+                    })
+                    .nullIfEquals(...nullables.tempLow)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 71,
+                    })
+                    .nullIfEquals(...nullables.tempHigh)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
             },
             year: {
-                low: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(77),
-                    nullables: nullables.tempLow,
-                    transform: Pipeline(unitTransformers.temperature),
-                }),
-                high: ParseEntry.create({
-                    type: Types.INT16,
-                    offset: Length.BYTES(75),
-                    nullables: nullables.tempHigh,
-                    transform: Pipeline(unitTransformers.temperature),
-                }),
+                low: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 77,
+                    })
+                    .nullIfEquals(...nullables.tempLow)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.INT16_LE,
+                        offset: 75,
+                    })
+                    .nullIfEquals(...nullables.tempHigh)
+                    .transform(transformers.temperature)
+                    .transform(unitTransformers.temperature)
+                    .end(),
             },
         },
         chill: {
-            day: ParseEntry.create({
-                type: Types.INT16,
-                offset: Length.BYTES(79),
-                nullables: nullables.chill,
-                nullWith: "dayTime",
-                transform: Pipeline(unitTransformers.temperature),
-            }),
-            dayTime: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(81),
-                nullables: nullables.time,
-                transform: Pipeline(transformers.time),
-                nullWith: "day",
-            }),
-            month: ParseEntry.create({
-                type: Types.INT16,
-                offset: Length.BYTES(83),
-                nullables: nullables.chill,
-                transform: Pipeline(unitTransformers.temperature),
-            }),
-            year: ParseEntry.create({
-                type: Types.INT16,
-                offset: Length.BYTES(85),
-                nullables: nullables.chill,
-                transform: Pipeline(unitTransformers.temperature),
-            }),
+            day: easy
+                .read({
+                    type: Type.INT16_LE,
+                    offset: 79,
+                })
+                .nullIfEquals(...nullables.chill)
+                .transform(unitTransformers.temperature)
+                .end(),
+            dayTime: easy
+                .read({
+                    type: Type.UINT16_LE,
+                    offset: 81,
+                })
+                .nullIfEquals(...nullables.time)
+                .transform(transformers.time)
+                .end(),
+            month: easy
+                .read({
+                    type: Type.INT16_LE,
+                    offset: 83,
+                })
+                .nullIfEquals(...nullables.chill)
+                .transform(unitTransformers.temperature)
+                .end(),
+            year: easy
+                .read({
+                    type: Type.INT16_LE,
+                    offset: 85,
+                })
+                .nullIfEquals(...nullables.chill)
+                .transform(unitTransformers.temperature)
+                .end(),
         },
         heat: {
-            day: ParseEntry.create({
-                type: Types.INT16,
-                offset: Length.BYTES(87),
-                nullables: nullables.heat,
-                nullWith: "dayTime",
-                transform: Pipeline(unitTransformers.temperature),
-            }),
-            dayTime: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(89),
-                nullables: nullables.time,
-                transform: Pipeline(transformers.time),
-                nullWith: "day",
-            }),
-            month: ParseEntry.create({
-                type: Types.INT16,
-                offset: Length.BYTES(91),
-                nullables: nullables.heat,
-                transform: Pipeline(unitTransformers.temperature),
-            }),
-            year: ParseEntry.create({
-                type: Types.INT16,
-                offset: Length.BYTES(93),
-                nullables: nullables.heat,
-                transform: Pipeline(unitTransformers.temperature),
-            }),
+            day: easy
+                .read({
+                    type: Type.INT16_LE,
+                    offset: 87,
+                })
+                .nullIfEquals(...nullables.heat)
+                .transform(unitTransformers.temperature)
+                .end(),
+            dayTime: easy
+                .read({
+                    type: Type.UINT16_LE,
+                    offset: 89,
+                })
+                .nullIfEquals(...nullables.time)
+                .transform(transformers.time)
+                .end(),
+            month: easy
+                .read({
+                    type: Type.INT16_LE,
+                    offset: 91,
+                })
+                .nullIfEquals(...nullables.heat)
+                .transform(unitTransformers.temperature)
+                .end(),
+            year: easy
+                .read({
+                    type: Type.INT16_LE,
+                    offset: 93,
+                })
+                .nullIfEquals(...nullables.heat)
+                .transform(unitTransformers.temperature)
+                .end(),
         },
         thsw: {
-            day: ParseEntry.create({
-                type: Types.INT16,
-                offset: Length.BYTES(95),
-                nullables: nullables.thsw,
-                nullWith: "dayTime",
-            }),
-            dayTime: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(97),
-                nullables: nullables.time,
-                transform: Pipeline(transformers.time),
-                nullWith: "day",
-            }),
-            month: ParseEntry.create({
-                type: Types.INT16,
-                offset: Length.BYTES(99),
-                nullables: nullables.thsw,
-            }),
-            year: ParseEntry.create({
-                type: Types.INT16,
-                offset: Length.BYTES(101),
-                nullables: nullables.thsw,
-            }),
+            day: easy
+                .read({
+                    type: Type.INT16_LE,
+                    offset: 95,
+                })
+                .nullIfEquals(...nullables.thsw)
+                .transform(unitTransformers.temperature)
+                .end(),
+            dayTime: easy
+                .read({
+                    type: Type.UINT16_LE,
+                    offset: 97,
+                })
+                .nullIfEquals(...nullables.time)
+                .transform(transformers.time)
+                .end(),
+            month: easy
+                .read({
+                    type: Type.INT16_LE,
+                    offset: 99,
+                })
+                .nullIfEquals(...nullables.thsw)
+                .transform(unitTransformers.temperature)
+                .end(),
+            year: easy
+                .read({
+                    type: Type.INT16_LE,
+                    offset: 101,
+                })
+                .nullIfEquals(...nullables.thsw)
+                .transform(unitTransformers.temperature)
+                .end(),
         },
         solarRadiation: {
-            month: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(107),
-                nullables: nullables.solar,
-                transform: Pipeline(unitTransformers.solarRadiation),
-            }),
-            year: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(109),
-                nullables: nullables.solar,
-                transform: Pipeline(unitTransformers.solarRadiation),
-            }),
-            day: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(103),
-                nullables: nullables.solar,
-                nullWith: "dayTime",
-                transform: Pipeline(unitTransformers.solarRadiation),
-            }),
-            dayTime: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(105),
-                nullables: nullables.time,
-                transform: Pipeline(transformers.time),
-                nullWith: "day",
-            }),
+            month: easy
+                .read({
+                    type: Type.UINT16_LE,
+                    offset: 107,
+                })
+                .nullIfEquals(...nullables.solar)
+                .transform(unitTransformers.solarRadiation)
+                .end(),
+            year: easy
+                .read({
+                    type: Type.UINT16_LE,
+                    offset: 109,
+                })
+                .nullIfEquals(...nullables.solar)
+                .transform(unitTransformers.solarRadiation)
+                .end(),
+            day: easy
+                .read({
+                    type: Type.UINT16_LE,
+                    offset: 103,
+                })
+                .nullIfEquals(...nullables.solar)
+                .transform(unitTransformers.solarRadiation)
+                .end(),
+            dayTime: easy
+                .read({
+                    type: Type.UINT16_LE,
+                    offset: 105,
+                })
+                .nullIfEquals(...nullables.time)
+                .transform(transformers.time)
+                .end(),
         },
         uv: {
-            month: ParseEntry.create({
-                type: Types.UINT8,
-                offset: Length.BYTES(114),
-                transform: Pipeline(transformers.uv),
-            }),
-            year: ParseEntry.create({
-                type: Types.UINT8,
-                offset: Length.BYTES(115),
-                transform: Pipeline(transformers.uv),
-            }),
-            day: ParseEntry.create({
-                type: Types.UINT8,
-                offset: Length.BYTES(111),
-                nullWith: "dayTime",
-                transform: Pipeline(transformers.uv),
-            }),
-            dayTime: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(112),
-                nullables: nullables.time,
-                transform: Pipeline(transformers.time),
-                nullWith: "day",
-            }),
+            month: easy
+                .read({
+                    type: Type.UINT8,
+                    offset: 114,
+                })
+                .nullIfEquals(...nullables.uv)
+                .transform(transformers.uv)
+                .end(),
+            year: easy
+                .read({
+                    type: Type.UINT8,
+                    offset: 115,
+                })
+                .nullIfEquals(...nullables.uv)
+                .transform(transformers.uv)
+                .end(),
+            day: easy
+                .read({
+                    type: Type.UINT8,
+                    offset: 111,
+                })
+                .nullIfEquals(...nullables.uv)
+                .transform(transformers.uv)
+                .end(),
+            dayTime: easy
+                .read({
+                    type: Type.UINT16_LE,
+                    offset: 112,
+                })
+                .nullIfEquals(...nullables.time)
+                .transform(transformers.time)
+                .end(),
         },
         rainRate: {
-            hour: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(120),
-                transform: Pipeline(
-                    rainClicksToInchTransformer,
-                    unitTransformers.rain
-                ),
-            }),
-            day: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(116),
-                nullWith: "dayTime",
-                transform: Pipeline(
-                    rainClicksToInchTransformer,
-                    unitTransformers.rain
-                ),
-            }),
-            dayTime: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(118),
-                nullables: nullables.time,
-                transform: Pipeline(transformers.time),
-                nullWith: "day",
-            }),
-            month: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(122),
-                transform: Pipeline(
-                    rainClicksToInchTransformer,
-                    unitTransformers.rain
-                ),
-            }),
-            year: ParseEntry.create({
-                type: Types.UINT16,
-                offset: Length.BYTES(124),
-                transform: Pipeline(
-                    rainClicksToInchTransformer,
-                    unitTransformers.rain
-                ),
-            }),
+            hour: easy
+                .read({
+                    type: Type.UINT16_LE,
+                    offset: 120,
+                })
+                .transform(rainClicksToInchTransformer)
+                .transform(unitTransformers.rain)
+                .end(),
+            day: easy
+                .read({
+                    type: Type.UINT16_LE,
+                    offset: 116,
+                })
+                .transform(rainClicksToInchTransformer)
+                .transform(unitTransformers.rain)
+                .end(),
+            dayTime: easy
+                .read({
+                    type: Type.UINT16_LE,
+                    offset: 118,
+                })
+                .nullIfEquals(...nullables.time)
+                .transform(transformers.time)
+                .end(),
+            month: easy
+                .read({
+                    type: Type.UINT16_LE,
+                    offset: 122,
+                })
+                .transform(rainClicksToInchTransformer)
+                .transform(unitTransformers.rain)
+                .end(),
+            year: easy
+                .read({
+                    type: Type.UINT16_LE,
+                    offset: 124,
+                })
+                .transform(rainClicksToInchTransformer)
+                .transform(unitTransformers.rain)
+                .end(),
         },
-        extraTemps: [
-            {
-                day: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.ZERO(),
-                        nullables: nullables.extraTemp,
-                        transform: Pipeline(
-                            transformers.extraTemp,
-                            unitTransformers.temperature
-                        ),
-                        nullWith: "lowTime",
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(15),
-                        nullables: nullables.extraTemp,
-                        transform: Pipeline(
-                            transformers.extraTemp,
-                            unitTransformers.temperature
-                        ),
-                        nullWith: "highTime",
-                    }),
-                    lowTime: ParseEntry.create({
-                        type: Types.UINT16,
-                        offset: Length.BYTES(30),
-                        nullables: nullables.time,
-                        transform: Pipeline(transformers.time),
-                        nullWith: "low",
-                    }),
-                    highTime: ParseEntry.create({
-                        type: Types.UINT16,
-                        offset: Length.BYTES(60),
-                        nullables: nullables.time,
-                        transform: Pipeline(transformers.time),
-                        nullWith: "high",
-                    }),
-                },
-                month: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(105),
-                        nullables: nullables.extraTemp,
-                        transform: Pipeline(
-                            transformers.extraTemp,
-                            unitTransformers.temperature
-                        ),
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(90),
-                        nullables: nullables.extraTemp,
-                        transform: Pipeline(
-                            transformers.extraTemp,
-                            unitTransformers.temperature
-                        ),
-                    }),
-                },
-                year: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(135),
-                        nullables: nullables.extraTemp,
-                        transform: Pipeline(
-                            transformers.extraTemp,
-                            unitTransformers.temperature
-                        ),
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(120),
-                        nullables: nullables.extraTemp,
-                        transform: Pipeline(
-                            transformers.extraTemp,
-                            unitTransformers.temperature
-                        ),
-                    }),
-                },
-            },
-            {
-                length: 7,
-                offset: Length.BYTES(126),
-            },
-        ],
-        soilTemps: [
-            {
-                day: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(0),
-                        nullables: nullables.soilTemp,
-                        transform: Pipeline(
-                            transformers.soilTemp,
-                            unitTransformers.temperature
-                        ),
-                        nullWith: "lowTime",
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(15),
-                        nullables: nullables.soilTemp,
-                        transform: Pipeline(
-                            transformers.soilTemp,
-                            unitTransformers.temperature
-                        ),
-                        nullWith: "highTime",
-                    }),
-                    lowTime: ParseEntry.create({
-                        type: Types.UINT16,
-                        offset: Length.BYTES(30),
-                        nullables: nullables.time,
-                        transform: Pipeline(transformers.time),
-                        nullWith: "low",
-                    }),
-                    highTime: ParseEntry.create({
-                        type: Types.UINT16,
-                        offset: Length.BYTES(60),
-                        nullables: nullables.time,
-                        transform: Pipeline(transformers.time),
-                        nullWith: "high",
-                    }),
-                },
-                month: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(105),
-                        nullables: nullables.soilTemp,
-                        transform: Pipeline(
-                            transformers.soilTemp,
-                            unitTransformers.temperature
-                        ),
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(90),
-                        nullables: nullables.soilTemp,
-                        transform: Pipeline(
-                            transformers.soilTemp,
-                            unitTransformers.temperature
-                        ),
-                    }),
-                },
-                year: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(135),
-                        nullables: nullables.soilTemp,
-                        transform: Pipeline(
-                            transformers.soilTemp,
-                            unitTransformers.temperature
-                        ),
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(120),
-                        nullables: nullables.soilTemp,
-                        transform: Pipeline(
-                            transformers.soilTemp,
-                            unitTransformers.temperature
-                        ),
-                    }),
-                },
-            },
-            {
-                length: 4,
-                offset: Length.BYTES(137),
-            },
-        ],
-        leafTemps: [
-            {
-                day: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(0),
-                        nullables: nullables.leafTemp,
-                        transform: Pipeline(
-                            transformers.leafTemp,
-                            unitTransformers.temperature
-                        ),
-                        nullWith: "lowTime",
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(15),
-                        nullables: nullables.leafTemp,
-                        transform: Pipeline(
-                            transformers.leafTemp,
-                            unitTransformers.temperature
-                        ),
-                        nullWith: "highTime",
-                    }),
-                    lowTime: ParseEntry.create({
-                        type: Types.UINT16,
-                        offset: Length.BYTES(30),
-                        nullables: nullables.time,
-                        transform: Pipeline(transformers.time),
-                        nullWith: "low",
-                    }),
-                    highTime: ParseEntry.create({
-                        type: Types.UINT16,
-                        offset: Length.BYTES(60),
-                        nullables: nullables.time,
-                        transform: Pipeline(transformers.time),
-                        nullWith: "high",
-                    }),
-                },
-                month: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(105),
-                        nullables: nullables.leafTemp,
-                        transform: Pipeline(
-                            transformers.leafTemp,
-                            unitTransformers.temperature
-                        ),
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(90),
-                        nullables: nullables.leafTemp,
-                        transform: Pipeline(
-                            transformers.leafTemp,
-                            unitTransformers.temperature
-                        ),
-                    }),
-                },
-                year: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(135),
-                        nullables: nullables.leafTemp,
-                        transform: Pipeline(
-                            transformers.leafTemp,
-                            unitTransformers.temperature
-                        ),
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(120),
-                        nullables: nullables.leafTemp,
-                        transform: Pipeline(
-                            transformers.leafTemp,
-                            unitTransformers.temperature
-                        ),
-                    }),
-                },
-            },
-            {
-                length: 4,
-                offset: Length.BYTES(133),
-            },
-        ],
-        extraHums: [
-            {
-                day: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(0),
-                        nullables: nullables.humidity,
-                        nullWith: "lowTime",
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(8),
-                        nullables: nullables.humidity,
-                        nullWith: "highTime",
-                    }),
-                    lowTime: ParseEntry.create({
-                        type: Types.UINT16,
-                        offset: Length.BYTES(16),
-                        nullables: nullables.time,
-                        transform: Pipeline(transformers.time),
-                        nullWith: "low",
-                    }),
-                    highTime: ParseEntry.create({
-                        type: Types.UINT16,
-                        offset: Length.BYTES(32),
-                        nullables: nullables.time,
-                        transform: Pipeline(transformers.time),
-                        nullWith: "high",
-                    }),
-                },
-                month: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(56),
-                        nullables: nullables.humidity,
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(48),
-                        nullables: nullables.humidity,
-                    }),
-                },
-                year: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(72),
-                        nullables: nullables.humidity,
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(64),
-                        nullables: nullables.humidity,
-                    }),
-                },
-            },
-            {
-                length: 7,
-                offset: Length.BYTES(277),
-            },
-        ],
-        soilMoistures: [
-            {
-                day: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(12),
-                        nullables: nullables.soilMoisture,
-                        nullWith: "lowTime",
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(0),
-                        nullables: nullables.soilMoisture,
-                        nullWith: "highTime",
-                    }),
-                    lowTime: ParseEntry.create({
-                        type: Types.UINT16,
-                        offset: Length.BYTES(16),
-                        nullables: nullables.time,
-                        transform: Pipeline(transformers.time),
-                        nullWith: "low",
-                    }),
-                    highTime: ParseEntry.create({
-                        type: Types.UINT16,
-                        offset: Length.BYTES(4),
-                        nullables: nullables.time,
-                        transform: Pipeline(transformers.time),
-                        nullWith: "high",
-                    }),
-                },
-                month: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(24),
-                        nullables: nullables.soilMoisture,
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(28),
-                        nullables: nullables.soilMoisture,
-                    }),
-                },
-                year: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(32),
-                        nullables: nullables.soilMoisture,
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(36),
-                        nullables: nullables.soilMoisture,
-                    }),
-                },
-            },
-            {
-                length: 4,
-                offset: Length.BYTES(356),
-            },
-        ],
-        leafWetnesses: [
-            {
-                day: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(12),
-                        nullables: nullables.leafWetness,
-                        nullWith: "lowTime",
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(0),
-                        nullables: nullables.leafWetness,
-                        nullWith: "highTime",
-                    }),
-                    lowTime: ParseEntry.create({
-                        type: Types.UINT16,
-                        offset: Length.BYTES(16),
-                        nullables: nullables.time,
-                        transform: Pipeline(transformers.time),
-                        nullWith: "low",
-                    }),
-                    highTime: ParseEntry.create({
-                        type: Types.UINT16,
-                        offset: Length.BYTES(4),
-                        nullables: nullables.time,
-                        transform: Pipeline(transformers.time),
-                        nullWith: "high",
-                    }),
-                },
-                month: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(24),
-                        nullables: nullables.leafWetness,
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(28),
-                        nullables: nullables.leafWetness,
-                    }),
-                },
-                year: {
-                    low: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(32),
-                        nullables: nullables.leafWetness,
-                    }),
-                    high: ParseEntry.create({
-                        type: Types.UINT8,
-                        offset: Length.BYTES(36),
-                        nullables: nullables.leafWetness,
-                    }),
-                },
-            },
-            {
-                length: 4,
-                offset: Length.BYTES(396),
-            },
-        ],
-        humOut: {
+        tempExtra: {
             day: {
-                low: ParseEntry.create({
-                    type: Types.UINT8,
-                    offset: Length.BYTES(276),
-                    nullables: nullables.humidity,
-                    nullWith: "lowTime",
-                }),
-                high: ParseEntry.create({
-                    type: Types.UINT8,
-                    offset: Length.BYTES(284),
-                    nullables: nullables.humidity,
-                    nullWith: "highTime",
-                }),
-                lowTime: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(292),
-                    nullables: nullables.time,
-                    transform: Pipeline(transformers.time),
-                    nullWith: "low",
-                }),
-                highTime: ParseEntry.create({
-                    type: Types.UINT16,
-                    offset: Length.BYTES(308),
-                    nullables: nullables.time,
-                    transform: Pipeline(transformers.time),
-                    nullWith: "high",
-                }),
+                low: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 126,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 141,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                lowTime: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE
+                        ),
+                        offset: 156,
+                    })
+                    .nullIfItemEquals(...nullables.time)
+                    .transformTupleItem(transformers.time)
+                    .end(),
+                highTime: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE
+                        ),
+                        offset: 186,
+                    })
+                    .nullIfItemEquals(...nullables.time)
+                    .transformTupleItem(transformers.time)
+                    .end(),
             },
             month: {
-                low: ParseEntry.create({
-                    type: Types.UINT8,
-                    offset: Length.BYTES(332),
-                    nullables: nullables.humidity,
-                }),
-                high: ParseEntry.create({
-                    type: Types.UINT8,
-                    offset: Length.BYTES(324),
-                    nullables: nullables.humidity,
-                }),
+                low: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 231,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 216,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
             },
             year: {
-                low: ParseEntry.create({
-                    type: Types.UINT8,
-                    offset: Length.BYTES(348),
-                    nullables: nullables.humidity,
-                }),
-                high: ParseEntry.create({
-                    type: Types.UINT8,
-                    offset: Length.BYTES(340),
-                    nullables: nullables.humidity,
-                }),
+                low: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 261,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 246,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
             },
         },
-    });
+        soilTemps: {
+            day: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 133,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 148,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                lowTime: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE
+                        ),
+                        offset: 170,
+                    })
+                    .nullIfItemEquals(...nullables.time)
+                    .transformTupleItem(transformers.time)
+                    .end(),
+                highTime: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE
+                        ),
+                        offset: 200,
+                    })
+                    .nullIfItemEquals(...nullables.time)
+                    .transformTupleItem(transformers.time)
+                    .end(),
+            },
+            month: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 238,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 223,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+            },
+            year: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 268,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 253,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+            },
+        },
+        leafTemps: {
+            day: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 137,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 152,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                lowTime: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE
+                        ),
+                        offset: 178,
+                    })
+                    .nullIfItemEquals(...nullables.time)
+                    .transformTupleItem(transformers.time)
+                    .end(),
+                highTime: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE
+                        ),
+                        offset: 208,
+                    })
+                    .nullIfItemEquals(...nullables.time)
+                    .transformTupleItem(transformers.time)
+                    .end(),
+            },
+            month: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 242,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 227,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+            },
+            year: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 272,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 257,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+            },
+        },
+        humExtra: {
+            day: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 277,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 285,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                lowTime: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE
+                        ),
+                        offset: 293,
+                    })
+                    .nullIfItemEquals(...nullables.time)
+                    .transformTupleItem(transformers.time)
+                    .end(),
+                highTime: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE
+                        ),
+                        offset: 309,
+                    })
+                    .nullIfItemEquals(...nullables.time)
+                    .transformTupleItem(transformers.time)
+                    .end(),
+            },
+            month: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 333,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 325,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+            },
+            year: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 349,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_7(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 341,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+            },
+        },
+        soilMoistures: {
+            day: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 368,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 356,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                lowTime: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE
+                        ),
+                        offset: 372,
+                    })
+                    .nullIfItemEquals(...nullables.time)
+                    .transformTupleItem(transformers.time)
+                    .end(),
+                highTime: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE
+                        ),
+                        offset: 360,
+                    })
+                    .nullIfItemEquals(...nullables.time)
+                    .transformTupleItem(transformers.time)
+                    .end(),
+            },
+            month: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 380,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 384,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+            },
+            year: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 388,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 392,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+            },
+        },
+        leafWetnesses: {
+            day: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 408,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 396,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                lowTime: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE
+                        ),
+                        offset: 412,
+                    })
+                    .nullIfItemEquals(...nullables.time)
+                    .transformTupleItem(transformers.time)
+                    .end(),
+                highTime: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE,
+                            Type.UINT16_LE
+                        ),
+                        offset: 400,
+                    })
+                    .nullIfItemEquals(...nullables.time)
+                    .transformTupleItem(transformers.time)
+                    .end(),
+            },
+            month: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 420,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 424,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+            },
+            year: {
+                low: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 428,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.TUPLE_4(
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8,
+                            Type.INT8
+                        ),
+                        offset: 432,
+                    })
+                    .nullIfItemEquals(...nullables.extraTemp)
+                    .transformTupleItem(transformers.extraTemp)
+                    .transformTupleItem(unitTransformers.temperature)
+                    .end(),
+            },
+        },
+        humOut: {
+            day: {
+                low: easy
+                    .read({
+                        type: Type.UINT8,
+                        offset: 276,
+                    })
+                    .nullIfEquals(...nullables.humidity)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.UINT8,
+                        offset: 284,
+                    })
+                    .nullIfEquals(...nullables.humidity)
+                    .end(),
+                lowTime: easy
+                    .read({
+                        type: Type.UINT16_LE,
+                        offset: 292,
+                    })
+                    .nullIfEquals(...nullables.time)
+                    .transform(transformers.time)
+                    .end(),
+                highTime: easy
+                    .read({
+                        type: Type.UINT16_LE,
+                        offset: 308,
+                    })
+                    .nullIfEquals(...nullables.time)
+                    .transform(transformers.time)
+                    .end(),
+            },
+            month: {
+                low: easy
+                    .read({
+                        type: Type.UINT8,
+                        offset: 332,
+                    })
+                    .nullIfEquals(...nullables.humidity)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.UINT8,
+                        offset: 324,
+                    })
+                    .nullIfEquals(...nullables.humidity)
+                    .end(),
+            },
+            year: {
+                low: easy
+                    .read({
+                        type: Type.UINT8,
+                        offset: 348,
+                    })
+                    .nullIfEquals(...nullables.humidity)
+                    .end(),
+                high: easy
+                    .read({
+                        type: Type.UINT8,
+                        offset: 340,
+                    })
+                    .nullIfEquals(...nullables.humidity)
+                    .end(),
+            },
+        },
+    };
 
-    return merge(new HighsAndLows(), parsed);
+    return result;
 }

@@ -1,4 +1,4 @@
-import { BaudRate, RainCollectorSize } from "vant-environment";
+import { BaudRate, RainCollectorSize } from "vant-environment/structures";
 import { UnitSettings } from "vant-environment/units";
 import { DeviceModel } from "./DeviceModel";
 import { OnContainerCreate } from "./OnContainerCreate";

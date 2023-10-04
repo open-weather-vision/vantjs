@@ -54,8 +54,8 @@ export default function (
                 ),
                 offset: 18,
             })
-            .nullIfItemEquals(...nullables.extraTemp)
-            .transformTupleItem(transformers.extraTemp)
+            .nullIfItemEquals(...nullables.tempExtra)
+            .transformTupleItem(transformers.tempExtra)
             .transformTupleItem(unitTransformers.temperature)
             .end(),
         leafTemps: easy
@@ -581,7 +581,7 @@ export default function (
                 type: Type.UINT8,
                 offset: 43,
             })
-            .nullIfEquals(65535)
+            .nullIfEquals(255)
             .transform(transformers.uv)
             .end(),
         solarRadiation: easy
@@ -589,7 +589,7 @@ export default function (
                 type: Type.INT16_LE,
                 offset: 44,
             })
-            .nullIfEquals(65535)
+            .nullIfEquals(...nullables.solar)
             .transform(unitTransformers.solarRadiation)
             .end(),
         time: new Date(),

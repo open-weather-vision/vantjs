@@ -78,7 +78,7 @@ export default function (
         altimeter: easy
             .read({ type: Type.INT16_LE, offset: 69 })
             .transform((val) => val / 1000)
-            .transform(unitTransformers.elevation)
+            .transform(unitTransformers.pressure)
             .end(),
         heat: easy
             .read({ type: Type.INT16_LE, offset: 35 })

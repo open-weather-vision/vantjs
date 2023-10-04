@@ -116,7 +116,7 @@ const transformers = {
     hex: (value: number | null) =>
         value !== null ? `0x${value.toString(16)}` : null,
     uv: (value: number | null) => (value !== null ? value / 10 : null),
-    extraTemp: (value: number | null) => (value !== null ? value - 90 : null),
+    tempExtra: (value: number | null) => (value !== null ? value - 90 : null),
     soilTemp: (value: number | null) => (value !== null ? value - 90 : null),
     leafTemp: (value: number | null) => (value !== null ? value - 90 : null),
     dayET: (value: number | null) => (value !== null ? value / 1000 : null),

@@ -83,7 +83,7 @@
     },
     "homepage": "https://github.com/harrydehix/vantjs#readme",
     "dependencies": {
-        "@harrydehix/easy-buffer": "^1.0.6",
+        "@harrydehix/easy-buffer": "^1.0.7",
         "crc-full": "^1.1.0",
         "deep-for-each": "^3.0.0",
         "lodash.clonedeep": "^4.5.0",

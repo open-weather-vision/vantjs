@@ -612,8 +612,8 @@ export default function (
                         ),
                         offset: 126,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
+                    .nullIfItemEquals(...nullables.tempExtra)
+                    .transformTupleItem(transformers.tempExtra)
                     .transformTupleItem(unitTransformers.temperature)
                     .end(),
                 high: easy
@@ -629,8 +629,8 @@ export default function (
                         ),
                         offset: 141,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
+                    .nullIfItemEquals(...nullables.tempExtra)
+                    .transformTupleItem(transformers.tempExtra)
                     .transformTupleItem(unitTransformers.temperature)
                     .end(),
                 lowTime: easy
@@ -680,8 +680,8 @@ export default function (
                         ),
                         offset: 231,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
+                    .nullIfItemEquals(...nullables.tempExtra)
+                    .transformTupleItem(transformers.tempExtra)
                     .transformTupleItem(unitTransformers.temperature)
                     .end(),
                 high: easy
@@ -697,8 +697,8 @@ export default function (
                         ),
                         offset: 216,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
+                    .nullIfItemEquals(...nullables.tempExtra)
+                    .transformTupleItem(transformers.tempExtra)
                     .transformTupleItem(unitTransformers.temperature)
                     .end(),
             },
@@ -716,8 +716,8 @@ export default function (
                         ),
                         offset: 261,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
+                    .nullIfItemEquals(...nullables.tempExtra)
+                    .transformTupleItem(transformers.tempExtra)
                     .transformTupleItem(unitTransformers.temperature)
                     .end(),
                 high: easy
@@ -733,8 +733,8 @@ export default function (
                         ),
                         offset: 246,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
+                    .nullIfItemEquals(...nullables.tempExtra)
+                    .transformTupleItem(transformers.tempExtra)
                     .transformTupleItem(unitTransformers.temperature)
                     .end(),
             },
@@ -751,9 +751,9 @@ export default function (
                         ),
                         offset: 133,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.soilTemp)
+                    .transformTupleItem(transformers.soilTemp)
+                    .transformTupleItem(unitTransformers.soilTemperature)
                     .end(),
                 high: easy
                     .read({
@@ -765,9 +765,9 @@ export default function (
                         ),
                         offset: 148,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.soilTemp)
+                    .transformTupleItem(transformers.soilTemp)
+                    .transformTupleItem(unitTransformers.soilTemperature)
                     .end(),
                 lowTime: easy
                     .read({
@@ -807,9 +807,9 @@ export default function (
                         ),
                         offset: 238,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.soilTemp)
+                    .transformTupleItem(transformers.soilTemp)
+                    .transformTupleItem(unitTransformers.soilTemperature)
                     .end(),
                 high: easy
                     .read({
@@ -821,9 +821,9 @@ export default function (
                         ),
                         offset: 223,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.soilTemp)
+                    .transformTupleItem(transformers.soilTemp)
+                    .transformTupleItem(unitTransformers.soilTemperature)
                     .end(),
             },
             year: {
@@ -837,9 +837,9 @@ export default function (
                         ),
                         offset: 268,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.soilTemp)
+                    .transformTupleItem(transformers.soilTemp)
+                    .transformTupleItem(unitTransformers.soilTemperature)
                     .end(),
                 high: easy
                     .read({
@@ -851,9 +851,9 @@ export default function (
                         ),
                         offset: 253,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.soilTemp)
+                    .transformTupleItem(transformers.soilTemp)
+                    .transformTupleItem(unitTransformers.soilTemperature)
                     .end(),
             },
         },
@@ -869,9 +869,10 @@ export default function (
                         ),
                         offset: 137,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+            
+                    .nullIfItemEquals(...nullables.leafTemp)
+                    .transformTupleItem(transformers.leafTemp)
+                    .transformTupleItem(unitTransformers.leafTemperature)
                     .end(),
                 high: easy
                     .read({
@@ -883,9 +884,9 @@ export default function (
                         ),
                         offset: 152,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.leafTemp)
+                    .transformTupleItem(transformers.leafTemp)
+                    .transformTupleItem(unitTransformers.leafTemperature)
                     .end(),
                 lowTime: easy
                     .read({
@@ -925,9 +926,9 @@ export default function (
                         ),
                         offset: 242,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.leafTemp)
+                    .transformTupleItem(transformers.leafTemp)
+                    .transformTupleItem(unitTransformers.leafTemperature)
                     .end(),
                 high: easy
                     .read({
@@ -939,9 +940,9 @@ export default function (
                         ),
                         offset: 227,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.leafTemp)
+                    .transformTupleItem(transformers.leafTemp)
+                    .transformTupleItem(unitTransformers.leafTemperature)
                     .end(),
             },
             year: {
@@ -955,9 +956,9 @@ export default function (
                         ),
                         offset: 272,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.leafTemp)
+                    .transformTupleItem(transformers.leafTemp)
+                    .transformTupleItem(unitTransformers.leafTemperature)
                     .end(),
                 high: easy
                     .read({
@@ -969,9 +970,9 @@ export default function (
                         ),
                         offset: 257,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.leafTemp)
+                    .transformTupleItem(transformers.leafTemp)
+                    .transformTupleItem(unitTransformers.leafTemperature)
                     .end(),
             },
         },
@@ -990,9 +991,8 @@ export default function (
                         ),
                         offset: 277,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.humidity)
+                    .transformTupleItem(unitTransformers.humidity)
                     .end(),
                 high: easy
                     .read({
@@ -1007,9 +1007,8 @@ export default function (
                         ),
                         offset: 285,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.humidity)
+                    .transformTupleItem(unitTransformers.humidity)
                     .end(),
                 lowTime: easy
                     .read({
@@ -1058,9 +1057,8 @@ export default function (
                         ),
                         offset: 333,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.humidity)
+                    .transformTupleItem(unitTransformers.humidity)
                     .end(),
                 high: easy
                     .read({
@@ -1075,9 +1073,8 @@ export default function (
                         ),
                         offset: 325,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.humidity)
+                    .transformTupleItem(unitTransformers.humidity)
                     .end(),
             },
             year: {
@@ -1094,9 +1091,8 @@ export default function (
                         ),
                         offset: 349,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.humidity)
+                    .transformTupleItem(unitTransformers.humidity)
                     .end(),
                 high: easy
                     .read({
@@ -1111,9 +1107,8 @@ export default function (
                         ),
                         offset: 341,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.humidity)
+                    .transformTupleItem(unitTransformers.humidity)
                     .end(),
             },
         },
@@ -1129,9 +1124,8 @@ export default function (
                         ),
                         offset: 368,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.soilMoisture)
+                    .transformTupleItem(unitTransformers.soilMoisture)
                     .end(),
                 high: easy
                     .read({
@@ -1143,9 +1137,8 @@ export default function (
                         ),
                         offset: 356,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.soilMoisture)
+                    .transformTupleItem(unitTransformers.soilMoisture)
                     .end(),
                 lowTime: easy
                     .read({
@@ -1185,9 +1178,8 @@ export default function (
                         ),
                         offset: 380,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.soilMoisture)
+                    .transformTupleItem(unitTransformers.soilMoisture)
                     .end(),
                 high: easy
                     .read({
@@ -1199,9 +1191,8 @@ export default function (
                         ),
                         offset: 384,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.soilMoisture)
+                    .transformTupleItem(unitTransformers.soilMoisture)
                     .end(),
             },
             year: {
@@ -1215,9 +1206,8 @@ export default function (
                         ),
                         offset: 388,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.soilMoisture)
+                    .transformTupleItem(unitTransformers.soilMoisture)
                     .end(),
                 high: easy
                     .read({
@@ -1229,9 +1219,8 @@ export default function (
                         ),
                         offset: 392,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.soilMoisture)
+                    .transformTupleItem(unitTransformers.soilMoisture)
                     .end(),
             },
         },
@@ -1247,9 +1236,7 @@ export default function (
                         ),
                         offset: 408,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.leafWetness)
                     .end(),
                 high: easy
                     .read({
@@ -1261,9 +1248,7 @@ export default function (
                         ),
                         offset: 396,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.leafWetness)
                     .end(),
                 lowTime: easy
                     .read({
@@ -1303,9 +1288,7 @@ export default function (
                         ),
                         offset: 420,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.leafWetness)
                     .end(),
                 high: easy
                     .read({
@@ -1317,9 +1300,7 @@ export default function (
                         ),
                         offset: 424,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.leafWetness)
                     .end(),
             },
             year: {
@@ -1333,9 +1314,7 @@ export default function (
                         ),
                         offset: 428,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.leafWetness)
                     .end(),
                 high: easy
                     .read({
@@ -1347,9 +1326,7 @@ export default function (
                         ),
                         offset: 432,
                     })
-                    .nullIfItemEquals(...nullables.extraTemp)
-                    .transformTupleItem(transformers.extraTemp)
-                    .transformTupleItem(unitTransformers.temperature)
+                    .nullIfItemEquals(...nullables.leafWetness)
                     .end(),
             },
         },
@@ -1421,5 +1398,117 @@ export default function (
         },
     };
 
+    if(!result.press.day.lowTime || result.press.day.low === null){
+        result.press.day.low = null;
+        result.press.day.lowTime = null;
+    }
+    if(!result.press.day.highTime || result.press.day.high === null){
+        result.press.day.high = null;
+        result.press.day.highTime = null;
+    }
+
+    if(!result.wind.dayTime || result.wind.day === null){
+        result.wind.day = null;
+        result.wind.dayTime = null;
+    }
+
+    if(!result.chill.dayTime || result.chill.day === null){
+        result.chill.day = null;
+        result.chill.dayTime = null;
+    }
+
+    if(!result.heat.dayTime || result.heat.day === null){
+        result.heat.day = null;
+        result.heat.dayTime = null;
+    }
+
+    if(!result.thsw.dayTime || result.thsw.day === null){
+        result.thsw.day = null;
+        result.thsw.dayTime = null;
+    }
+
+    if(!result.solarRadiation.dayTime || result.solarRadiation.day === null){
+        result.solarRadiation.day = null;
+        result.solarRadiation.dayTime = null;
+    }
+
+    if(!result.uv.dayTime || result.uv.day === null){
+        result.uv.day = null;
+        result.uv.dayTime = null;
+    }
+
+    if(!result.rainRate.dayTime || result.rainRate.day === null){
+        result.rainRate.day = null;
+        result.rainRate.hour = null;
+        result.rainRate.dayTime = null;
+    }
+
+    if(!result.tempIn.day.lowTime || result.tempIn.day.low === null){
+        result.tempIn.day.low = null;
+        result.tempIn.day.lowTime = null;
+    }
+    if(!result.tempIn.day.highTime || result.tempIn.day.high === null){
+        result.tempIn.day.high = null;
+        result.tempIn.day.highTime = null;
+    }
+
+    if(!result.humIn.day.lowTime || result.humIn.day.low === null){
+        result.humIn.day.low = null;
+        result.humIn.day.lowTime = null;
+    }
+    if(!result.humIn.day.highTime || result.humIn.day.high === null){
+        result.humIn.day.high = null;
+        result.humIn.day.highTime = null;
+    }
+
+    if(!result.tempOut.day.lowTime || result.tempOut.day.low === null){
+        result.tempOut.day.low = null;
+        result.tempOut.day.lowTime = null;
+    }
+    if(!result.tempOut.day.highTime || result.tempOut.day.high === null){
+        result.tempOut.day.high = null;
+        result.tempOut.day.highTime = null;
+    }
+
+    if(!result.humOut.day.lowTime || result.humOut.day.low === null){
+        result.humOut.day.low = null;
+        result.humOut.day.lowTime = null;
+    }
+    if(!result.humOut.day.highTime || result.humOut.day.high === null){
+        result.humOut.day.high = null;
+        result.humOut.day.highTime = null;
+    }
+
+    if(!result.dew.day.lowTime || result.dew.day.low === null){
+        result.dew.day.low = null;
+        result.dew.day.lowTime = null;
+    }
+    if(!result.dew.day.highTime || result.dew.day.high === null){
+        result.dew.day.high = null;
+        result.dew.day.highTime = null;
+    }
+
+    setNeighboursNullInTuple(result, "soilMoistures");
+    setNeighboursNullInTuple(result, "soilTemps");
+    setNeighboursNullInTuple(result, "humExtra");
+    setNeighboursNullInTuple(result, "tempExtra");
+    setNeighboursNullInTuple(result, "leafTemps");
+    setNeighboursNullInTuple(result, "leafWetnesses");
+
+
     return result;
+}
+
+
+function setNeighboursNullInTuple(result: HighsAndLows, field: "soilMoistures" | "soilTemps" | "humExtra" | "tempExtra" | "leafTemps" | "leafWetnesses"){
+    for(let i = 0; i < result[field].day.lowTime.length; i++){
+        if(!result[field].day.lowTime[i] || result[field].day.low[i] === null){
+            result[field].day.low[i] = null;
+            result[field].day.lowTime[i] = null;
+        }
+        if(!result[field].day.highTime[i] || result[field].day.high[i] === null){
+            result[field].day.high[i] = null;
+            result[field].day.highTime[i] = null;
+        }
+    }
 }

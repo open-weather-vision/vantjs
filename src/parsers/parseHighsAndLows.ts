@@ -15,43 +15,37 @@ export default function (
         press: {
             day: {
                 low: easy
-                    .read({ type: Type.UINT16_LE, offset: 0 })
+                    .read(Type.UINT16_LE, 0)
                     .nullIfEquals(...nullables.pressure)
                     .transform(transformers.pressure)
                     .transform(unitTransformers.pressure)
                     .end(),
                 high: easy
-                    .read({ type: Type.UINT16_LE, offset: 2 })
+                    .read(Type.UINT16_LE, 2)
                     .nullIfEquals(...nullables.pressure)
                     .transform(transformers.pressure)
                     .transform(unitTransformers.pressure)
                     .end(),
                 lowTime: easy
-                    .read({
-                        type: Type.UINT16_LE,
-                        offset: 12,
-                    })
+                    .read(Type.UINT16_LE, 12)
                     .nullIfEquals(...nullables.time)
                     .transform(transformers.time)
                     .end(),
                 highTime: easy
-                    .read({
-                        type: Type.UINT16_LE,
-                        offset: 14,
-                    })
+                    .read(Type.UINT16_LE, 14)
                     .nullIfEquals(...nullables.time)
                     .transform(transformers.time)
                     .end(),
             },
             month: {
                 low: easy
-                    .read({ type: Type.UINT16_LE, offset: 4 })
+                    .read(Type.UINT16_LE, 4)
                     .nullIfEquals(...nullables.pressure)
                     .transform(transformers.pressure)
                     .transform(unitTransformers.pressure)
                     .end(),
                 high: easy
-                    .read({ type: Type.UINT16_LE, offset: 6 })
+                    .read(Type.UINT16_LE, 6)
                     .nullIfEquals(...nullables.pressure)
                     .transform(transformers.pressure)
                     .transform(unitTransformers.pressure)
@@ -59,13 +53,13 @@ export default function (
             },
             year: {
                 low: easy
-                    .read({ type: Type.UINT16_LE, offset: 8 })
+                    .read(Type.UINT16_LE, 8)
                     .nullIfEquals(...nullables.pressure)
                     .transform(transformers.pressure)
                     .transform(unitTransformers.pressure)
                     .end(),
                 high: easy
-                    .read({ type: Type.UINT16_LE, offset: 10 })
+                    .read(Type.UINT16_LE, 10)
                     .nullIfEquals(...nullables.pressure)
                     .transform(transformers.pressure)
                     .transform(unitTransformers.pressure)
@@ -74,69 +68,57 @@ export default function (
         },
         wind: {
             day: easy
-                .read({ type: Type.UINT8, offset: 16 })
+                .read(Type.UINT8, 16)
                 .transform(unitTransformers.wind)
                 .end(),
             dayTime: easy
-                .read({ type: Type.UINT16_LE, offset: 17 })
+                .read(Type.UINT16_LE, 17)
                 .nullIfEquals(...nullables.time)
                 .transform(transformers.time)
                 .end(),
             month: easy
-                .read({ type: Type.UINT8, offset: 19 })
+                .read(Type.UINT8, 19)
                 .transform(unitTransformers.wind)
                 .end(),
             year: easy
-                .read({ type: Type.UINT8, offset: 20 })
+                .read(Type.UINT8, 20)
                 .transform(unitTransformers.wind)
                 .end(),
         },
         tempIn: {
             day: {
                 low: easy
-                    .read({ type: Type.INT16_LE, offset: 23 })
+                    .read(Type.INT16_LE, 23)
                     .nullIfEquals(...nullables.tempLow)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
                     .end(),
                 high: easy
-                    .read({ type: Type.INT16_LE, offset: 21 })
+                    .read(Type.INT16_LE, 21)
                     .nullIfEquals(...nullables.tempHigh)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
                     .end(),
                 lowTime: easy
-                    .read({
-                        type: Type.UINT16_LE,
-                        offset: 27,
-                    })
+                    .read(Type.UINT16_LE, 27)
                     .nullIfEquals(...nullables.time)
                     .transform(transformers.time)
                     .end(),
                 highTime: easy
-                    .read({
-                        type: Type.UINT16_LE,
-                        offset: 25,
-                    })
+                    .read(Type.UINT16_LE, 25)
                     .nullIfEquals(...nullables.time)
                     .transform(transformers.time)
                     .end(),
             },
             month: {
                 low: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 29,
-                    })
+                    .read(Type.INT16_LE, 29)
                     .nullIfEquals(...nullables.tempLow)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 31,
-                    })
+                    .read(Type.INT16_LE, 31)
                     .nullIfEquals(...nullables.tempHigh)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
@@ -144,19 +126,13 @@ export default function (
             },
             year: {
                 low: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 33,
-                    })
+                    .read(Type.INT16_LE, 33)
                     .nullIfEquals(...nullables.tempLow)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 35,
-                    })
+                    .read(Type.INT16_LE, 35)
                     .nullIfEquals(...nullables.tempHigh)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
@@ -166,65 +142,41 @@ export default function (
         humIn: {
             day: {
                 low: easy
-                    .read({
-                        type: Type.UINT8,
-                        offset: 38,
-                    })
+                    .read(Type.UINT8, 38)
                     .nullIfEquals(...nullables.humidity)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.UINT8,
-                        offset: 37,
-                    })
+                    .read(Type.UINT8, 37)
                     .nullIfEquals(...nullables.humidity)
                     .end(),
                 lowTime: easy
-                    .read({
-                        type: Type.UINT16_LE,
-                        offset: 41,
-                    })
+                    .read(Type.UINT16_LE, 41)
                     .nullIfEquals(...nullables.time)
                     .transform(transformers.time)
                     .end(),
                 highTime: easy
-                    .read({
-                        type: Type.UINT16_LE,
-                        offset: 39,
-                    })
+                    .read(Type.UINT16_LE, 39)
                     .nullIfEquals(...nullables.time)
                     .transform(transformers.time)
                     .end(),
             },
             month: {
                 low: easy
-                    .read({
-                        type: Type.UINT8,
-                        offset: 44,
-                    })
+                    .read(Type.UINT8, 44)
                     .nullIfEquals(...nullables.humidity)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.UINT8,
-                        offset: 43,
-                    })
+                    .read(Type.UINT8, 43)
                     .nullIfEquals(...nullables.humidity)
                     .end(),
             },
             year: {
                 low: easy
-                    .read({
-                        type: Type.UINT8,
-                        offset: 46,
-                    })
+                    .read(Type.UINT8, 46)
                     .nullIfEquals(...nullables.humidity)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.UINT8,
-                        offset: 45,
-                    })
+                    .read(Type.UINT8, 45)
                     .nullIfEquals(...nullables.humidity)
                     .end(),
             },
@@ -232,55 +184,37 @@ export default function (
         tempOut: {
             day: {
                 low: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 47,
-                    })
+                    .read(Type.INT16_LE, 47)
                     .nullIfEquals(...nullables.tempLow)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 49,
-                    })
+                    .read(Type.INT16_LE, 49)
                     .nullIfEquals(...nullables.tempHigh)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
                     .end(),
                 lowTime: easy
-                    .read({
-                        type: Type.UINT16_LE,
-                        offset: 51,
-                    })
+                    .read(Type.UINT16_LE, 51)
                     .nullIfEquals(...nullables.time)
                     .transform(transformers.time)
                     .end(),
                 highTime: easy
-                    .read({
-                        type: Type.UINT16_LE,
-                        offset: 53,
-                    })
+                    .read(Type.UINT16_LE, 53)
                     .nullIfEquals(...nullables.time)
                     .transform(transformers.time)
                     .end(),
             },
             month: {
                 low: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 57,
-                    })
+                    .read(Type.INT16_LE, 57)
                     .nullIfEquals(...nullables.tempLow)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 55,
-                    })
+                    .read(Type.INT16_LE, 55)
                     .nullIfEquals(...nullables.tempHigh)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
@@ -288,19 +222,13 @@ export default function (
             },
             year: {
                 low: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 61,
-                    })
+                    .read(Type.INT16_LE, 61)
                     .nullIfEquals(...nullables.tempLow)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 59,
-                    })
+                    .read(Type.INT16_LE, 59)
                     .nullIfEquals(...nullables.tempHigh)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
@@ -310,55 +238,37 @@ export default function (
         dew: {
             day: {
                 low: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 63,
-                    })
+                    .read(Type.INT16_LE, 63)
                     .nullIfEquals(...nullables.tempLow)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 65,
-                    })
+                    .read(Type.INT16_LE, 65)
                     .nullIfEquals(...nullables.tempHigh)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
                     .end(),
                 lowTime: easy
-                    .read({
-                        type: Type.UINT16_LE,
-                        offset: 67,
-                    })
+                    .read(Type.UINT16_LE, 67)
                     .nullIfEquals(...nullables.time)
                     .transform(transformers.time)
                     .end(),
                 highTime: easy
-                    .read({
-                        type: Type.UINT16_LE,
-                        offset: 69,
-                    })
+                    .read(Type.UINT16_LE, 69)
                     .nullIfEquals(...nullables.time)
                     .transform(transformers.time)
                     .end(),
             },
             month: {
                 low: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 73,
-                    })
+                    .read(Type.INT16_LE, 73)
                     .nullIfEquals(...nullables.tempLow)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 71,
-                    })
+                    .read(Type.INT16_LE, 71)
                     .nullIfEquals(...nullables.tempHigh)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
@@ -366,19 +276,13 @@ export default function (
             },
             year: {
                 low: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 77,
-                    })
+                    .read(Type.INT16_LE, 77)
                     .nullIfEquals(...nullables.tempLow)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.INT16_LE,
-                        offset: 75,
-                    })
+                    .read(Type.INT16_LE, 75)
                     .nullIfEquals(...nullables.tempHigh)
                     .transform(transformers.temperature)
                     .transform(unitTransformers.temperature)
@@ -387,212 +291,137 @@ export default function (
         },
         chill: {
             day: easy
-                .read({
-                    type: Type.INT16_LE,
-                    offset: 79,
-                })
+                .read(Type.INT16_LE, 79)
                 .nullIfEquals(...nullables.chill)
                 .transform(unitTransformers.temperature)
                 .end(),
             dayTime: easy
-                .read({
-                    type: Type.UINT16_LE,
-                    offset: 81,
-                })
+                .read(Type.UINT16_LE, 81)
                 .nullIfEquals(...nullables.time)
                 .transform(transformers.time)
                 .end(),
             month: easy
-                .read({
-                    type: Type.INT16_LE,
-                    offset: 83,
-                })
+                .read(Type.INT16_LE, 83)
                 .nullIfEquals(...nullables.chill)
                 .transform(unitTransformers.temperature)
                 .end(),
             year: easy
-                .read({
-                    type: Type.INT16_LE,
-                    offset: 85,
-                })
+                .read(Type.INT16_LE, 85)
                 .nullIfEquals(...nullables.chill)
                 .transform(unitTransformers.temperature)
                 .end(),
         },
         heat: {
             day: easy
-                .read({
-                    type: Type.INT16_LE,
-                    offset: 87,
-                })
+                .read(Type.INT16_LE, 87)
                 .nullIfEquals(...nullables.heat)
                 .transform(unitTransformers.temperature)
                 .end(),
             dayTime: easy
-                .read({
-                    type: Type.UINT16_LE,
-                    offset: 89,
-                })
+                .read(Type.UINT16_LE, 89)
                 .nullIfEquals(...nullables.time)
                 .transform(transformers.time)
                 .end(),
             month: easy
-                .read({
-                    type: Type.INT16_LE,
-                    offset: 91,
-                })
+                .read(Type.INT16_LE, 91)
                 .nullIfEquals(...nullables.heat)
                 .transform(unitTransformers.temperature)
                 .end(),
             year: easy
-                .read({
-                    type: Type.INT16_LE,
-                    offset: 93,
-                })
+                .read(Type.INT16_LE, 93)
                 .nullIfEquals(...nullables.heat)
                 .transform(unitTransformers.temperature)
                 .end(),
         },
         thsw: {
             day: easy
-                .read({
-                    type: Type.INT16_LE,
-                    offset: 95,
-                })
+                .read(Type.INT16_LE, 95)
                 .nullIfEquals(...nullables.thsw)
                 .transform(unitTransformers.temperature)
                 .end(),
             dayTime: easy
-                .read({
-                    type: Type.UINT16_LE,
-                    offset: 97,
-                })
+                .read(Type.UINT16_LE, 97)
                 .nullIfEquals(...nullables.time)
                 .transform(transformers.time)
                 .end(),
             month: easy
-                .read({
-                    type: Type.INT16_LE,
-                    offset: 99,
-                })
+                .read(Type.INT16_LE, 99)
                 .nullIfEquals(...nullables.thsw)
                 .transform(unitTransformers.temperature)
                 .end(),
             year: easy
-                .read({
-                    type: Type.INT16_LE,
-                    offset: 101,
-                })
+                .read(Type.INT16_LE, 101)
                 .nullIfEquals(...nullables.thsw)
                 .transform(unitTransformers.temperature)
                 .end(),
         },
         solarRadiation: {
             month: easy
-                .read({
-                    type: Type.UINT16_LE,
-                    offset: 107,
-                })
+                .read(Type.UINT16_LE, 107)
                 .nullIfEquals(...nullables.solar)
                 .transform(unitTransformers.solarRadiation)
                 .end(),
             year: easy
-                .read({
-                    type: Type.UINT16_LE,
-                    offset: 109,
-                })
+                .read(Type.UINT16_LE, 109)
                 .nullIfEquals(...nullables.solar)
                 .transform(unitTransformers.solarRadiation)
                 .end(),
             day: easy
-                .read({
-                    type: Type.UINT16_LE,
-                    offset: 103,
-                })
+                .read(Type.UINT16_LE, 103)
                 .nullIfEquals(...nullables.solar)
                 .transform(unitTransformers.solarRadiation)
                 .end(),
             dayTime: easy
-                .read({
-                    type: Type.UINT16_LE,
-                    offset: 105,
-                })
+                .read(Type.UINT16_LE, 105)
                 .nullIfEquals(...nullables.time)
                 .transform(transformers.time)
                 .end(),
         },
         uv: {
             month: easy
-                .read({
-                    type: Type.UINT8,
-                    offset: 114,
-                })
+                .read(Type.UINT8, 114)
                 .nullIfEquals(...nullables.uv)
                 .transform(transformers.uv)
                 .end(),
             year: easy
-                .read({
-                    type: Type.UINT8,
-                    offset: 115,
-                })
+                .read(Type.UINT8, 115)
                 .nullIfEquals(...nullables.uv)
                 .transform(transformers.uv)
                 .end(),
             day: easy
-                .read({
-                    type: Type.UINT8,
-                    offset: 111,
-                })
+                .read(Type.UINT8, 111)
                 .nullIfEquals(...nullables.uv)
                 .transform(transformers.uv)
                 .end(),
             dayTime: easy
-                .read({
-                    type: Type.UINT16_LE,
-                    offset: 112,
-                })
+                .read(Type.UINT16_LE, 112)
                 .nullIfEquals(...nullables.time)
                 .transform(transformers.time)
                 .end(),
         },
         rainRate: {
             hour: easy
-                .read({
-                    type: Type.UINT16_LE,
-                    offset: 120,
-                })
+                .read(Type.UINT16_LE, 120)
                 .transform(rainClicksToInchTransformer)
                 .transform(unitTransformers.rain)
                 .end(),
             day: easy
-                .read({
-                    type: Type.UINT16_LE,
-                    offset: 116,
-                })
+                .read(Type.UINT16_LE, 116)
                 .transform(rainClicksToInchTransformer)
                 .transform(unitTransformers.rain)
                 .end(),
             dayTime: easy
-                .read({
-                    type: Type.UINT16_LE,
-                    offset: 118,
-                })
+                .read(Type.UINT16_LE, 118)
                 .nullIfEquals(...nullables.time)
                 .transform(transformers.time)
                 .end(),
             month: easy
-                .read({
-                    type: Type.UINT16_LE,
-                    offset: 122,
-                })
+                .read(Type.UINT16_LE, 122)
                 .transform(rainClicksToInchTransformer)
                 .transform(unitTransformers.rain)
                 .end(),
             year: easy
-                .read({
-                    type: Type.UINT16_LE,
-                    offset: 124,
-                })
+                .read(Type.UINT16_LE, 124)
                 .transform(rainClicksToInchTransformer)
                 .transform(unitTransformers.rain)
                 .end(),
@@ -600,8 +429,8 @@ export default function (
         tempExtra: {
             day: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
@@ -610,15 +439,15 @@ export default function (
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 126,
-                    })
+                        126
+                    )
                     .nullIfItemEquals(...nullables.tempExtra)
                     .transformTupleItem(transformers.tempExtra)
                     .transformTupleItem(unitTransformers.temperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
@@ -627,15 +456,15 @@ export default function (
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 141,
-                    })
+                        141
+                    )
                     .nullIfItemEquals(...nullables.tempExtra)
                     .transformTupleItem(transformers.tempExtra)
                     .transformTupleItem(unitTransformers.temperature)
                     .end(),
                 lowTime: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE,
@@ -644,14 +473,14 @@ export default function (
                             Type.UINT16_LE,
                             Type.UINT16_LE
                         ),
-                        offset: 156,
-                    })
+                        156
+                    )
                     .nullIfItemEquals(...nullables.time)
                     .transformTupleItem(transformers.time)
                     .end(),
                 highTime: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE,
@@ -660,16 +489,16 @@ export default function (
                             Type.UINT16_LE,
                             Type.UINT16_LE
                         ),
-                        offset: 186,
-                    })
+                        186
+                    )
                     .nullIfItemEquals(...nullables.time)
                     .transformTupleItem(transformers.time)
                     .end(),
             },
             month: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
@@ -678,15 +507,15 @@ export default function (
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 231,
-                    })
+                        231
+                    )
                     .nullIfItemEquals(...nullables.tempExtra)
                     .transformTupleItem(transformers.tempExtra)
                     .transformTupleItem(unitTransformers.temperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
@@ -695,8 +524,8 @@ export default function (
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 216,
-                    })
+                        216
+                    )
                     .nullIfItemEquals(...nullables.tempExtra)
                     .transformTupleItem(transformers.tempExtra)
                     .transformTupleItem(unitTransformers.temperature)
@@ -704,8 +533,8 @@ export default function (
             },
             year: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
@@ -714,15 +543,15 @@ export default function (
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 261,
-                    })
+                        261
+                    )
                     .nullIfItemEquals(...nullables.tempExtra)
                     .transformTupleItem(transformers.tempExtra)
                     .transformTupleItem(unitTransformers.temperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
@@ -731,8 +560,8 @@ export default function (
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 246,
-                    })
+                        246
+                    )
                     .nullIfItemEquals(...nullables.tempExtra)
                     .transformTupleItem(transformers.tempExtra)
                     .transformTupleItem(unitTransformers.temperature)
@@ -742,85 +571,85 @@ export default function (
         soilTemps: {
             day: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 133,
-                    })
+                        133
+                    )
                     .nullIfItemEquals(...nullables.soilTemp)
                     .transformTupleItem(transformers.soilTemp)
                     .transformTupleItem(unitTransformers.soilTemperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 148,
-                    })
+                        148
+                    )
                     .nullIfItemEquals(...nullables.soilTemp)
                     .transformTupleItem(transformers.soilTemp)
                     .transformTupleItem(unitTransformers.soilTemperature)
                     .end(),
                 lowTime: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE
                         ),
-                        offset: 170,
-                    })
+                        170
+                    )
                     .nullIfItemEquals(...nullables.time)
                     .transformTupleItem(transformers.time)
                     .end(),
                 highTime: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE
                         ),
-                        offset: 200,
-                    })
+                        200
+                    )
                     .nullIfItemEquals(...nullables.time)
                     .transformTupleItem(transformers.time)
                     .end(),
             },
             month: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 238,
-                    })
+                        238
+                    )
                     .nullIfItemEquals(...nullables.soilTemp)
                     .transformTupleItem(transformers.soilTemp)
                     .transformTupleItem(unitTransformers.soilTemperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 223,
-                    })
+                        223
+                    )
                     .nullIfItemEquals(...nullables.soilTemp)
                     .transformTupleItem(transformers.soilTemp)
                     .transformTupleItem(unitTransformers.soilTemperature)
@@ -828,29 +657,29 @@ export default function (
             },
             year: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 268,
-                    })
+                        268
+                    )
                     .nullIfItemEquals(...nullables.soilTemp)
                     .transformTupleItem(transformers.soilTemp)
                     .transformTupleItem(unitTransformers.soilTemperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 253,
-                    })
+                        253
+                    )
                     .nullIfItemEquals(...nullables.soilTemp)
                     .transformTupleItem(transformers.soilTemp)
                     .transformTupleItem(unitTransformers.soilTemperature)
@@ -860,86 +689,86 @@ export default function (
         leafTemps: {
             day: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 137,
-                    })
-            
+                        137
+                    )
+
                     .nullIfItemEquals(...nullables.leafTemp)
                     .transformTupleItem(transformers.leafTemp)
                     .transformTupleItem(unitTransformers.leafTemperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 152,
-                    })
+                        152
+                    )
                     .nullIfItemEquals(...nullables.leafTemp)
                     .transformTupleItem(transformers.leafTemp)
                     .transformTupleItem(unitTransformers.leafTemperature)
                     .end(),
                 lowTime: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE
                         ),
-                        offset: 178,
-                    })
+                        178
+                    )
                     .nullIfItemEquals(...nullables.time)
                     .transformTupleItem(transformers.time)
                     .end(),
                 highTime: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE
                         ),
-                        offset: 208,
-                    })
+                        208
+                    )
                     .nullIfItemEquals(...nullables.time)
                     .transformTupleItem(transformers.time)
                     .end(),
             },
             month: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 242,
-                    })
+                        242
+                    )
                     .nullIfItemEquals(...nullables.leafTemp)
                     .transformTupleItem(transformers.leafTemp)
                     .transformTupleItem(unitTransformers.leafTemperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 227,
-                    })
+                        227
+                    )
                     .nullIfItemEquals(...nullables.leafTemp)
                     .transformTupleItem(transformers.leafTemp)
                     .transformTupleItem(unitTransformers.leafTemperature)
@@ -947,29 +776,29 @@ export default function (
             },
             year: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 272,
-                    })
+                        272
+                    )
                     .nullIfItemEquals(...nullables.leafTemp)
                     .transformTupleItem(transformers.leafTemp)
                     .transformTupleItem(unitTransformers.leafTemperature)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 257,
-                    })
+                        257
+                    )
                     .nullIfItemEquals(...nullables.leafTemp)
                     .transformTupleItem(transformers.leafTemp)
                     .transformTupleItem(unitTransformers.leafTemperature)
@@ -979,8 +808,8 @@ export default function (
         humExtra: {
             day: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
@@ -989,14 +818,14 @@ export default function (
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 277,
-                    })
+                        277
+                    )
                     .nullIfItemEquals(...nullables.humidity)
                     .transformTupleItem(unitTransformers.humidity)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
@@ -1005,14 +834,14 @@ export default function (
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 285,
-                    })
+                        285
+                    )
                     .nullIfItemEquals(...nullables.humidity)
                     .transformTupleItem(unitTransformers.humidity)
                     .end(),
                 lowTime: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE,
@@ -1021,14 +850,14 @@ export default function (
                             Type.UINT16_LE,
                             Type.UINT16_LE
                         ),
-                        offset: 293,
-                    })
+                        293
+                    )
                     .nullIfItemEquals(...nullables.time)
                     .transformTupleItem(transformers.time)
                     .end(),
                 highTime: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE,
@@ -1037,16 +866,16 @@ export default function (
                             Type.UINT16_LE,
                             Type.UINT16_LE
                         ),
-                        offset: 309,
-                    })
+                        309
+                    )
                     .nullIfItemEquals(...nullables.time)
                     .transformTupleItem(transformers.time)
                     .end(),
             },
             month: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
@@ -1055,14 +884,14 @@ export default function (
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 333,
-                    })
+                        333
+                    )
                     .nullIfItemEquals(...nullables.humidity)
                     .transformTupleItem(unitTransformers.humidity)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
@@ -1071,16 +900,16 @@ export default function (
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 325,
-                    })
+                        325
+                    )
                     .nullIfItemEquals(...nullables.humidity)
                     .transformTupleItem(unitTransformers.humidity)
                     .end(),
             },
             year: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
@@ -1089,14 +918,14 @@ export default function (
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 349,
-                    })
+                        349
+                    )
                     .nullIfItemEquals(...nullables.humidity)
                     .transformTupleItem(unitTransformers.humidity)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_7(
+                    .read(
+                        Type.TUPLE_7(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
@@ -1105,8 +934,8 @@ export default function (
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 341,
-                    })
+                        341
+                    )
                     .nullIfItemEquals(...nullables.humidity)
                     .transformTupleItem(unitTransformers.humidity)
                     .end(),
@@ -1115,110 +944,110 @@ export default function (
         soilMoistures: {
             day: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 368,
-                    })
+                        368
+                    )
                     .nullIfItemEquals(...nullables.soilMoisture)
                     .transformTupleItem(unitTransformers.soilMoisture)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 356,
-                    })
+                        356
+                    )
                     .nullIfItemEquals(...nullables.soilMoisture)
                     .transformTupleItem(unitTransformers.soilMoisture)
                     .end(),
                 lowTime: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE
                         ),
-                        offset: 372,
-                    })
+                        372
+                    )
                     .nullIfItemEquals(...nullables.time)
                     .transformTupleItem(transformers.time)
                     .end(),
                 highTime: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE
                         ),
-                        offset: 360,
-                    })
+                        360
+                    )
                     .nullIfItemEquals(...nullables.time)
                     .transformTupleItem(transformers.time)
                     .end(),
             },
             month: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 380,
-                    })
+                        380
+                    )
                     .nullIfItemEquals(...nullables.soilMoisture)
                     .transformTupleItem(unitTransformers.soilMoisture)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 384,
-                    })
+                        384
+                    )
                     .nullIfItemEquals(...nullables.soilMoisture)
                     .transformTupleItem(unitTransformers.soilMoisture)
                     .end(),
             },
             year: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 388,
-                    })
+                        388
+                    )
                     .nullIfItemEquals(...nullables.soilMoisture)
                     .transformTupleItem(unitTransformers.soilMoisture)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 392,
-                    })
+                        392
+                    )
                     .nullIfItemEquals(...nullables.soilMoisture)
                     .transformTupleItem(unitTransformers.soilMoisture)
                     .end(),
@@ -1227,105 +1056,105 @@ export default function (
         leafWetnesses: {
             day: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 408,
-                    })
+                        408
+                    )
                     .nullIfItemEquals(...nullables.leafWetness)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 396,
-                    })
+                        396
+                    )
                     .nullIfItemEquals(...nullables.leafWetness)
                     .end(),
                 lowTime: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE
                         ),
-                        offset: 412,
-                    })
+                        412
+                    )
                     .nullIfItemEquals(...nullables.time)
                     .transformTupleItem(transformers.time)
                     .end(),
                 highTime: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE,
                             Type.UINT16_LE
                         ),
-                        offset: 400,
-                    })
+                        400
+                    )
                     .nullIfItemEquals(...nullables.time)
                     .transformTupleItem(transformers.time)
                     .end(),
             },
             month: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 420,
-                    })
+                        420
+                    )
                     .nullIfItemEquals(...nullables.leafWetness)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 424,
-                    })
+                        424
+                    )
                     .nullIfItemEquals(...nullables.leafWetness)
                     .end(),
             },
             year: {
                 low: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 428,
-                    })
+                        428
+                    )
                     .nullIfItemEquals(...nullables.leafWetness)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.TUPLE_4(
+                    .read(
+                        Type.TUPLE_4(
                             Type.INT8,
                             Type.INT8,
                             Type.INT8,
                             Type.INT8
                         ),
-                        offset: 432,
-                    })
+                        432
+                    )
                     .nullIfItemEquals(...nullables.leafWetness)
                     .end(),
             },
@@ -1333,157 +1162,133 @@ export default function (
         humOut: {
             day: {
                 low: easy
-                    .read({
-                        type: Type.UINT8,
-                        offset: 276,
-                    })
+                    .read(Type.UINT8, 276)
                     .nullIfEquals(...nullables.humidity)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.UINT8,
-                        offset: 284,
-                    })
+                    .read(Type.UINT8, 284)
                     .nullIfEquals(...nullables.humidity)
                     .end(),
                 lowTime: easy
-                    .read({
-                        type: Type.UINT16_LE,
-                        offset: 292,
-                    })
+                    .read(Type.UINT16_LE, 292)
                     .nullIfEquals(...nullables.time)
                     .transform(transformers.time)
                     .end(),
                 highTime: easy
-                    .read({
-                        type: Type.UINT16_LE,
-                        offset: 308,
-                    })
+                    .read(Type.UINT16_LE, 308)
                     .nullIfEquals(...nullables.time)
                     .transform(transformers.time)
                     .end(),
             },
             month: {
                 low: easy
-                    .read({
-                        type: Type.UINT8,
-                        offset: 332,
-                    })
+                    .read(Type.UINT8, 332)
                     .nullIfEquals(...nullables.humidity)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.UINT8,
-                        offset: 324,
-                    })
+                    .read(Type.UINT8, 324)
                     .nullIfEquals(...nullables.humidity)
                     .end(),
             },
             year: {
                 low: easy
-                    .read({
-                        type: Type.UINT8,
-                        offset: 348,
-                    })
+                    .read(Type.UINT8, 348)
                     .nullIfEquals(...nullables.humidity)
                     .end(),
                 high: easy
-                    .read({
-                        type: Type.UINT8,
-                        offset: 340,
-                    })
+                    .read(Type.UINT8, 340)
                     .nullIfEquals(...nullables.humidity)
                     .end(),
             },
         },
     };
 
-    if(!result.press.day.lowTime || result.press.day.low === null){
+    if (!result.press.day.lowTime || result.press.day.low === null) {
         result.press.day.low = null;
         result.press.day.lowTime = null;
     }
-    if(!result.press.day.highTime || result.press.day.high === null){
+    if (!result.press.day.highTime || result.press.day.high === null) {
         result.press.day.high = null;
         result.press.day.highTime = null;
     }
 
-    if(!result.wind.dayTime || result.wind.day === null){
+    if (!result.wind.dayTime || result.wind.day === null) {
         result.wind.day = null;
         result.wind.dayTime = null;
     }
 
-    if(!result.chill.dayTime || result.chill.day === null){
+    if (!result.chill.dayTime || result.chill.day === null) {
         result.chill.day = null;
         result.chill.dayTime = null;
     }
 
-    if(!result.heat.dayTime || result.heat.day === null){
+    if (!result.heat.dayTime || result.heat.day === null) {
         result.heat.day = null;
         result.heat.dayTime = null;
     }
 
-    if(!result.thsw.dayTime || result.thsw.day === null){
+    if (!result.thsw.dayTime || result.thsw.day === null) {
         result.thsw.day = null;
         result.thsw.dayTime = null;
     }
 
-    if(!result.solarRadiation.dayTime || result.solarRadiation.day === null){
+    if (!result.solarRadiation.dayTime || result.solarRadiation.day === null) {
         result.solarRadiation.day = null;
         result.solarRadiation.dayTime = null;
     }
 
-    if(!result.uv.dayTime || result.uv.day === null){
+    if (!result.uv.dayTime || result.uv.day === null) {
         result.uv.day = null;
         result.uv.dayTime = null;
     }
 
-    if(!result.rainRate.dayTime || result.rainRate.day === null){
+    if (!result.rainRate.dayTime || result.rainRate.day === null) {
         result.rainRate.day = null;
         result.rainRate.hour = null;
         result.rainRate.dayTime = null;
     }
 
-    if(!result.tempIn.day.lowTime || result.tempIn.day.low === null){
+    if (!result.tempIn.day.lowTime || result.tempIn.day.low === null) {
         result.tempIn.day.low = null;
         result.tempIn.day.lowTime = null;
     }
-    if(!result.tempIn.day.highTime || result.tempIn.day.high === null){
+    if (!result.tempIn.day.highTime || result.tempIn.day.high === null) {
         result.tempIn.day.high = null;
         result.tempIn.day.highTime = null;
     }
 
-    if(!result.humIn.day.lowTime || result.humIn.day.low === null){
+    if (!result.humIn.day.lowTime || result.humIn.day.low === null) {
         result.humIn.day.low = null;
         result.humIn.day.lowTime = null;
     }
-    if(!result.humIn.day.highTime || result.humIn.day.high === null){
+    if (!result.humIn.day.highTime || result.humIn.day.high === null) {
         result.humIn.day.high = null;
         result.humIn.day.highTime = null;
     }
 
-    if(!result.tempOut.day.lowTime || result.tempOut.day.low === null){
+    if (!result.tempOut.day.lowTime || result.tempOut.day.low === null) {
         result.tempOut.day.low = null;
         result.tempOut.day.lowTime = null;
     }
-    if(!result.tempOut.day.highTime || result.tempOut.day.high === null){
+    if (!result.tempOut.day.highTime || result.tempOut.day.high === null) {
         result.tempOut.day.high = null;
         result.tempOut.day.highTime = null;
     }
 
-    if(!result.humOut.day.lowTime || result.humOut.day.low === null){
+    if (!result.humOut.day.lowTime || result.humOut.day.low === null) {
         result.humOut.day.low = null;
         result.humOut.day.lowTime = null;
     }
-    if(!result.humOut.day.highTime || result.humOut.day.high === null){
+    if (!result.humOut.day.highTime || result.humOut.day.high === null) {
         result.humOut.day.high = null;
         result.humOut.day.highTime = null;
     }
 
-    if(!result.dew.day.lowTime || result.dew.day.low === null){
+    if (!result.dew.day.lowTime || result.dew.day.low === null) {
         result.dew.day.low = null;
         result.dew.day.lowTime = null;
     }
-    if(!result.dew.day.highTime || result.dew.day.high === null){
+    if (!result.dew.day.highTime || result.dew.day.high === null) {
         result.dew.day.high = null;
         result.dew.day.highTime = null;
     }
@@ -1495,18 +1300,31 @@ export default function (
     setNeighboursNullInTuple(result, "leafTemps");
     setNeighboursNullInTuple(result, "leafWetnesses");
 
-
     return result;
 }
 
-
-function setNeighboursNullInTuple(result: HighsAndLows, field: "soilMoistures" | "soilTemps" | "humExtra" | "tempExtra" | "leafTemps" | "leafWetnesses"){
-    for(let i = 0; i < result[field].day.lowTime.length; i++){
-        if(!result[field].day.lowTime[i] || result[field].day.low[i] === null){
+function setNeighboursNullInTuple(
+    result: HighsAndLows,
+    field:
+        | "soilMoistures"
+        | "soilTemps"
+        | "humExtra"
+        | "tempExtra"
+        | "leafTemps"
+        | "leafWetnesses"
+) {
+    for (let i = 0; i < result[field].day.lowTime.length; i++) {
+        if (
+            !result[field].day.lowTime[i] ||
+            result[field].day.low[i] === null
+        ) {
             result[field].day.low[i] = null;
             result[field].day.lowTime[i] = null;
         }
-        if(!result[field].day.highTime[i] || result[field].day.high[i] === null){
+        if (
+            !result[field].day.highTime[i] ||
+            result[field].day.high[i] === null
+        ) {
             result[field].day.high[i] = null;
             result[field].day.highTime[i] = null;
         }

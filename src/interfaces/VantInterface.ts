@@ -27,7 +27,7 @@ import {
     createUnitTransformers,
     UnitTransformers,
 } from "../parsers";
-import createBuffer, { TypedValue, Types } from "../util/buffer/BufferCreator";
+import { EasyBuffer, Type } from "@harrydehix/easy-buffer";
 
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). Provides useful methods to access realtime weather data from your weather station's
@@ -772,15 +772,14 @@ export default class VantInterface extends TypedEmitter<VantInterfaceEvents> {
     > => {
         this.checkPortConnection();
 
-        const data = await this.writeAndWaitForBuffer(
-            createBuffer(
-                new TypedValue("WRD", Types.STRING_ASCII),
-                new TypedValue(0x12, Types.UINT8),
-                new TypedValue(0x4d, Types.UINT8),
-                new TypedValue("\n", Types.STRING_ASCII)
-            ),
-            2
-        );
+        const easy = new EasyBuffer(Buffer.alloc(3 + 1 + 1 + 1));
+        easy.at(0)
+            .write(Type.STRING(3, "ascii"), "WRD")
+            .write(Type.UINT8, 0x12)
+            .write(Type.UINT8, 0x4d)
+            .write(Type.STRING(1, "ascii"), "\n");
+
+        const data = await this.writeAndWaitForBuffer(easy.buffer, 2);
 
         this.validateAcknowledgementByte(data);
 

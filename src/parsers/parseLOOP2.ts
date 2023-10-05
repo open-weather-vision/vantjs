@@ -12,50 +12,31 @@ export default function (
     const easy = new EasyBuffer(buffer);
 
     const pressTrendID = easy
-        .read({
-            type: Type.INT8,
-            offset: 3,
-        })
+        .read(Type.INT8, 3)
         .transform(transformers.pressTrendID);
 
     const pressReductionMethodID = easy
-        .read({
-            type: Type.UINT8,
-            offset: 60,
-        })
+        .read(Type.UINT8, 60)
         .transform(transformers.pressReductionMethodID);
 
-    const windDirDeg = easy
-        .read({ type: Type.UINT16_LE, offset: 16 })
-        .nullIfEquals(0);
+    const windDirDeg = easy.read(Type.UINT16_LE, 16).nullIfEquals(0);
 
-    const windGustDirDeg = easy
-        .read({ type: Type.UINT16_LE, offset: 24 })
-        .nullIfEquals(0);
+    const windGustDirDeg = easy.read(Type.UINT16_LE, 24).nullIfEquals(0);
 
     const result: LOOP2 = {
         press: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 7,
-            })
+            .read(Type.UINT16_LE, 7)
             .nullIfEquals(...nullables.pressure)
             .transform(transformers.pressure)
             .transform(unitTransformers.pressure)
             .end(),
         pressRaw: easy
-            .read({
-                type: Type.INT16_LE,
-                offset: 65,
-            })
+            .read(Type.INT16_LE, 65)
             .transform(transformers.pressure)
             .transform(unitTransformers.pressure)
             .end(),
         pressAbs: easy
-            .read({
-                type: Type.INT16_LE,
-                offset: 67,
-            })
+            .read(Type.INT16_LE, 67)
             .transform(transformers.pressure)
             .transform(unitTransformers.pressure)
             .end(),
@@ -66,63 +47,60 @@ export default function (
             .transform(transformers.pressReductionMethod)
             .end(),
         pressUserOffset: easy
-            .read({ type: Type.INT16_LE, offset: 61 })
+            .read(Type.INT16_LE, 61)
             .transform((val) => val / 1000)
             .transform(unitTransformers.pressure)
             .end(),
         pressCalibrationOffset: easy
-            .read({ type: Type.INT16_LE, offset: 63 })
+            .read(Type.INT16_LE, 63)
             .transform((val) => val / 1000)
             .transform(unitTransformers.pressure)
             .end(),
         altimeter: easy
-            .read({ type: Type.INT16_LE, offset: 69 })
+            .read(Type.INT16_LE, 69)
             .transform((val) => val / 1000)
             .transform(unitTransformers.pressure)
             .end(),
         heat: easy
-            .read({ type: Type.INT16_LE, offset: 35 })
+            .read(Type.INT16_LE, 35)
             .nullIfEquals(255)
             .transform(unitTransformers.temperature)
             .end(),
         dew: easy
-            .read({ type: Type.INT16_LE, offset: 30 })
+            .read(Type.INT16_LE, 30)
             .nullIfEquals(255)
             .transform(unitTransformers.temperature)
             .end(),
         tempIn: easy
-            .read({ type: Type.INT16_LE, offset: 9 })
+            .read(Type.INT16_LE, 9)
             .nullIfEquals(...nullables.temperature)
             .transform(transformers.temperature)
             .transform(unitTransformers.temperature)
             .end(),
         tempOut: easy
-            .read({ type: Type.INT16_LE, offset: 12 })
+            .read(Type.INT16_LE, 12)
             .nullIfEquals(...nullables.temperature)
             .transform(transformers.temperature)
             .transform(unitTransformers.temperature)
             .end(),
         humIn: easy
-            .read({ type: Type.UINT8, offset: 11 })
+            .read(Type.UINT8, 11)
             .nullIfEquals(...nullables.humidity)
             .transform(unitTransformers.humidity)
             .end(),
         humOut: easy
-            .read({ type: Type.UINT8, offset: 33 })
+            .read(Type.UINT8, 33)
             .nullIfEquals(...nullables.humidity)
             .transform(unitTransformers.humidity)
             .end(),
-        wind: easy
-            .read({ type: Type.UINT8, offset: 14 })
-            .transform(unitTransformers.wind)
-            .end(),
+        wind: easy.read(Type.UINT8, 14).transform(unitTransformers.wind).end(),
         windAvg2m: easy
-            .read({ type: Type.UINT16_LE, offset: 20 })
+            .read(Type.UINT16_LE, 20)
             .transform((val) => (val !== null ? val / 10 : val))
             .transform(unitTransformers.wind)
             .end(),
         windAvg10m: easy
-            .read({ type: Type.UINT16_LE, offset: 18 })
+            .read(Type.UINT16_LE, 18)
             .transform((val) => (val !== null ? val / 10 : val))
             .transform(unitTransformers.wind)
             .end(),
@@ -131,87 +109,81 @@ export default function (
         windGustDirDeg: windGustDirDeg.end(),
         windGustDir: windGustDirDeg.transform(transformers.windDir).end(),
         windGust: easy
-            .read({ type: Type.UINT16_LE, offset: 22 })
+            .read(Type.UINT16_LE, 22)
             .transform((val) => (val !== null ? val / 10 : val))
             .transform(unitTransformers.wind)
             .end(),
         chill: easy
-            .read({ type: Type.INT16_LE, offset: 37 })
+            .read(Type.INT16_LE, 37)
             .nullIfEquals(255)
             .transform(unitTransformers.temperature)
             .end(),
         thsw: easy
-            .read({ type: Type.INT16_LE, offset: 39 })
+            .read(Type.INT16_LE, 39)
             .nullIfEquals(255)
             .transform(unitTransformers.temperature)
             .end(),
         rainRate: easy
-            .read({ type: Type.UINT16_LE, offset: 41 })
+            .read(Type.UINT16_LE, 41)
             .transform(rainClicksToInchTransformer)
             .transform(unitTransformers.rain)
             .end(),
         stormStartDate: easy
-            .read({ type: Type.INT16_LE, offset: 48 })
+            .read(Type.INT16_LE, 48)
             .nullIfEquals(-1, 0xffff)
             .transform(transformers.stormStartDate)
             .end(),
         stormRain: easy
-            .read({ type: Type.UINT16_LE, offset: 46 })
+            .read(Type.UINT16_LE, 46)
             .transform(rainClicksToInchTransformer)
             .transform(unitTransformers.rain)
             .end(),
         rainDay: easy
-            .read({ type: Type.UINT16_LE, offset: 50 })
+            .read(Type.UINT16_LE, 50)
             .transform(rainClicksToInchTransformer)
             .transform(unitTransformers.rain)
             .end(),
         rain15m: easy
-            .read({ type: Type.UINT16_LE, offset: 52 })
+            .read(Type.UINT16_LE, 52)
             .transform(rainClicksToInchTransformer)
             .transform(unitTransformers.rain)
             .end(),
         rain1h: easy
-            .read({ type: Type.UINT16_LE, offset: 54 })
+            .read(Type.UINT16_LE, 54)
             .transform(rainClicksToInchTransformer)
             .transform(unitTransformers.rain)
             .end(),
         rain24h: easy
-            .read({ type: Type.UINT16_LE, offset: 58 })
+            .read(Type.UINT16_LE, 58)
             .transform(rainClicksToInchTransformer)
             .transform(unitTransformers.rain)
             .end(),
         etDay: easy
-            .read({ type: Type.UINT16_LE, offset: 56 })
+            .read(Type.UINT16_LE, 56)
             .nullIfEquals(65535)
             .transform(transformers.dayET)
             .transform(unitTransformers.evoTranspiration)
             .end(),
         uv: easy
-            .read({ type: Type.UINT8, offset: 43 })
+            .read(Type.UINT8, 43)
             .nullIfEquals(...nullables.uv)
             .end(),
         solarRadiation: easy
-            .read({ type: Type.UINT16_LE, offset: 44 })
+            .read(Type.UINT16_LE, 44)
             .nullIfEquals(...nullables.solar)
             .transform(unitTransformers.solarRadiation)
             .end(),
         graphPointers: {
-            next10mWindSpeed: easy.read({ type: Type.UINT8, offset: 73 }).end(),
-            next15mWindSpeed: easy.read({ type: Type.UINT8, offset: 74 }).end(),
-            nextHourWindSpeed: easy
-                .read({ type: Type.UINT8, offset: 75 })
-                .end(),
-            nextDailyWindSpeed: easy
-                .read({ type: Type.UINT8, offset: 76 })
-                .end(),
-            nextMinuteRain: easy.read({ type: Type.UINT8, offset: 77 }).end(),
-            nextMonthlyRain: easy.read({ type: Type.UINT8, offset: 80 }).end(),
-            nextYearlyRain: easy.read({ type: Type.UINT8, offset: 81 }).end(),
-            nextSeasonalRain: easy.read({ type: Type.UINT8, offset: 82 }).end(),
-            nextRainStorm: easy.read({ type: Type.UINT8, offset: 78 }).end(),
-            currentMinuteIndex: easy
-                .read({ type: Type.UINT8, offset: 79 })
-                .end(),
+            next10mWindSpeed: easy.read(Type.UINT8, 73).end(),
+            next15mWindSpeed: easy.read(Type.UINT8, 74).end(),
+            nextHourWindSpeed: easy.read(Type.UINT8, 75).end(),
+            nextDailyWindSpeed: easy.read(Type.UINT8, 76).end(),
+            nextMinuteRain: easy.read(Type.UINT8, 77).end(),
+            nextMonthlyRain: easy.read(Type.UINT8, 80).end(),
+            nextYearlyRain: easy.read(Type.UINT8, 81).end(),
+            nextSeasonalRain: easy.read(Type.UINT8, 82).end(),
+            nextRainStorm: easy.read(Type.UINT8, 78).end(),
+            currentMinuteIndex: easy.read(Type.UINT8, 79).end(),
         },
         packageType: LOOPPackageType.LOOP2,
         time: new Date(),

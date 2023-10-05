@@ -20,30 +20,19 @@ export default function (
     const easy = new EasyBuffer(buffer);
 
     const forecastID = easy
-        .read({
-            type: Type.INT8,
-            offset: 89,
-        })
+        .read(Type.INT8, 89)
         .transform(transformers.forecastID);
 
     const pressTrendID = easy
-        .read({
-            type: Type.INT8,
-            offset: 3,
-        })
+        .read(Type.INT8, 3)
         .transform(transformers.pressTrendID);
 
-    const windDirDeg = easy
-        .read({
-            type: Type.UINT16_LE,
-            offset: 16,
-        })
-        .nullIfEquals(0);
+    const windDirDeg = easy.read(Type.UINT16_LE, 16).nullIfEquals(0);
 
     const result: LOOP1 = {
         tempExtra: easy
-            .read({
-                type: Type.TUPLE_7(
+            .read(
+                Type.TUPLE_7(
                     Type.UINT8,
                     Type.UINT8,
                     Type.UINT8,
@@ -52,43 +41,33 @@ export default function (
                     Type.UINT8,
                     Type.UINT8
                 ),
-                offset: 18,
-            })
+                18
+            )
             .nullIfItemEquals(...nullables.tempExtra)
             .transformTupleItem(transformers.tempExtra)
             .transformTupleItem(unitTransformers.temperature)
             .end(),
         leafTemps: easy
-            .read({
-                type: Type.TUPLE_4(
-                    Type.UINT8,
-                    Type.UINT8,
-                    Type.UINT8,
-                    Type.UINT8
-                ),
-                offset: 29,
-            })
+            .read(
+                Type.TUPLE_4(Type.UINT8, Type.UINT8, Type.UINT8, Type.UINT8),
+                29
+            )
             .nullIfItemEquals(...nullables.leafTemp)
             .transformTupleItem(transformers.leafTemp)
             .transformTupleItem(unitTransformers.leafTemperature)
             .end(),
         soilTemps: easy
-            .read({
-                type: Type.TUPLE_4(
-                    Type.UINT8,
-                    Type.UINT8,
-                    Type.UINT8,
-                    Type.UINT8
-                ),
-                offset: 25,
-            })
+            .read(
+                Type.TUPLE_4(Type.UINT8, Type.UINT8, Type.UINT8, Type.UINT8),
+                25
+            )
             .nullIfItemEquals(...nullables.soilTemp)
             .transformTupleItem(transformers.soilTemp)
             .transformTupleItem(unitTransformers.soilTemperature)
             .end(),
         humExtra: easy
-            .read({
-                type: Type.TUPLE_7(
+            .read(
+                Type.TUPLE_7(
                     Type.UINT8,
                     Type.UINT8,
                     Type.UINT8,
@@ -97,272 +76,102 @@ export default function (
                     Type.UINT8,
                     Type.UINT8
                 ),
-                offset: 34,
-            })
+                34
+            )
             .nullIfItemEquals(...nullables.humidity)
             .transformTupleItem(unitTransformers.humidity)
             .end(),
         rainMonth: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 52,
-            })
+            .read(Type.UINT16_LE, 52)
             .transform(rainClicksToInchTransformer)
             .transform(unitTransformers.rain)
             .end(),
         rainYear: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 54,
-            })
+            .read(Type.UINT16_LE, 54)
             .transform(rainClicksToInchTransformer)
             .transform(unitTransformers.rain)
             .end(),
         etMonth: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 58,
-            })
+            .read(Type.UINT16_LE, 58)
             .nullIfEquals(65535)
             .transform(transformers.monthET)
             .transform(unitTransformers.evoTranspiration)
             .end(),
         etYear: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 60,
-            })
+            .read(Type.UINT16_LE, 60)
             .nullIfEquals(255)
             .transform(transformers.yearET)
             .transform(unitTransformers.evoTranspiration)
             .end(),
         soilMoistures: easy
-            .read({
-                type: Type.TUPLE_4(
-                    Type.UINT8,
-                    Type.UINT8,
-                    Type.UINT8,
-                    Type.UINT8
-                ),
-                offset: 62,
-            })
+            .read(
+                Type.TUPLE_4(Type.UINT8, Type.UINT8, Type.UINT8, Type.UINT8),
+                62
+            )
             .nullIfItemEquals(255)
             .transformTupleItem(unitTransformers.soilMoisture)
             .end(),
         leafWetnesses: easy
-            .read({
-                type: Type.TUPLE_4(
-                    Type.UINT8,
-                    Type.UINT8,
-                    Type.UINT8,
-                    Type.UINT8
-                ),
-                offset: 66,
-            })
+            .read(
+                Type.TUPLE_4(Type.UINT8, Type.UINT8, Type.UINT8, Type.UINT8),
+                66
+            )
             .nullIfItemEquals(255)
             .end(),
         forecastID: forecastID.end(),
         forecast: forecastID.transform(transformers.forecast).end(),
         forecastRule:
-            forecastID !== null
-                ? easy
-                      .read({
-                          type: Type.UINT8,
-                          offset: 90,
-                      })
-                      .end()
-                : null,
-        nextArchiveRecord: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 5,
-            })
-            .end(),
+            forecastID !== null ? easy.read(Type.UINT8, 90).end() : null,
+        nextArchiveRecord: easy.read(Type.UINT16_LE, 5).end(),
         alarms: {
             press: {
-                falling: easy
-                    .read({
-                        type: Type.BIT(0),
-                        offset: 70,
-                    })
-                    .end(),
-                rising: easy
-                    .read({
-                        type: Type.BIT(1),
-                        offset: 70,
-                    })
-                    .end(),
+                falling: easy.read(Type.BIT(0), 70).end(),
+                rising: easy.read(Type.BIT(1), 70).end(),
             },
             tempIn: {
-                low: easy
-                    .read({
-                        type: Type.BIT(2),
-                        offset: 70,
-                    })
-                    .end(),
-                high: easy
-                    .read({
-                        type: Type.BIT(3),
-                        offset: 70,
-                    })
-                    .end(),
+                low: easy.read(Type.BIT(2), 70).end(),
+                high: easy.read(Type.BIT(3), 70).end(),
             },
             humIn: {
-                low: easy
-                    .read({
-                        type: Type.BIT(4),
-                        offset: 70,
-                    })
-                    .end(),
-                high: easy
-                    .read({
-                        type: Type.BIT(5),
-                        offset: 70,
-                    })
-                    .end(),
+                low: easy.read(Type.BIT(4), 70).end(),
+                high: easy.read(Type.BIT(5), 70).end(),
             },
-            time: easy
-                .read({
-                    type: Type.BIT(6),
-                    offset: 70,
-                })
-                .end(),
+            time: easy.read(Type.BIT(6), 70).end(),
             rain: {
-                rate: easy
-                    .read({
-                        type: Type.BIT(0),
-                        offset: 71,
-                    })
-                    .end(),
-                quarter: easy
-                    .read({
-                        type: Type.BIT(1),
-                        offset: 71,
-                    })
-                    .end(),
-                daily: easy
-                    .read({
-                        type: Type.BIT(2),
-                        offset: 71,
-                    })
-                    .end(),
-                stormTotal: easy
-                    .read({
-                        type: Type.BIT(3),
-                        offset: 71,
-                    })
-                    .end(),
+                rate: easy.read(Type.BIT(0), 71).end(),
+                quarter: easy.read(Type.BIT(1), 71).end(),
+                daily: easy.read(Type.BIT(2), 71).end(),
+                stormTotal: easy.read(Type.BIT(3), 71).end(),
             },
-            etDay: easy
-                .read({
-                    type: Type.BIT(4),
-                    offset: 71,
-                })
-                .end(),
+            etDay: easy.read(Type.BIT(4), 71).end(),
             tempOut: {
-                low: easy
-                    .read({
-                        type: Type.BIT(0),
-                        offset: 72,
-                    })
-                    .end(),
-                high: easy
-                    .read({
-                        type: Type.BIT(1),
-                        offset: 72,
-                    })
-                    .end(),
+                low: easy.read(Type.BIT(0), 72).end(),
+                high: easy.read(Type.BIT(1), 72).end(),
             },
             wind: {
-                speed: easy
-                    .read({
-                        type: Type.BIT(2),
-                        offset: 72,
-                    })
-                    .end(),
-                avg: easy
-                    .read({
-                        type: Type.BIT(3),
-                        offset: 72,
-                    })
-                    .end(),
+                speed: easy.read(Type.BIT(2), 72).end(),
+                avg: easy.read(Type.BIT(3), 72).end(),
             },
             dew: {
-                low: easy
-                    .read({
-                        type: Type.BIT(4),
-                        offset: 72,
-                    })
-                    .end(),
-                high: easy
-                    .read({
-                        type: Type.BIT(5),
-                        offset: 72,
-                    })
-                    .end(),
+                low: easy.read(Type.BIT(4), 72).end(),
+                high: easy.read(Type.BIT(5), 72).end(),
             },
-            heat: easy
-                .read({
-                    type: Type.BIT(6),
-                    offset: 72,
-                })
-                .end(),
-            chill: easy
-                .read({
-                    type: Type.BIT(7),
-                    offset: 72,
-                })
-                .end(),
-            thsw: easy
-                .read({
-                    type: Type.BIT(0),
-                    offset: 73,
-                })
-                .end(),
-            solarRadiation: easy
-                .read({
-                    type: Type.BIT(1),
-                    offset: 73,
-                })
-                .end(),
+            heat: easy.read(Type.BIT(6), 72).end(),
+            chill: easy.read(Type.BIT(7), 72).end(),
+            thsw: easy.read(Type.BIT(0), 73).end(),
+            solarRadiation: easy.read(Type.BIT(1), 73).end(),
             uv: {
-                high: easy
-                    .read({
-                        type: Type.BIT(2),
-                        offset: 73,
-                    })
-                    .end(),
-                dose: easy
-                    .read({
-                        type: Type.BIT(3),
-                        offset: 73,
-                    })
-                    .end(),
-                enabledAndCleared: easy
-                    .read({
-                        type: Type.BIT(4),
-                        offset: 73,
-                    })
-                    .end(),
+                high: easy.read(Type.BIT(2), 73).end(),
+                dose: easy.read(Type.BIT(3), 73).end(),
+                enabledAndCleared: easy.read(Type.BIT(4), 73).end(),
             },
             humOut: {
-                low: easy
-                    .read({
-                        type: Type.BIT(2),
-                        offset: 74,
-                    })
-                    .end(),
-                high: easy
-                    .read({
-                        type: Type.BIT(3),
-                        offset: 74,
-                    })
-                    .end(),
+                low: easy.read(Type.BIT(2), 74).end(),
+                high: easy.read(Type.BIT(3), 74).end(),
             },
             tempExtra: easy
-                .read({
-                    offset: 75,
-                    type: Type.TUPLE_7(
+                .read(
+                    Type.TUPLE_7(
                         Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
                         Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
                         Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
@@ -372,13 +181,13 @@ export default function (
                         Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
                         1
                     ),
-                })
+                    75
+                )
                 .transformTupleItem((item) => ({ low: item[0], high: item[1] }))
                 .end(),
             humExtra: easy
-                .read({
-                    offset: 75,
-                    type: Type.TUPLE_7(
+                .read(
+                    Type.TUPLE_7(
                         Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
                         Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
                         Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
@@ -388,97 +197,81 @@ export default function (
                         Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
                         1
                     ),
-                })
+                    75
+                )
                 .transformTupleItem((item) => ({ low: item[0], high: item[1] }))
                 .end(),
             leafWetnesses: easy
-                .read({
-                    offset: 82,
-                    type: Type.TUPLE_4(
+                .read(
+                    Type.TUPLE_4(
                         Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
                         Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
                         Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
                         Type.TUPLE_2(Type.BIT(0), Type.BIT(1)),
                         1
                     ),
-                })
+                    82
+                )
                 .transformTupleItem((item) => ({ low: item[0], high: item[1] }))
                 .end(),
             soilMoistures: easy
-                .read({
-                    offset: 82,
-                    type: Type.TUPLE_4(
+                .read(
+                    Type.TUPLE_4(
                         Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
                         Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
                         Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
                         Type.TUPLE_2(Type.BIT(2), Type.BIT(3)),
                         1
                     ),
-                })
+                    82
+                )
                 .transformTupleItem((item) => ({ low: item[0], high: item[1] }))
                 .end(),
             leafTemps: easy
-                .read({
-                    offset: 82,
-                    type: Type.TUPLE_4(
+                .read(
+                    Type.TUPLE_4(
                         Type.TUPLE_2(Type.BIT(4), Type.BIT(5)),
                         Type.TUPLE_2(Type.BIT(4), Type.BIT(5)),
                         Type.TUPLE_2(Type.BIT(4), Type.BIT(5)),
                         Type.TUPLE_2(Type.BIT(4), Type.BIT(5)),
                         1
                     ),
-                })
+                    82
+                )
                 .transformTupleItem((item) => ({ low: item[0], high: item[1] }))
                 .end(),
             soilTemps: easy
-                .read({
-                    offset: 82,
-                    type: Type.TUPLE_4(
+                .read(
+                    Type.TUPLE_4(
                         Type.TUPLE_2(Type.BIT(6), Type.BIT(7)),
                         Type.TUPLE_2(Type.BIT(6), Type.BIT(7)),
                         Type.TUPLE_2(Type.BIT(6), Type.BIT(7)),
                         Type.TUPLE_2(Type.BIT(6), Type.BIT(7)),
                         1
                     ),
-                })
+                    82
+                )
                 .transformTupleItem((item) => ({ low: item[0], high: item[1] }))
                 .end(),
         },
-        transmitterBatteryStatus: easy
-            .read({
-                type: Type.UINT8,
-                offset: 86,
-            })
-            .end(),
+        transmitterBatteryStatus: easy.read(Type.UINT8, 86).end(),
         consoleBatteryVoltage: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 87,
-            })
+            .read(Type.UINT16_LE, 87)
             .transform((val) => (val * 300) / 512 / 100)
             .end(),
         sunrise: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 91,
-            })
+            .read(Type.UINT16_LE, 91)
             .nullIfEquals(...nullables.time)
             .transform(transformers.time)
             .end(),
         sunset: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 93,
-            })
+            .read(Type.UINT16_LE, 93)
             .nullIfEquals(...nullables.time)
             .transform(transformers.time)
             .end(),
         packageType: LOOPPackageType.LOOP1,
         press: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 7,
-            })
+            .read(Type.UINT16_LE, 7)
             .nullIfEquals(...nullables.pressure)
             .transform(transformers.pressure)
             .transform(unitTransformers.pressure)
@@ -486,109 +279,67 @@ export default function (
         pressTrendID: pressTrendID.end(),
         pressTrend: pressTrendID.transform(transformers.pressTrend).end(),
         tempOut: easy
-            .read({
-                type: Type.INT16_LE,
-                offset: 12,
-            })
+            .read(Type.INT16_LE, 12)
             .nullIfEquals(...nullables.temperature)
             .transform(transformers.temperature)
             .transform(unitTransformers.temperature)
             .end(),
         tempIn: easy
-            .read({
-                type: Type.INT16_LE,
-                offset: 9,
-            })
+            .read(Type.INT16_LE, 9)
             .nullIfEquals(...nullables.temperature)
             .transform(transformers.temperature)
             .transform(unitTransformers.temperature)
             .end(),
         humIn: easy
-            .read({
-                type: Type.UINT8,
-                offset: 11,
-            })
+            .read(Type.UINT8, 11)
             .nullIfEquals(...nullables.humidity)
             .transform(unitTransformers.humidity)
             .end(),
         humOut: easy
-            .read({
-                type: Type.UINT8,
-                offset: 33,
-            })
+            .read(Type.UINT8, 33)
             .nullIfEquals(...nullables.humidity)
             .transform(unitTransformers.humidity)
             .end(),
-        wind: easy
-            .read({
-                type: Type.UINT8,
-                offset: 14,
-            })
-            .transform(unitTransformers.wind)
-            .end(),
+        wind: easy.read(Type.UINT8, 14).transform(unitTransformers.wind).end(),
         windAvg10m: easy
-            .read({
-                type: Type.UINT8,
-                offset: 15,
-            })
+            .read(Type.UINT8, 15)
             .transform(unitTransformers.wind)
             .end(),
         windDirDeg: windDirDeg.end(),
         windDir: windDirDeg.transform(transformers.windDir).end(),
         rainRate: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 41,
-            })
+            .read(Type.UINT16_LE, 41)
             .transform(rainClicksToInchTransformer)
             .transform(unitTransformers.rain)
             .end(),
         rainDay: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 50,
-            })
+            .read(Type.UINT16_LE, 50)
             .transform(rainClicksToInchTransformer)
             .transform(unitTransformers.rain)
             .end(),
         stormStartDate: easy
-            .read({
-                type: Type.INT16_LE,
-                offset: 48,
-            })
+            .read(Type.INT16_LE, 48)
             .nullIfEquals(-1, 0xffff)
             .transform(transformers.stormStartDate)
             .end(),
         stormRain: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 46,
-            })
+            .read(Type.UINT16_LE, 46)
             .transform(rainClicksToInchTransformer)
             .transform(unitTransformers.rain)
             .end(),
         etDay: easy
-            .read({
-                type: Type.UINT16_LE,
-                offset: 56,
-            })
+            .read(Type.UINT16_LE, 56)
             .nullIfEquals(65535)
             .transform(transformers.dayET)
             .transform(unitTransformers.evoTranspiration)
             .end(),
         uv: easy
-            .read({
-                type: Type.UINT8,
-                offset: 43,
-            })
+            .read(Type.UINT8, 43)
             .nullIfEquals(255)
             .transform(transformers.uv)
             .end(),
         solarRadiation: easy
-            .read({
-                type: Type.INT16_LE,
-                offset: 44,
-            })
+            .read(Type.INT16_LE, 44)
             .nullIfEquals(...nullables.solar)
             .transform(unitTransformers.solarRadiation)
             .end(),

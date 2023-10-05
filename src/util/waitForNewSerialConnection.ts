@@ -17,6 +17,11 @@ function getNewPath(oldPaths: string[], newPaths: string[]) {
     }
 }
 
+/**
+ * This methods waits for a new serial connection until a timeout occurs.
+ * @param timeout time to wait in seconds
+ * @returns the serial path of the connected device
+ */
 export default function waitForNewSerialConnection(
     timeout: number
 ): Promise<string> {

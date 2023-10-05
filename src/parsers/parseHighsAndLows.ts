@@ -239,14 +239,12 @@ export default function (
             day: {
                 low: easy
                     .read(Type.INT16_LE, 63)
-                    .nullIfEquals(...nullables.tempLow)
-                    .transform(transformers.temperature)
+                    .nullIfEquals(...nullables.dew)
                     .transform(unitTransformers.temperature)
                     .end(),
                 high: easy
                     .read(Type.INT16_LE, 65)
-                    .nullIfEquals(...nullables.tempHigh)
-                    .transform(transformers.temperature)
+                    .nullIfEquals(...nullables.dew)
                     .transform(unitTransformers.temperature)
                     .end(),
                 lowTime: easy
@@ -263,28 +261,24 @@ export default function (
             month: {
                 low: easy
                     .read(Type.INT16_LE, 73)
-                    .nullIfEquals(...nullables.tempLow)
-                    .transform(transformers.temperature)
+                    .nullIfEquals(...nullables.dew)
                     .transform(unitTransformers.temperature)
                     .end(),
                 high: easy
                     .read(Type.INT16_LE, 71)
-                    .nullIfEquals(...nullables.tempHigh)
-                    .transform(transformers.temperature)
+                    .nullIfEquals(...nullables.dew)
                     .transform(unitTransformers.temperature)
                     .end(),
             },
             year: {
                 low: easy
                     .read(Type.INT16_LE, 77)
-                    .nullIfEquals(...nullables.tempLow)
-                    .transform(transformers.temperature)
+                    .nullIfEquals(...nullables.dew)
                     .transform(unitTransformers.temperature)
                     .end(),
                 high: easy
                     .read(Type.INT16_LE, 75)
-                    .nullIfEquals(...nullables.tempHigh)
-                    .transform(transformers.temperature)
+                    .nullIfEquals(...nullables.dew)
                     .transform(unitTransformers.temperature)
                     .end(),
             },

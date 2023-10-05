@@ -93,13 +93,13 @@ export default function (
             .end(),
         etMonth: easy
             .read(Type.UINT16_LE, 58)
-            .nullIfEquals(65535)
+            .nullIfEquals(...nullables.etMonthYear)
             .transform(transformers.monthET)
             .transform(unitTransformers.evoTranspiration)
             .end(),
         etYear: easy
             .read(Type.UINT16_LE, 60)
-            .nullIfEquals(255)
+            .nullIfEquals(...nullables.etMonthYear)
             .transform(transformers.yearET)
             .transform(unitTransformers.evoTranspiration)
             .end(),
@@ -108,7 +108,7 @@ export default function (
                 Type.TUPLE_4(Type.UINT8, Type.UINT8, Type.UINT8, Type.UINT8),
                 62
             )
-            .nullIfItemEquals(255)
+            .nullIfItemEquals(...nullables.soilMoisture)
             .transformTupleItem(unitTransformers.soilMoisture)
             .end(),
         leafWetnesses: easy
@@ -116,7 +116,7 @@ export default function (
                 Type.TUPLE_4(Type.UINT8, Type.UINT8, Type.UINT8, Type.UINT8),
                 66
             )
-            .nullIfItemEquals(255)
+            .nullIfItemEquals(...nullables.leafWetness)
             .end(),
         forecastID: forecastID.end(),
         forecast: forecastID.transform(transformers.forecast).end(),
@@ -319,7 +319,7 @@ export default function (
             .end(),
         stormStartDate: easy
             .read(Type.INT16_LE, 48)
-            .nullIfEquals(-1, 0xffff)
+            .nullIfEquals(...nullables.time)
             .transform(transformers.stormStartDate)
             .end(),
         stormRain: easy
@@ -329,13 +329,13 @@ export default function (
             .end(),
         etDay: easy
             .read(Type.UINT16_LE, 56)
-            .nullIfEquals(65535)
-            .transform(transformers.dayET)
+            .nullIfEquals(...nullables.et)
+            .transform(transformers.etDay)
             .transform(unitTransformers.evoTranspiration)
             .end(),
         uv: easy
             .read(Type.UINT8, 43)
-            .nullIfEquals(255)
+            .nullIfEquals(...nullables.uv)
             .transform(transformers.uv)
             .end(),
         solarRadiation: easy

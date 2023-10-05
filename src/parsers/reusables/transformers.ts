@@ -119,7 +119,7 @@ const transformers = {
     tempExtra: (value: number | null) => (value !== null ? value - 90 : null),
     soilTemp: (value: number | null) => (value !== null ? value - 90 : null),
     leafTemp: (value: number | null) => (value !== null ? value - 90 : null),
-    dayET: (value: number | null) => (value !== null ? value / 1000 : null),
+    etDay: (value: number | null) => (value !== null ? value / 1000 : null),
     monthET: (value: number | null) => (value !== null ? value / 100 : null),
     yearET: (value: number | null) => (value !== null ? value / 100 : null),
     pressure: (value: number | null) => {

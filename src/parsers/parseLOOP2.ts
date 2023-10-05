@@ -19,9 +19,9 @@ export default function (
         .read(Type.UINT8, 60)
         .transform(transformers.pressReductionMethodID);
 
-    const windDirDeg = easy.read(Type.UINT16_LE, 16).nullIfEquals(0);
+    const windDirDeg = easy.read(Type.UINT16_LE, 16).nullIfEquals(...nullables.windDirDeg);
 
-    const windGustDirDeg = easy.read(Type.UINT16_LE, 24).nullIfEquals(0);
+    const windGustDirDeg = easy.read(Type.UINT16_LE, 24).nullIfEquals(...nullables.windDirDeg);
 
     const result: LOOP2 = {
         press: easy
@@ -63,12 +63,12 @@ export default function (
             .end(),
         heat: easy
             .read(Type.INT16_LE, 35)
-            .nullIfEquals(255)
+            .nullIfEquals(...nullables.heat)
             .transform(unitTransformers.temperature)
             .end(),
         dew: easy
             .read(Type.INT16_LE, 30)
-            .nullIfEquals(255)
+            .nullIfEquals(...nullables.dew)
             .transform(unitTransformers.temperature)
             .end(),
         tempIn: easy
@@ -115,12 +115,12 @@ export default function (
             .end(),
         chill: easy
             .read(Type.INT16_LE, 37)
-            .nullIfEquals(255)
+            .nullIfEquals(...nullables.chill)
             .transform(unitTransformers.temperature)
             .end(),
         thsw: easy
             .read(Type.INT16_LE, 39)
-            .nullIfEquals(255)
+            .nullIfEquals(...nullables.thsw)
             .transform(unitTransformers.temperature)
             .end(),
         rainRate: easy
@@ -130,7 +130,7 @@ export default function (
             .end(),
         stormStartDate: easy
             .read(Type.INT16_LE, 48)
-            .nullIfEquals(-1, 0xffff)
+            .nullIfEquals(...nullables.time)
             .transform(transformers.stormStartDate)
             .end(),
         stormRain: easy
@@ -160,8 +160,8 @@ export default function (
             .end(),
         etDay: easy
             .read(Type.UINT16_LE, 56)
-            .nullIfEquals(65535)
-            .transform(transformers.dayET)
+            .nullIfEquals(...nullables.et)
+            .transform(transformers.etDay)
             .transform(unitTransformers.evoTranspiration)
             .end(),
         uv: easy

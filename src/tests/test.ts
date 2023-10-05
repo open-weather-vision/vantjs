@@ -5,7 +5,7 @@ import inspect from "./inspect";
 async function main() {
     try {
         const device = await VantPro2Interface.create({
-            path: await waitForNewSerialConnection(5),
+            path: "/dev/ttyUSB0",
             rainCollectorSize: "0.2mm",
             units: {
                 soilMoisture: "cb",

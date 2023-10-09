@@ -13,13 +13,13 @@ export default class VantVueInterface extends VantPro2Interface {
      *
      * @example
      * ```typescript
-     * const device = await VantVueInterface.create({ path: "COM3", rainCollectorSize: "0.2mm" });
+     * const device = await VantVueInterface.connect({ path: "COM3", rainCollectorSize: "0.2mm" });
      *
      *
      * const richRealtimeData = await device.getRichRealtimeData();
      * inspect(richRealtimeData);
      *
-     * await device.close();
+     * await device.disconnect();
      * ```
      * @param settings the settings
      *
@@ -30,7 +30,8 @@ export default class VantVueInterface extends VantPro2Interface {
     public static async create(settings: MinimumVantInterfaceSettings) {
         const device = new VantVueInterface(settings);
 
-        await this.performOnCreateAction(device);
+        await device.openSerialPort();
+        await device.wakeUp(true);
 
         return device;
     }

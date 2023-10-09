@@ -3,11 +3,9 @@
  */
 export interface VantInterfaceEvents {
     /** Fires when the connection to the vantage console closes. */
-    close: () => void;
-    /** Fires when the vantage console awakes successfully. */
-    awakening: () => void;
-    /** Fires when the connection to the vantage console opens. */
-    open: () => void;
+    disconnect: () => void;
+    /** Fires when serial connection to the vantage console has been established successfully. */
+    connect: () => void;
 
     /**
      * Inherited event. Fires when a new event listener is added. See [here](https://nodejs.org/api/events.html#event-newlistener).

@@ -1,7 +1,7 @@
 import { VantInterface, VantPro2Interface } from "../interfaces";
 
 async function main() {
-    const device = await VantPro2Interface.create({
+    const device = await VantPro2Interface.connect({
         path: "COM4",
         rainCollectorSize: "0.2mm",
     });

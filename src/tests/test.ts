@@ -4,7 +4,7 @@ import inspect from "./inspect";
 
 async function main() {
     try {
-        const device = await VantPro2Interface.create({
+        const device = await VantPro2Interface.connect({
             path: "/dev/ttyUSB0",
             rainCollectorSize: "0.2mm",
             units: {
@@ -23,7 +23,7 @@ async function main() {
         });
 
         // Validate the console's connection
-        if (await device.validateConnection()) {
+        if (await device.checkConnection()) {
             console.log("Test worked!");
         } else {
             throw new Error("Connection to console failed");
@@ -31,22 +31,22 @@ async function main() {
 
         // Getting the console's firmware date code
         console.log("\n\nFirmware date code: ");
-        const firmwareDateCode = await device.getFirmwareDateCode();
+        const [firmwareDateCode, err1] = await device.getFirmwareDateCode();
         inspect(firmwareDateCode);
 
         // Getting highs and lows
         console.log("\n\nHighs and lows: ");
-        const highsAndLows = await device.getHighsAndLows();
+        const [highsAndLows, err2] = await device.getHighsAndLows();
         inspect(highsAndLows);
 
         // Getting default LOOP package
         console.log("\n\nDefault LOOP: ");
-        const defaultLOOP = await device.getDefaultLOOP();
+        const [defaultLOOP, err3] = await device.getDefaultLOOP();
         inspect(defaultLOOP);
 
         // Getting basic weather data
         console.log("\nBasic weather data: ");
-        const basicWeatherData = await device.getSimpleRealtimeData();
+        const [basicWeatherData, err4] = await device.getSimpleRealtimeData();
         inspect(basicWeatherData);
 
         console.log("\nSupports LOOP2: ");
@@ -54,22 +54,22 @@ async function main() {
 
         // Getting firmware version
         console.log("\nFirmware version: ");
-        const firmwareVersion = await device.getFirmwareVersion();
+        const [firmwareVersion, err5] = await device.getFirmwareVersion();
         inspect(firmwareVersion);
 
         // Getting LOOP1 package
         console.log("\nLOOP1 package: ");
-        const LOOP1 = await device.getLOOP1();
+        const [LOOP1, err6] = await device.getLOOP1();
         inspect(LOOP1);
 
         // Getting LOOP2 package
         console.log("\nLOOP2 package: ");
-        const LOOP2 = await device.getLOOP2();
+        const [LOOP2, err7] = await device.getLOOP2();
         inspect(LOOP2);
 
         // Getting a lot of weather data
         console.log("\nA lot of weather data: ");
-        const richRealtimeRecord = await device.getRichRealtimeData();
+        const [richRealtimeRecord, err8] = await device.getRichRealtimeData();
         inspect(richRealtimeRecord);
 
         console.log("\nWeather station type: ");
@@ -82,7 +82,7 @@ async function main() {
             await device.close();
         }, 4000);*/
 
-        await device.close();
+        await device.disconnect();
     } catch (err) {
         console.error("Catched error: " + err);
     }

@@ -15,13 +15,13 @@ export default class VantProInterface extends VantInterface {
      *
      * @example
      * ```typescript
-     * const device = await VantProInterface.create({ path: "COM3", rainCollectorSize: "0.2mm" });
+     * const device = await VantProInterface.connect({ path: "COM3", rainCollectorSize: "0.2mm" });
      *
      *
      * const highsAndLows = await device.getHighsAndLows();
      * inspect(highsAndLows);
      *
-     * await device.close();
+     * await device.disconnect();
      * ```
      * @param settings the settings
      *
@@ -29,10 +29,11 @@ export default class VantProInterface extends VantInterface {
      * @throws {@link FailedToWakeUpError} if the console doesn't wake up after trying three times
      * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
      */
-    public static async create(settings: MinimumVantInterfaceSettings) {
-        const device = new VantInterface(settings);
+    public static async connect(settings: MinimumVantInterfaceSettings) {
+        const device = new VantProInterface(settings);
 
-        await this.performOnCreateAction(device);
+        await device.openSerialPort();
+        await device.wakeUp(true);
 
         return device;
     }

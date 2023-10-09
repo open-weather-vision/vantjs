@@ -508,7 +508,7 @@ export default class BigRealtimeDataContainer
         }
 
         try {
-            this.highsAndLows = await device.getHighsAndLows();
+            this.highsAndLows = (await device.getHighsAndLows())[0];
         } catch (err) {
             this.highsAndLows = new HighsAndLows();
             throw err;

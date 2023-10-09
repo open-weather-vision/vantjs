@@ -1,4 +1,3 @@
-import { OnInterfaceCreate } from "./OnInterfaceCreate";
 import { UnitSettings } from "vant-environment/units";
 import { BaudRate, RainCollectorSize } from "vant-environment/structures";
 
@@ -19,11 +18,6 @@ export interface VantInterfaceSettings {
     readonly baudRate: BaudRate;
 
     /**
-     * The action to perform automatically on creating an interface. See {@link OnCreate}.
-     */
-    readonly onCreate: OnInterfaceCreate;
-
-    /**
      * The weather station's collector size. See {@link RainCollectorSize}.
      */
     readonly rainCollectorSize: RainCollectorSize;
@@ -32,4 +26,9 @@ export interface VantInterfaceSettings {
      * Configures the units to use. Doesn't have to match the units displayed on your console. See {@link UnitSettings}.
      */
     readonly units: UnitSettings;
+
+    /**
+     * Specifies the interval between every reconnection try in `ms`. Default is `1000`.
+     */
+    readonly reconnectionInterval: number;
 }

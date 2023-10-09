@@ -1,6 +1,5 @@
-import { OnInterfaceCreate } from "./OnInterfaceCreate";
 import { BaudRate, RainCollectorSize } from "vant-environment/structures";
-import { UnitSettings } from "vant-environment/units";
+import { UnitConfiguration } from "vant-environment/units";
 
 /**
  * The minimum required settings for any vant interface.
@@ -19,12 +18,6 @@ export interface MinimumVantInterfaceSettings {
     readonly baudRate?: BaudRate;
 
     /**
-     * **Optional**. The action to perform automatically on creating the interface. See {@link OnInterfaceCreate}.
-     * Default is {@link OnInterfaceCreate.OpenAndWakeUp}.
-     */
-    readonly onCreate?: OnInterfaceCreate;
-
-    /**
      * **Required**. The weather station's collector size. See {@link RainCollectorSize}.
      */
     readonly rainCollectorSize: RainCollectorSize;
@@ -32,5 +25,10 @@ export interface MinimumVantInterfaceSettings {
     /**
      * **Optional**. Configures the units to use. Doesn't have to match the units displayed on your console. Your weather data gets converted automatically.
      */
-    readonly units?: Partial<UnitSettings>;
+    readonly units?: Partial<UnitConfiguration>;
+
+    /**
+     * **Optional**: Specifies the interval between every reconnection try in `ms`. Default is `1000`.
+     */
+    readonly reconnectionInterval?: number;
 }

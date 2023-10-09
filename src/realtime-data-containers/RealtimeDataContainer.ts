@@ -419,7 +419,7 @@ export default abstract class RealtimeDataContainer<
             this.settings;
         switch (model) {
             case DeviceModel.VantagePro2:
-                this.currentDevice = (await VantPro2Interface.create({
+                this.currentDevice = (await VantPro2Interface.connect({
                     path,
                     baudRate,
                     rainCollectorSize,

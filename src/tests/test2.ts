@@ -1,50 +1,42 @@
 import "source-map-support/register";
-import BigRealtimeDataContainer from "../realtime-data-containers/BigRealtimeDataContainer";
-import {
-    DeviceModel,
-    OnContainerCreate,
-} from "../realtime-data-containers/settings";
+import DetailedRealtimeInterface from "../realtime-interfaces/DetailedRealtimeInterface";
 
 async function main() {
-    const weatherData = await BigRealtimeDataContainer.create({
-        path: "COM4",
-        model: DeviceModel.VantagePro2,
+    const realtime = await DetailedRealtimeInterface.connect({
+        path: "/dev/ttyUSB0",
         rainCollectorSize: "0.2mm",
-        updateInterval: 3,
+        updateInterval: 1,
         units: {
             temperature: "°C",
         },
-        onCreate: OnContainerCreate.DoNothing,
     });
 
-    weatherData.on("device-open", () => {
+    realtime.on("device-connect", () => {
         console.log("Connected device!");
     });
 
-    weatherData.on("device-close", () => {
+    realtime.on("device-disconnect", () => {
         console.log("Disconnected device!");
     });
 
-    weatherData.on("start", () => {
+    realtime.on("start", () => {
         console.log("Container started!");
     });
 
-    weatherData.on("stop", () => {
-        console.log("Container stopped!");
+    realtime.on("destroy", () => {
+        console.log("Container destroyed!");
     });
-
-    weatherData.start();
 
     let i = 0;
     while (i < 12) {
-        await weatherData.waitForUpdate();
+        await realtime.waitForUpdate();
         console.log(
-            weatherData.tempIn + weatherData.settings.units.temperature
+            realtime.tempIn + realtime.settings.units.temperature
         );
         i++;
     }
 
-    await weatherData.stop();
+    await realtime.destroy();
 }
 
 main();

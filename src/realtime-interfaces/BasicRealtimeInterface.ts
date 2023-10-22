@@ -1,35 +1,26 @@
 import merge from "lodash.merge";
-import VantInterface from "../interfaces/VantInterface";
-import { HighsAndLows, SimpleRealtimeData } from "vant-environment/structures";
-import { DeviceModel } from "./settings/DeviceModel";
-import RealtimeDataContainer from "./RealtimeDataContainer";
-import { MinimumRealtimeDataContainerSettings } from "./settings/MinimumRealtimeDataContainerSettings";
+import { HighsAndLows, BasicRealtimeData } from "vant-environment/structures";
+import RealtimeInterface from "./RealtimeInterface";
+import { MinimumRealtimeInterfaceSettings } from "./settings/MinimumRealtimeInterfaceSettings";
+import { WeatherStation } from "../weather-station";
 
 /**
- * The smaller version of the realtime data container providing {@link HighsAndLows} and {@link SimpleRealtimeData}.
- * Works on Vantage Vue, Pro and Pro 2.
+ * The smaller version of the realtime interface providing {@link HighsAndLows} and {@link SimpleRealtimeData}.
+ * Works on any Vantage Vue, Pro and Pro 2.
  *
- * **What are realtime data containers?**
+ * **What are realtime interfaces?**
  *
- * Realtime data containers provide another level of abstraction to interact with your weather station. Instead of manually calling methods like
- * {@link VantInterface.getHighsAndLows} or {@link VantInterface.getSimpleRealtimeData}, you just access the properties of an instance of this class.
- * E.g. to get the current outside temperature you just create a realtime data container and access it using `container.tempOut`.
+ * Realtime interfaces provide another level of abstraction to interact with your weather station. Instead of manually calling methods like
+ * {@link WeatherStationAdvanced.getHighsAndLows} or {@link WeatherStationAdvanced.getDetailedRealtimeData}, you just access the attributes of an instance of this class.
+ * E.g. to get the current outside temperature you just create a realtime interface and access it using `realtime.tempOut`.
  *
- * Internally this works via an update cycle. Every `container.settings.updateInterval` seconds the container uses an {@link VantInterface} to update its properties.
- * As the realtime data container is an [EventEmitter](https://nodejs.org/api/events.html#class-eventemitter), you can listen to the `"update"` event. Additionally
- * there is the `"valid-update"` event which only fires if no error occurrs. To get an overview of all fired events take a look at {@link RealtimeDataContainerEvents}.
- *
- * Realtime data containers provide **another level of stability**. If the console disconnects from your computer the realtime data container stays alive waiting
- * for the console to reconnect.
+ * Internally this works via an update cycle. Every `container.settings.updateInterval` seconds the interface requests data from your weather station to update its attributes.
+ * As the realtime interface is an [EventEmitter](https://nodejs.org/api/events.html#class-eventemitter), you can listen to the `"update"` event. Additionally
+ * there is the `"valid-update"` event which only fires if no error occurrs.
  */
-export default class SmallRealtimeDataContainer
-    extends RealtimeDataContainer<
-        VantInterface,
-        | DeviceModel.VantagePro
-        | DeviceModel.VantagePro2
-        | DeviceModel.VantageVue
-    >
-    implements SimpleRealtimeData
+export default class BasicRealtimeInterface
+    extends RealtimeInterface<WeatherStation>
+    implements BasicRealtimeData
 {
     /**
      *  Holds daily, monthly and yearly highs and lows for all weather elements / sensors.
@@ -179,15 +170,26 @@ export default class SmallRealtimeDataContainer
     public time: Date = new Date();
 
     /**
-     * Creates a small realtime container using the passed settings. Your device should be connected serially.
-     * @param settings the container's settings
+     * Connects the realtime data container with your weather station.
+     * 
+     * @example
+     * ```ts
+     * const realtime = await BasicRealtimeInterface.connect({...});
+     * await realtime.waitForUpdate();
+     * 
+     * console.log(`It's ${realtime.tempOut}°F outside!`);
+     * ```
+     * @param settings your desired settings
+     * @returns the connected realtime data container
+     * 
+     * @link _Following errors are possible_:
+     * - {@link ClosedConnectionError} if the connection to the weather station's console closes suddenly
+     * - {@link FailedToWakeUpError} if the interface failed to wake up the console
+     * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public static async create(
-        settings: MinimumRealtimeDataContainerSettings<DeviceModel>
-    ) {
-        return await this.performOnCreateAction(
-            new SmallRealtimeDataContainer(settings)
-        );
+    public static connect = async (settings: MinimumRealtimeInterfaceSettings) => {
+        const device = await WeatherStation.connect(settings);
+        return new BasicRealtimeInterface(settings, device);
     }
 
     /**
@@ -195,38 +197,30 @@ export default class SmallRealtimeDataContainer
      * @param settings
      */
     private constructor(
-        settings: MinimumRealtimeDataContainerSettings<DeviceModel>
+        settings: MinimumRealtimeInterfaceSettings,
+        device: WeatherStation,
     ) {
-        super(settings);
+        super(settings, device, false);
     }
 
     /**
-     * Sets all sensor values to `null`.
-     */
-    protected onConnectionError = async () => {
-        merge(this, new SimpleRealtimeData());
-        this.highsAndLows = new HighsAndLows();
-    };
-
-    /**
-     * Updates the small realtime data container. Merges a new SimpleRealtimeData instance
+     * Updates the small realtime interface. Merges a new SimpleRealtimeData instance
      * into this and updates the highs and lows.
      * @param device
      */
-    protected onUpdate = async (device: VantInterface) => {
-        try {
-            const simpleRealtimeData = await device.getSimpleRealtimeData();
-            merge(this, simpleRealtimeData);
-        } catch (err) {
-            merge(this, new SimpleRealtimeData());
-            throw err;
-        }
+    protected updateData = async () => {
+        const [simpleRealtimeData, err1] = await this.device.getBasicRealtimeData();
+        merge(this, simpleRealtimeData);
 
-        try {
-            this.highsAndLows = await device.getHighsAndLows();
-        } catch (err) {
-            this.highsAndLows = new HighsAndLows();
-            throw err;
+        const [highsAndLows, err2] = await this.device.getHighsAndLows();
+
+        this.highsAndLows = highsAndLows;
+
+        if(err1){
+            throw err1;
+        }
+        if(err2){
+            throw err2;
         }
     };
 }

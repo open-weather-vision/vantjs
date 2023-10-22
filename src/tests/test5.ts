@@ -1,13 +1,13 @@
-import { VantInterface, VantPro2Interface } from "../interfaces";
+import { WeatherStationAdvanced } from "../weather-station";
 
 async function main() {
-    const device = await VantPro2Interface.connect({
-        path: "COM4",
+    const device = await WeatherStationAdvanced.connect({
+        path: "/dev/ttyUSB0",
         rainCollectorSize: "0.2mm",
     });
 
     // access data from your weather station
-    const simpleRealtimeData = await device.getRichRealtimeData();
+    const [simpleRealtimeData, err] = await device.getDetailedRealtimeData();
 
     console.log("Outside it's " + simpleRealtimeData.tempOut + " °F");
     console.log("The wind speed is " + simpleRealtimeData.wind + " mph");
@@ -21,7 +21,7 @@ async function main() {
         "(measured at " + simpleRealtimeData.time.toLocaleString() + ")"
     );
 
-    await device.close();
+    await device.disconnect();
 }
 
 main();

@@ -1,7 +1,7 @@
 import { TypedEmitter } from "tiny-typed-emitter";
-import { VantInterfaceEvents } from "./events";
+import { WeatherStationEvents } from "./events";
 
-export default class VantInterfaceEventBase extends TypedEmitter<VantInterfaceEvents> {
+export default class WeatherStationEventBase extends TypedEmitter<WeatherStationEvents> {
     /**
      *  By default, a maximum of 10 listeners can be registered for any single event. This limit can be changed for individual VantInterface instances using the {@link setMaxListeners} method.
      *
@@ -10,14 +10,14 @@ export default class VantInterfaceEventBase extends TypedEmitter<VantInterfaceEv
     public static defaultMaxListeners: number;
 
     /**
-     * Adds an event listener. Possible events are described {@link VantInterfaceEvents here}.
+     * Adds an event listener. Possible events are described {@link WeatherStationEvents here}.
      * @param eventName The event to listen for
      * @param listener The listener to add
      * @returns this (for chaining calls)
      */
-    public addListener<U extends keyof VantInterfaceEvents>(
+    public addListener<U extends keyof WeatherStationEvents>(
         eventName: U,
-        listener: VantInterfaceEvents[U]
+        listener: WeatherStationEvents[U]
     ): this {
         return super.addListener(eventName, listener);
     }
@@ -28,9 +28,9 @@ export default class VantInterfaceEventBase extends TypedEmitter<VantInterfaceEv
      * @param listener the listener to remove
      * @returns this (for chaining calls)
      */
-    public removeListener<U extends keyof VantInterfaceEvents>(
+    public removeListener<U extends keyof WeatherStationEvents>(
         eventName: U,
-        listener: VantInterfaceEvents[U]
+        listener: WeatherStationEvents[U]
     ): this {
         return super.removeListener(eventName, listener);
     }
@@ -42,9 +42,9 @@ export default class VantInterfaceEventBase extends TypedEmitter<VantInterfaceEv
      * @param args
      * @returns whether the event had listeners
      */
-    public emit<U extends keyof VantInterfaceEvents>(
+    public emit<U extends keyof WeatherStationEvents>(
         eventName: U,
-        ...args: Parameters<VantInterfaceEvents[U]>
+        ...args: Parameters<WeatherStationEvents[U]>
     ): boolean {
         return super.emit(eventName, ...args);
     }
@@ -53,7 +53,7 @@ export default class VantInterfaceEventBase extends TypedEmitter<VantInterfaceEv
      * Returns an array listing the events for which the VantInterface has registered listeners.
      * @returns an array listing the events for which the VantInterface has registered listeners
      */
-    public eventNames<U extends keyof VantInterfaceEvents>(): U[] {
+    public eventNames<U extends keyof WeatherStationEvents>(): U[] {
         return super.eventNames();
     }
 
@@ -70,7 +70,7 @@ export default class VantInterfaceEventBase extends TypedEmitter<VantInterfaceEv
      * @param eventName
      * @returns the number of listeners listening to the event
      */
-    public listenerCount(type: keyof VantInterfaceEvents): number {
+    public listenerCount(type: keyof WeatherStationEvents): number {
         return super.listenerCount(type);
     }
 
@@ -79,9 +79,9 @@ export default class VantInterfaceEventBase extends TypedEmitter<VantInterfaceEv
      * @param eventName
      * @returns a copy of the array of listeners for the passed event
      */
-    public listeners<U extends keyof VantInterfaceEvents>(
+    public listeners<U extends keyof WeatherStationEvents>(
         eventName: U
-    ): VantInterfaceEvents[U][] {
+    ): WeatherStationEvents[U][] {
         return super.listeners(eventName);
     }
 
@@ -91,9 +91,9 @@ export default class VantInterfaceEventBase extends TypedEmitter<VantInterfaceEv
      * @param listener
      * @returns this (for chaining calls)
      */
-    public off<U extends keyof VantInterfaceEvents>(
+    public off<U extends keyof WeatherStationEvents>(
         eventName: U,
-        listener: VantInterfaceEvents[U]
+        listener: WeatherStationEvents[U]
     ): this {
         return super.off(eventName, listener);
     }
@@ -104,9 +104,9 @@ export default class VantInterfaceEventBase extends TypedEmitter<VantInterfaceEv
      * @param listener
      * @returns this (for chaining calls)
      */
-    public on<U extends keyof VantInterfaceEvents>(
+    public on<U extends keyof WeatherStationEvents>(
         eventName: U,
-        listener: VantInterfaceEvents[U]
+        listener: WeatherStationEvents[U]
     ): this {
         return super.on(eventName, listener);
     }
@@ -117,9 +117,9 @@ export default class VantInterfaceEventBase extends TypedEmitter<VantInterfaceEv
      * @param listener
      * @returns this (for chaining calls)
      */
-    public once<U extends keyof VantInterfaceEvents>(
+    public once<U extends keyof WeatherStationEvents>(
         eventName: U,
-        listener: VantInterfaceEvents[U]
+        listener: WeatherStationEvents[U]
     ): this {
         return super.once(eventName, listener);
     }
@@ -144,9 +144,9 @@ export default class VantInterfaceEventBase extends TypedEmitter<VantInterfaceEv
      * @param listener
      * @returns this (for chaining calls)
      */
-    public prependListener<U extends keyof VantInterfaceEvents>(
+    public prependListener<U extends keyof WeatherStationEvents>(
         eventName: U,
-        listener: VantInterfaceEvents[U]
+        listener: WeatherStationEvents[U]
     ): this {
         return super.prependListener(eventName, listener);
     }
@@ -158,9 +158,9 @@ export default class VantInterfaceEventBase extends TypedEmitter<VantInterfaceEv
      * @param listener
      * @returns this (for chaining calls)
      */
-    public prependOnceListener<U extends keyof VantInterfaceEvents>(
+    public prependOnceListener<U extends keyof WeatherStationEvents>(
         eventName: U,
-        listener: VantInterfaceEvents[U]
+        listener: WeatherStationEvents[U]
     ): this {
         return super.prependOnceListener(eventName, listener);
     }
@@ -170,7 +170,7 @@ export default class VantInterfaceEventBase extends TypedEmitter<VantInterfaceEv
      * @param eventName
      * @returns this (for chaining calls)
      */
-    public removeAllListeners(eventName?: keyof VantInterfaceEvents): this {
+    public removeAllListeners(eventName?: keyof WeatherStationEvents): this {
         return super.removeAllListeners(eventName);
     }
 }

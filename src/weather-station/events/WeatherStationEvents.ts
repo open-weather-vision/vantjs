@@ -1,10 +1,11 @@
 /**
  * Describes the events fired by the {@link VantInterface}.
  */
-export interface VantInterfaceEvents {
+export interface WeatherStationEvents {
     /** Fires when the connection to the vantage console closes. */
     disconnect: () => void;
-    /** Fires when serial connection to the vantage console has been established successfully. */
+    
+    /** Fires when the connection to the vantage console has been established successfully and the console is awake. */
     connect: () => void;
 
     /**

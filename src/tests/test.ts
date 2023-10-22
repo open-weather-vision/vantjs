@@ -1,10 +1,11 @@
-import VantPro2Interface from "../interfaces/VantPro2Interface";
+import WeatherStationAdvanced from "../weather-station/WeatherStationAdvanced";
 import { waitForNewSerialConnection } from "../util";
 import inspect from "./inspect";
+import { sleep } from "vant-environment/utils";
 
 async function main() {
     try {
-        const device = await VantPro2Interface.connect({
+        const device = await WeatherStationAdvanced.connect({
             path: "/dev/ttyUSB0",
             rainCollectorSize: "0.2mm",
             units: {
@@ -20,6 +21,7 @@ async function main() {
                 solarRadiation: "W/m²",
                 wind: "km/h",
             },
+            reconnectionInterval: 3
         });
 
         // Validate the console's connection
@@ -46,11 +48,12 @@ async function main() {
 
         // Getting basic weather data
         console.log("\nBasic weather data: ");
-        const [basicWeatherData, err4] = await device.getSimpleRealtimeData();
+        const [basicWeatherData, err4] = await device.getBasicRealtimeData();
         inspect(basicWeatherData);
 
         console.log("\nSupports LOOP2: ");
-        console.log(await device.isSupportingLOOP2Packages());
+        const [support, errr] = await device.isSupportingLOOP2Packages();
+        console.log(support);
 
         // Getting firmware version
         console.log("\nFirmware version: ");
@@ -69,11 +72,12 @@ async function main() {
 
         // Getting a lot of weather data
         console.log("\nA lot of weather data: ");
-        const [richRealtimeRecord, err8] = await device.getRichRealtimeData();
+        let [richRealtimeRecord, err8] = await device.getDetailedRealtimeData();
         inspect(richRealtimeRecord);
 
         console.log("\nWeather station type: ");
-        inspect(await device.getWeatherstationType());
+        const [type, err9] = await device.getWeatherstationType();
+        inspect(type);
 
         /*
         await device.setBackgroundLight(false);
@@ -81,6 +85,9 @@ async function main() {
             await device.setBackgroundLight(true);
             await device.close();
         }, 4000);*/
+
+        await sleep(100 * 1000);
+        [richRealtimeRecord, err8] = await device.getDetailedRealtimeData();
 
         await device.disconnect();
     } catch (err) {

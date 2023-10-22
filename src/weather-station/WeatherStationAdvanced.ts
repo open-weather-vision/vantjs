@@ -1,6 +1,4 @@
-import VantInterface from "./VantInterface";
-
-import { LOOP1, LOOP2, RichRealtimeData } from "vant-environment/structures";
+import { LOOP1, LOOP2, DetailedRealtimeData } from "vant-environment/structures";
 import {
     UnsupportedDeviceModelError,
     MalformedDataError,
@@ -8,40 +6,44 @@ import {
     ClosedConnectionError,
     SerialPortError,
 } from "../errors";
-import { MinimumVantInterfaceSettings } from "./settings";
+import { MinimumWeatherStationSettings } from "./settings";
 import { parseLOOP1, parseLOOP2 } from "../parsers";
 import flatMerge from "../util/flatMerge";
+import WeatherStation from "./WeatherStation";
 
 /**
- * Interface to the _Vantage Pro 2_ weather station. Is built on top of the {@link VantInterface}.
+ * More feature rich interface to any _Vantage Pro 2_ or _Vantage Vue_ weather station with firmware dated after April 24, 2002 (v1.90 or above).
+ * Is built on top of the {@link VantageWeatherStation}.
  *
- * Offers station dependent features like {@link VantPro2Interface.getRichRealtimeData}, {@link VantPro2Interface.getLOOP1}, {@link VantPro2Interface.getLOOP2}, {@link VantPro2Interface.isSupportingLOOP2Packages} and {@link VantPro2Interface.getFirmwareVersion}.
+ * Offers station dependent features like {@link VantageWeatherStationAdvanced.getDetailedRealtimeData}, {@link VantageWeatherStationAdvanced.getLOOP1}, {@link VantageWeatherStationAdvanced.getLOOP2}, {@link VantageWeatherStationAdvanced.isSupportingLOOP2Packages} and {@link VantageWeatherStationAdvanced.getFirmwareVersion}.
  */
-export default class VantPro2Interface extends VantInterface {
+export default class WeatherStationAdvanced extends WeatherStation {
     /**
      * Creates an interface to your vantage pro 2 weather station using the passed settings. The device should be connected
      * serially.
      *
      * @example
      * ```typescript
-     * const device = await VantPro2Interface.connect({ path: "COM3", rainCollectorSize: "0.2mm" });
+     * const device = await VantProInterface.connect({ path: "COM3", rainCollectorSize: "0.2mm" });
      *
-     * const [richRealtimeData, err] = await device.getRichRealtimeData();
-     * inspect(richRealtimeData);
+     *
+     * const [data, err] = await device.getSimpleRealtimeData();
+     * console.log(`It's ${data.tempOut}°F outside!`);
      *
      * await device.disconnect();
      * ```
      * @param settings the settings
      *
-     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
-     * @throws {@link FailedToWakeUpError} if the console doesn't wake up after trying three times
-     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is closed while connecting
+     * @link _Following errors are possible_:
+     * - {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * - {@link FailedToWakeUpError} if the interface failed to wake up the console
+     * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public static async connect(settings: MinimumVantInterfaceSettings) {
-        const device = new VantPro2Interface(settings);
+    public static async connect(settings: MinimumWeatherStationSettings) {
+        const device = new WeatherStationAdvanced(settings);
 
         await device.openSerialPort();
-        await device.wakeUp(true);
+        await device.wakeUp();
 
         return device;
     }
@@ -50,9 +52,10 @@ export default class VantPro2Interface extends VantInterface {
      * Checks whether the connected weather station is supporting {@link LOOP2} packages. This is done using the firmware's date code.
      * @returns whether the connected weather station is supporting {@link LOOP2} packages
      *
-     * @throws {@link ClosedConnectionError} if the connection to the weather station's console is already closed
-     * @throws {@link MalformedDataError} if the data received from the console is malformed
-     * @throws {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
+     * @link _Following errors are possible_:
+     * - {@link ClosedConnectionError} if the connection to the weather station's console is already closed
+     * - {@link MalformedDataError} if the data received from the console is malformed
+     * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
     public async isSupportingLOOP2Packages(): Promise<
         [boolean | null, VantError | undefined]
@@ -80,7 +83,7 @@ export default class VantPro2Interface extends VantInterface {
         [string, undefined] | [null, VantError]
     > {
         try {
-            this.checkPortConnection();
+            await this.checkConsoleConnection();
         } catch (err: any) {
             return [null, err];
         }
@@ -108,7 +111,7 @@ export default class VantPro2Interface extends VantInterface {
     public getLOOP1 = async (): Promise<[LOOP1, VantError | undefined]> => {
         const result = new LOOP1();
         try {
-            this.checkPortConnection();
+            await this.checkConsoleConnection();
         } catch (err: any) {
             return [result, err];
         }
@@ -160,7 +163,7 @@ export default class VantPro2Interface extends VantInterface {
     public async getLOOP2(): Promise<[LOOP2, VantError | undefined]> {
         const result = new LOOP2();
         try {
-            this.checkPortConnection();
+            await this.checkConsoleConnection();
         } catch (err: any) {
             return [result, err];
         }
@@ -209,12 +212,12 @@ export default class VantPro2Interface extends VantInterface {
      * - {@link MalformedDataError} if the data received from the console is malformed
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public async getRichRealtimeData(): Promise<
-        [RichRealtimeData, VantError | undefined]
+    public async getDetailedRealtimeData(): Promise<
+        [DetailedRealtimeData, VantError | undefined]
     > {
-        const result: RichRealtimeData = new RichRealtimeData();
+        const result: DetailedRealtimeData = new DetailedRealtimeData();
         try {
-            this.checkPortConnection();
+            await this.checkConsoleConnection();
         } catch (err: any) {
             return [result, err];
         }

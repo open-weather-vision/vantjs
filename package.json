@@ -22,13 +22,13 @@
                 "dist/errors"
             ],
             "weather-station": [
-                "dist/interfaces"
+                "dist/weather-station"
             ],
             "weather-station/settings": [
-                "dist/interfaces/settings"
+                "dist/weather-station/settings"
             ],
             "weather-station/events": [
-                "dist/interfaces/events"
+                "dist/weather-station/events"
             ],
             "realtime-interfaces": [
                 "dist/realtime-interfaces"

@@ -10,7 +10,7 @@ vantjs is a platform-independent javascript and typescript interface to the Davi
 
 # Features
 
--   Getting **hourly, daily, monthly** and **yearly highs and lows** (read more [here](https://harrydehix.github.io/vantjs/classes/structures.HighsAndLows.html))
+-   Getting **hourly, daily, monthly** and **yearly highs and lows** (read more [here](https://open-weather-vision.github.io/vantjs/classes/structures.HighsAndLows.html))
 
 ```ts
 const highsAndLows = await device.getHighsAndLows();
@@ -26,7 +26,7 @@ console.log(
 // Output: The maximum rain rate in the current hour was 0.2 in/h!
 ```
 
--   Getting **realtime weather data** (read more [here](https://harrydehix.github.io/vantjs/classes/structures.RichRealtimeData.html))
+-   Getting **realtime weather data** (read more [here](https://open-weather-vision.github.io/vantjs/classes/structures.RichRealtimeData.html))
 
 ```ts
 const realtime = await device.getRichRealtimeData();
@@ -58,7 +58,7 @@ console.log(`It's ${realtime.tempIn} °C`);
 // Output: It's 23.1233 °C
 ```
 
--   and more (read the [docs](https://harrydehix.github.io/vantjs/index.html)!)
+-   and more (read the [docs](https://open-weather-vision.github.io/vantjs/index.html)!)
 
 # Installation
 
@@ -73,4 +73,4 @@ Read a guide about realtime data containers [here](/guides/2-realtime-data-conta
 
 # Documentation
 
-Read the full documentation [here](https://harrydehix.github.io/vantjs/).
+Read the full documentation [here](https://open-weather-vision.github.io/vantjs/).

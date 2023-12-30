@@ -74,16 +74,3 @@ Read a guide about realtime data containers [here](/guides/2-realtime-data-conta
 # Documentation
 
 Read the full documentation [here](https://harrydehix.github.io/vantjs/).
-
-# Community
-
-This project is updated on demand. If you have discovered a bug or want to suggest a feature🚀, please create an issue [here](https://github.com/harrydehix/vantjs/issues/new/choose).
-
-# Beyond vantjs
-
-_vantjs_ is only a small part of the **Vantage Environment**.
-
-While _vantjs_ provides the direct serial connection to the weather station, the [vant-api](https://github.com/harrydehix/vant-api) provides a convenient interface for this data in the form of a RESTful API for any kind of application. In the background it manages a mongodb database. The [vant-api](https://github.com/harrydehix/vant-api) package also includes a _recorder_ that utilizes _vantjs_ to repeatedly send weather data to the running REST API. Finally [vant-gui](https://github.com/harrydehix/vant-gui) utilizes the api to beautifully visualize your weather data in a react application.
-These programs together form a robust platform that allows you to use your weather data pretty much anywhere.
-
-⚠️ The **Vantage Environment** is still in active development. Once it is finished multiple _guides_ will guide you through the process of setting up your very own vantage environment.

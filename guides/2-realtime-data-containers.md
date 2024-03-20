@@ -64,9 +64,9 @@ When creating a realtime data container, specify:
 -   **required** `rainCollectorSize`: Your weather station's rain collector size. Possible sizes are `"0.1in"`, `"0.2mm"` and `"0.1mm"`.
 -   **required** `model`: The model of the connected weather station. Possible values are `DeviceModel.VantagePro`, `DeviceModel.VantagePro2` and `DeviceModel.VantageVue`.
 -   _optional_ `updateInterval`: The interval (in seconds) the container updates itself. Default is `60` seconds.
--   _optional_ `baudRate`: The used baud rate (learn more [here](https://harrydehix.github.io/vantjs/interfaces/interfaces_settings.MinimumVantInterfaceSettings.html#baudRate))
--   _optional_ `units`: Your desired unit settings (learn more [here](https://harrydehix.github.io/vantjs/modules/units.html#UnitSettings))
--   _optional_ `onCreate`: The action automatically to perform on creating the container (learn more [here](https://harrydehix.github.io/vantjs/enums/realtime_data_containers_settings.OnContainerCreate.html))
+-   _optional_ `baudRate`: The used baud rate (learn more [here](https://open-weather-vision.github.io/vantjs/interfaces/interfaces_settings.MinimumVantInterfaceSettings.html#baudRate))
+-   _optional_ `units`: Your desired unit settings (learn more [here](https://open-weather-vision.github.io/vantjs/modules/units.html#UnitSettings))
+-   _optional_ `onCreate`: The action automatically to perform on creating the container (learn more [here](https://open-weather-vision.github.io/vantjs/enums/realtime_data_containers_settings.OnContainerCreate.html))
 
 The most importing thing to specify is the serial port's path. This defines the channel used to communicate with the weather station.
 

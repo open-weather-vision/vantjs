@@ -57,8 +57,8 @@ When creating an interface, specify:
 -   **required** `path`: Path to serial port. Defines the channel used to communicate with the weather station.
 -   **required** `rainCollectorSize`: Your weather station's rain collector size. Possible sizes are `"0.1in"`, `"0.2mm"` and `"0.1mm"`.
 -   _optional_ `baudRate`: The used baud rate (learn more [here](https://open-weather-vision.github.io/vantjs/interfaces/interfaces_settings.MinimumVantInterfaceSettings.html#baudRate))
--   _optional_ `units`: Your desired unit settings (learn more [here](https://harrydehix.github.io/vantjs/modules/units.html#UnitSettings))
--   _optional_ `onCreate`: The action automatically to perform on creating the interface (learn more [here](https://harrydehix.github.io/vantjs/enums/interfaces_settings.OnInterfaceCreate.html))
+-   _optional_ `units`: Your desired unit settings (learn more [here](https://open-weather-vision.github.io/vantjs/modules/units.html#UnitSettings))
+-   _optional_ `onCreate`: The action automatically to perform on creating the interface (learn more [here](https://open-weather-vision.github.io/vantjs/enums/interfaces_settings.OnInterfaceCreate.html))
 
 The most importing thing to specify is the serial port's path. This defines the channel used to communicate with the weather station.
 
@@ -82,7 +82,7 @@ console.log("(measured at " + simpleRealtimeData.time.toLocaleString() + ")");
 ```
 
 The returned `SimpleRealtimeData` object contains basic realtime information about temperature,
-pressure, humidity, wind speed / direction, rain (rate), et, uv and solar radiation. It is documented in detail [here](https://harrydehix.github.io/vantjs/classes/structures.SimpleRealtimeData.html). The default units are listed [here](https://harrydehix.github.io/vantjs/modules/units.html).
+pressure, humidity, wind speed / direction, rain (rate), et, uv and solar radiation. It is documented in detail [here](https://open-weather-vision.github.io/vantjs/classes/structures.SimpleRealtimeData.html). The default units are listed [here](https://open-weather-vision.github.io/vantjs/modules/units.html).
 
 #### 3. Closing the serial connection
 
@@ -119,4 +119,4 @@ For example:
 -   repeatedly accessing realtime weather data in a steady interval using realtime data containers
 -   and much more...
 
-To learn more about these topics read its [official documentation](https://harrydehix.github.io/vantjs/).
+To learn more about these topics read its [official documentation](https://open-weather-vision.github.io/vantjs/).

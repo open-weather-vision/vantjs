@@ -56,7 +56,7 @@ When creating an interface, specify:
 
 -   **required** `path`: Path to serial port. Defines the channel used to communicate with the weather station.
 -   **required** `rainCollectorSize`: Your weather station's rain collector size. Possible sizes are `"0.1in"`, `"0.2mm"` and `"0.1mm"`.
--   _optional_ `baudRate`: The used baud rate (learn more [here](https://harrydehix.github.io/vantjs/interfaces/interfaces_settings.MinimumVantInterfaceSettings.html#baudRate))
+-   _optional_ `baudRate`: The used baud rate (learn more [here](https://open-weather-vision.github.io/vantjs/interfaces/interfaces_settings.MinimumVantInterfaceSettings.html#baudRate))
 -   _optional_ `units`: Your desired unit settings (learn more [here](https://harrydehix.github.io/vantjs/modules/units.html#UnitSettings))
 -   _optional_ `onCreate`: The action automatically to perform on creating the interface (learn more [here](https://harrydehix.github.io/vantjs/enums/interfaces_settings.OnInterfaceCreate.html))
 

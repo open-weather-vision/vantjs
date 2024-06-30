@@ -11,9 +11,7 @@ first realtime data (temperature, pressure, humidity, wind, ...) directly from y
 
 ## 1. Connect the vantage console serially to your computer
 
-When you connect your weather station console via the datalogger for the first time, it should be connected serially by default (even if you use the datalogger's USB version).
-
-However, if you have installed the Weather Link software, configured your weather station there, and _selected USB as the communication type_, you will need to run the **CP210X USB to Serial Converter**. This utility is included in the Weather Link software. You can run it from the Windows Start menu by selecting _WeatherLink_ **>** _CP210X USB to Serial Converter_.
+The vantjs library needs your console to be connected serially to your computer. A possible setup would be to use the datalogger (also the USB version) and install the correct driver after that. The tool to install the correct driver is [**CP210X USB to Serial Converter**](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers?tab=downloads). This utility is also included in the Weather Link software. You can run it from the Windows Start menu by selecting _WeatherLink_ **>** _CP210X USB to Serial Converter_.
 
 ## 2. Install the vantjs package
 

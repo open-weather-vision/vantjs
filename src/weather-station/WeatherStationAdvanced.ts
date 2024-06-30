@@ -42,7 +42,7 @@ export default class WeatherStationAdvanced extends WeatherStation {
     public static async connect(settings: MinimumWeatherStationSettings) {
         const device = new WeatherStationAdvanced(settings);
 
-        await device.openSerialPort();
+        await device.port.open();
         await device.wakeUp();
 
         return device;
@@ -57,10 +57,10 @@ export default class WeatherStationAdvanced extends WeatherStation {
      * - {@link MalformedDataError} if the data received from the console is malformed
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public async isSupportingLOOP2Packages(): Promise<
+    public async isSupportingLOOP2Packages(timeout?: number): Promise<
         [boolean | null, VantError | undefined]
     > {
-        const [firmwareDateCode, err] = await this.getFirmwareDateCode();
+        const [firmwareDateCode, err] = await this.getFirmwareDateCode(timeout);
         if (err) {
             return [null, err];
         }
@@ -79,16 +79,16 @@ export default class WeatherStationAdvanced extends WeatherStation {
      * - {@link MalformedDataError} if the data received from the console is malformed
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public async getFirmwareVersion(): Promise<
+    public async getFirmwareVersion(timeout?: number): Promise<
         [string, undefined] | [null, VantError]
     > {
         try {
-            await this.checkConsoleConnection();
+            await this.checkConsoleConnection(timeout);
         } catch (err: any) {
             return [null, err];
         }
         try {
-            const data = await this.writeAndWaitForBuffer("NVER\n", 12);
+            const data = await this.writeAndWaitForBuffer("NVER\n", 12, timeout);
             const firmwareVersion = data
                 .toString("ascii")
                 .split("OK")[1]
@@ -108,16 +108,16 @@ export default class WeatherStationAdvanced extends WeatherStation {
      * - {@link MalformedDataError} if the data received from the console is malformed
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public getLOOP1 = async (): Promise<[LOOP1, VantError | undefined]> => {
+    public getLOOP1 = async (timeout?: number): Promise<[LOOP1, VantError | undefined]> => {
         const result = new LOOP1();
         try {
-            await this.checkConsoleConnection();
+            await this.checkConsoleConnection(timeout);
         } catch (err: any) {
             return [result, err];
         }
 
         try {
-            const data = await this.writeAndWaitForBuffer("LPS 1 1\n", 100);
+            const data = await this.writeAndWaitForBuffer("LPS 1 1\n", 100, timeout);
 
             // Check ack
             this.validateAcknowledgementByte(data);
@@ -160,16 +160,16 @@ export default class WeatherStationAdvanced extends WeatherStation {
      * - {@link MalformedDataError} if the data received from the console is malformed
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public async getLOOP2(): Promise<[LOOP2, VantError | undefined]> {
+    public async getLOOP2(timeout?: number): Promise<[LOOP2, VantError | undefined]> {
         const result = new LOOP2();
         try {
-            await this.checkConsoleConnection();
+            await this.checkConsoleConnection(timeout);
         } catch (err: any) {
             return [result, err];
         }
 
         try {
-            const data = await this.writeAndWaitForBuffer("LPS 2 1\n", 100);
+            const data = await this.writeAndWaitForBuffer("LPS 2 1\n", 100, timeout);
 
             // Check ack
             this.validateAcknowledgementByte(data);
@@ -212,20 +212,15 @@ export default class WeatherStationAdvanced extends WeatherStation {
      * - {@link MalformedDataError} if the data received from the console is malformed
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public async getDetailedRealtimeData(): Promise<
+    public async getDetailedRealtimeData(timeout?: number): Promise<
         [DetailedRealtimeData, VantError | undefined]
     > {
         const result: DetailedRealtimeData = new DetailedRealtimeData();
-        try {
-            await this.checkConsoleConnection();
-        } catch (err: any) {
-            return [result, err];
-        }
 
-        const [loop1, err1] = await this.getLOOP1();
+        const [loop1, err1] = await this.getLOOP1(timeout);
         if (err1) return [result, err1];
 
-        const [loop2, err2] = await this.getLOOP2();
+        const [loop2, err2] = await this.getLOOP2(timeout);
         if (err2) return [result, err2];
 
         flatMerge(result, loop1);

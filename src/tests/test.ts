@@ -2,11 +2,13 @@ import WeatherStationAdvanced from "../weather-station/WeatherStationAdvanced";
 import { waitForNewSerialConnection } from "../util";
 import inspect from "./inspect";
 import { sleep } from "vant-environment/utils";
+import serialPortList from "../util/serialPortList";
 
 async function main() {
     try {
+        console.log(await serialPortList())
         const device = await WeatherStationAdvanced.connect({
-            path: "/dev/ttyUSB0",
+            path: "COM7",
             rainCollectorSize: "0.2mm",
             units: {
                 soilMoisture: "cb",
@@ -21,14 +23,23 @@ async function main() {
                 solarRadiation: "W/m²",
                 wind: "km/h",
             },
-            reconnectionInterval: 3
+            reconnectionInterval: 3,
+            defaultTimeout: undefined,
         });
+
+        device.on("disconnect", () => {
+            console.log("disconnect!");
+        })
+
+        device.on("connect", () => {
+            console.log("connect!");
+        })
 
         // Validate the console's connection
         if (await device.checkConnection()) {
             console.log("Test worked!");
         } else {
-            throw new Error("Connection to console failed");
+           console.log("Connection failed!");
         }
 
         // Getting the console's firmware date code
@@ -86,8 +97,9 @@ async function main() {
             await device.close();
         }, 4000);*/
 
-        await sleep(100 * 1000);
+        console.log("Rich realtime data: ");
         [richRealtimeRecord, err8] = await device.getDetailedRealtimeData();
+        inspect(richRealtimeRecord);
 
         await device.disconnect();
     } catch (err) {

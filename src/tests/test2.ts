@@ -3,12 +3,13 @@ import DetailedRealtimeInterface from "../realtime-interfaces/DetailedRealtimeIn
 
 async function main() {
     const realtime = await DetailedRealtimeInterface.connect({
-        path: "/dev/ttyUSB0",
+        path: "COM7",
         rainCollectorSize: "0.2mm",
         updateInterval: 1,
         units: {
             temperature: "°C",
         },
+        defaultTimeout: 250,
     });
 
     realtime.on("device-connect", () => {

@@ -33,22 +33,7 @@ export interface MinimumWeatherStationSettings {
     readonly reconnectionInterval?: number;
 
     /**
-     * Defines the interface's behaviour if the serial connection is lost (because of an error).
-     * 
-     * _Imagine following scenario_:
-     * 
-     * Your console is connected serially to your computer. Your program is **already running and connected** to the weather station.
-     * Now you **unplug** your weather station. The program _wont't crash_, _vantjs_ can handle this situation.
-     * If your program is now requesting data from the weather station (e.g. via `await device.getSimpleRealtimeData()`),
-     * _vantjs_ will recognize, that it has lost the connection to the console.
-     * It automatically tries to reconnect. Depending on this setting your program acts different. 
-     * 
-     * If you set `disconnectionBehaviour` to
-     * `"WAIT_UNTIL_RECONNECTED"` _vantjs_ first repeatedly tries to reconnect (your program pauses until you plug the weather station in again) and after that returns the requested weather data.
-     * 
-     * If you choose `"RETURN_ERROR"` _vantjs_ will return a {@link ClosedConnectionError} as second element in the result array, and tries to reconnect in the background.
-     * 
-     * Default is `"WAIT_UNTIL_RECONNECTED"`.
+     * **Optional**: Specifies the default maximum time in milliseconds _vantjs_ waits for a weather station package. `undefined` disables timeouts (by default). Default is `1000`.
      */
-    readonly disconnectionBehaviour?: "WAIT_UNTIL_RECONNECTED" | "RETURN_ERROR";
+    readonly defaultTimeout?: number;
 }

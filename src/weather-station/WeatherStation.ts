@@ -32,6 +32,8 @@ import { EasyBuffer, Type } from "@harrydehix/easy-buffer";
 import TimeoutError from "../errors/TimeoutError";
 import { MinimumWeatherStationSettings, WeatherStationSettings } from "./settings";
 import WeatherStationEventBase from "./WeatherStationEventBase";
+import { time } from "console";
+import BetterSerialPort from "../util/BetterSerialPort";
 
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). Provides useful methods to access realtime weather data from your weather station's
@@ -48,14 +50,14 @@ export default class WeatherStation extends WeatherStationEventBase {
      * The serial port connection used internally.
      * @hidden
      */
-    private readonly port: SerialPort;
+    protected readonly port: BetterSerialPort;
 
     /** 
-     * If the interface is _active_ is tries to stay connected to the console.
-     * After calling `connect()` the interface is active. After calling `disconnect()` it is inactive.
+     * Whether _vantjs_ tries to stay connected to the console.
+     * After calling `connect()` this returns `true`, after calling `disconnect()` this returns `false`.
      * @hidden
      */
-    protected active: boolean = false;
+    protected wantsToBeConnected: boolean = false;
 
     /**
      * The crc type used internally to validate transmitted packages.
@@ -73,9 +75,8 @@ export default class WeatherStation extends WeatherStationEventBase {
 
     protected readonly unitTransformers: UnitTransformers;
 
-    /** This attribute stores the time of the latest successfull console communcation. Used to determine if the console needs to be woken up again. */
+    /** This attribute stores the time of the latest successfull console communcation. Used to determine if the console needs to be woken up again. @hidden */
     private latestConsoleCommunicationTime : Date | null = null;
-    private reconnectInterval?: NodeJS.Timeout;
 
     /**
      * The WeatherStation's default settings.
@@ -84,9 +85,9 @@ export default class WeatherStation extends WeatherStationEventBase {
         baudRate: 19200,
         units: defaultUnitSettings,
         reconnectionInterval: 1000,
-        disconnectionBehaviour: "WAIT_UNTIL_RECONNECTED",
         path: "",
         rainCollectorSize: "0.01in",
+        defaultTimeout: 1000,
     };
 
     /**
@@ -123,25 +124,22 @@ export default class WeatherStation extends WeatherStationEventBase {
     public static async connect(settings: MinimumWeatherStationSettings) {
         const device = new WeatherStation(settings);
 
-        await device.openSerialPort();
+        await device.port.open();
         await device.wakeUp();
 
         return device;
     }
 
     /**
-     * Reconnects to the weather station.
+     * Reconnects to the weather station (opens the serial connection and wakes the station up).
      * @link _Following errors are possible_:
      * - {@link ClosedConnectionError} if the connection to the weather station's console is already closed
      * - {@link FailedToWakeUpError} if the interface failed to wake up the console
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public reconnect = async () => {
-        if(this.active){
-            return;
-        }
-        await this.openSerialPort();
-        await this.wakeUp();
+    public reconnect = async (timeout?: number) => {
+        await this.port.open();
+        await this.wakeUp(timeout);
     };
 
 
@@ -165,14 +163,17 @@ export default class WeatherStation extends WeatherStationEventBase {
 
         this.unitTransformers = createUnitTransformers(this.settings.units);
 
-        this.port = new SerialPort({
+        this.port = new BetterSerialPort({
             path: this.settings.path,
             baudRate: this.settings.baudRate,
-            autoOpen: false,
         });
 
-        this.port.on("close", () => {
+        this.wantsToBeConnected = true;
+
+        this.port.on("disconnect", () => {
+            this.latestConsoleCommunicationTime = null;
             this.emit("disconnect");
+            if(this.wantsToBeConnected) this.startReconnecting();
         });
     }
 
@@ -182,12 +183,14 @@ export default class WeatherStation extends WeatherStationEventBase {
      * @hidden
      */
     private startReconnecting = async () => {
-        await sleep(this.settings.reconnectionInterval);
-        try {
-            await this.openSerialPort();
-            await this.wakeUp();
-        } catch (err: any) {
-            this.startReconnecting();
+        if(this.wantsToBeConnected){
+            await sleep(this.settings.reconnectionInterval);
+            try {
+                await this.port.open();
+                await this.wakeUp();
+            } catch (err: any) {
+                this.startReconnecting();
+            }
         }
     };
 
@@ -198,52 +201,16 @@ export default class WeatherStation extends WeatherStationEventBase {
      * @returns the buffer having the expected size
      * @throws a {@link TimeoutError} (timeout exceeded)
      * @throws a {@link SerialPortError} (error while writing)
+     * @throws a {@link ClosedConnectionError} (connection has been suddenly closed)
      * @hidden
      */
-    protected writeAndWaitForBuffer = (
+    protected writeAndWaitForBuffer = async(
         chunk: any,
         expectedBufferSize: number,
-        timeout?: number
+        timeout: number | undefined = this.settings.defaultTimeout
     ) => {
-        return new Promise<Buffer>((resolve, reject) => {
-            let timeoutTimer: NodeJS.Timeout | undefined;
-            if (timeout) {
-                timeoutTimer = setTimeout(() => {
-                    reject(new TimeoutError(timeout));
-                }, timeout);
-            }
-
-            let dataListener: (data: Buffer) => void;
-
-            const errorListener = (err: Error) => {
-                this.port.removeListener("data", dataListener);
-                reject(new SerialPortError(err));
-            };
-
-            this.port.once("error", errorListener);
-
-            this.port.write(chunk, (err) => {
-                if (err) {
-                    this.port.removeListener("error", errorListener);
-                    reject(new SerialPortError(err));
-                } else {
-                    let buffer: Buffer = Buffer.alloc(0);
-
-                    dataListener = (data: Buffer) => {
-                        buffer = Buffer.concat([buffer, data]);
-
-                        if (buffer.byteLength >= expectedBufferSize) {
-                            this.port.removeListener("error", errorListener);
-                            this.port.removeListener("data", dataListener);
-                            if (timeoutTimer) clearTimeout(timeoutTimer);
-                            resolve(buffer);
-                        }
-                    };
-
-                    this.port.on("data", dataListener);
-                }
-            });
-        });
+        await this.port.write(chunk);
+        return await this.port.waitForData(expectedBufferSize, timeout);
     };
 
     /**
@@ -332,27 +299,26 @@ export default class WeatherStation extends WeatherStationEventBase {
             );
     };
 
-    /**
-     * Checks the serial port connection. If the connection is closed and the interface is active it tries to reconnect.
-     * @throws a {@link ClosedConnectionError} if the connection is already closed or closing
-     * @hidden
-     */
-    protected checkConsoleConnection = async(wakeUp: boolean = true) => {
-        if (!this.port.isOpen || this.port.closing) {
-            if (this.active) {
-                if(this.settings.disconnectionBehaviour === "WAIT_UNTIL_RECONNECTED")
-                    await this.startReconnecting();
-                else
-                    this.startReconnecting();
-            }else{
-                throw new ClosedConnectionError();
+    protected checkConsoleConnection = (timeout: number | undefined = this.settings.defaultTimeout, wakeUp: boolean = true) => {
+        return new Promise<void>((resolve, reject) => {
+            if(typeof timeout === "number"){
+                setTimeout(() => {
+                    reject(new TimeoutError(timeout));
+                }, timeout);
             }
-        }
-        if(wakeUp && !this.isConsoleAwake()){
-            console.log("Waking up console automatically :)")
-            await this.wakeUp();
-        }
-    };
+            if(this.port.connectionState === "connected"){
+                if(!this.isConsoleAwake() && wakeUp){
+                    this.wakeUp().then(() => resolve());
+                }else{
+                    resolve();
+                }
+            }else{
+                this.once("connect", () => {
+                    resolve();
+                });
+            }
+        })
+    }
 
     /** 
      * Checks if the last communication happended `90s` or less ago.
@@ -362,43 +328,18 @@ export default class WeatherStation extends WeatherStationEventBase {
         return this.latestConsoleCommunicationTime !== null && ((new Date().getTime() - this.latestConsoleCommunicationTime.getTime()) / 1000) <= 90;
     }
 
+    /**
+     * Registers a successfull console communication. This information is used to check if one needs to wake up the station again.
+     * @hidden
+     */
     protected registerSuccessfullConsoleCommunication = () => {
         this.latestConsoleCommunicationTime = new Date();
     };
 
     /**
-     * Opens the serial connection to the vantage console. Remember that
-     * the console also needs to be woken up via {@link wakeUp}. This is necessary in order to send and receive data.
-     *
-     * Calling this method even though the connection is already open won't cause any problems.
-     *
-     * @throws a {@link SerialPortError} if an error occurs while opening the serialport connection
-     * @hidden
-     */
-    protected openSerialPort = async () => {
-        return new Promise<void>((resolve, reject) => {
-            if (this.port.isOpen) {
-                resolve();
-            } else if (this.port.opening) {
-                this.port.once("open", () => {
-                    resolve();
-                });
-            } else {
-                this.port.open((err) => {
-                    if (err) {
-                        reject(new SerialPortError(err));
-                    } else {
-                        resolve();
-                    }
-                });
-            }
-        });
-    };
-
-    /**
      * Wakes up the vantage console. This is necessary in order to send and receive data. The console automatically
      * falls asleep after two minutes of inactivity and needs to be woken up again. The interface handels this automatically
-     * inside the `checkConsoleConnection()` method. If waking up is successfull the interface is **active**!
+     * inside the `checkConsoleConnection()` method.
      *
      * Fires the {@link WeatherStationEvents.connect} event if the console wakes up.
      *
@@ -407,15 +348,19 @@ export default class WeatherStation extends WeatherStationEventBase {
      * @throws a {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      * @hidden
      */
-    protected wakeUp = async () => {
-        await this.checkConsoleConnection(false);
+    protected wakeUp = async (timeout?: number) => {
+        await this.checkConsoleConnection(timeout, false);
         let succeeded = false;
         let tries = 0;
         do {
-            const data = await this.writeAndWaitForBuffer("\n", 2);
+            let data: Buffer;
+            try{
+                data = await this.writeAndWaitForBuffer("\n", 2);
+            }catch(err){
+                throw new FailedToWakeUpError();
+            }
             if (data.toString("ascii") === "\n\r") {
                 succeeded = true;
-                this.active = true;
                 this.registerSuccessfullConsoleCommunication();
                 this.emit("connect");
             } else {
@@ -432,10 +377,10 @@ export default class WeatherStation extends WeatherStationEventBase {
      * Validates the connection to the console by running the `TEST` command. No error is thrown on failure, instead `false` is resolved.
      * @returns whether the connection is valid
      */
-    public checkConnection = async (): Promise<boolean> => {
+    public checkConnection = async (timeout?: number): Promise<boolean> => {
         try {
-            await this.checkConsoleConnection();
-            const data = await this.writeAndWaitForBuffer("TEST\n", 8);
+            await this.checkConsoleConnection(timeout);
+            const data = await this.writeAndWaitForBuffer("TEST\n", 8, timeout);
             const testSuccessfull = data.toString("ascii").includes("TEST");
             if(testSuccessfull) this.registerSuccessfullConsoleCommunication();
             return testSuccessfull;
@@ -453,11 +398,17 @@ export default class WeatherStation extends WeatherStationEventBase {
      * - {@link MalformedDataError} if the data received from the console is malformed
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public getFirmwareDateCode = async (): Promise<
+    public getFirmwareDateCode = async (timeout?: number): Promise<
         [string, undefined] | [null, VantError]
     > => {
-        await this.checkConsoleConnection();
-        const data = await this.writeAndWaitForBuffer("VER\n", 19);
+        await this.checkConsoleConnection(timeout);
+
+        let data: Buffer;
+        try{
+            data = await this.writeAndWaitForBuffer("VER\n", 19, timeout);
+        }catch(err: any){
+            return [null, err];
+        }
         try {
             const result = data.toString("ascii").split("OK")[1].trim();
             this.registerSuccessfullConsoleCommunication();
@@ -472,30 +423,10 @@ export default class WeatherStation extends WeatherStationEventBase {
      *
      * @throws a {@link SerialPortError} if an error occurrs while closing the connection
      */
-    public disconnect = () => {
-        if (this.reconnectInterval) {
-            clearInterval(this.reconnectInterval);
-        }
-        this.active = false;
-
-        return new Promise<void>((resolve, reject) => {
-            if (this.port.closing) {
-                this.port.once("close", () => {
-                    resolve();
-                });
-            } else if (this.port.isOpen) {
-                this.port.close((err) => {
-                    if (err) {
-                        reject(new SerialPortError(err));
-                    } else {
-                        resolve();
-                    }
-                });
-            } else {
-                resolve();
-            }
-        });
-    };
+    public disconnect = async() => {
+        this.wantsToBeConnected = false;
+        await this.port.close();
+    }
 
     /**
      * Gets the highs and lows from the console.
@@ -506,18 +437,18 @@ export default class WeatherStation extends WeatherStationEventBase {
      * - {@link MalformedDataError} if the data received from the console is malformed
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public getHighsAndLows = async (): Promise<
+    public getHighsAndLows = async (timeout?: number): Promise<
         [HighsAndLows, VantError | undefined]
     > => {
         const result = new HighsAndLows();
         try {
-            await this.checkConsoleConnection();
+            await this.checkConsoleConnection(timeout);
         } catch (err: any) {
             return [result, err];
         }
 
         try {
-            let data = await this.writeAndWaitForBuffer("HILOWS\n", 439);
+            let data = await this.writeAndWaitForBuffer("HILOWS\n", 439, timeout);
 
             // Check acknowledgment byte
             this.validateAcknowledgementByte(data);
@@ -552,17 +483,17 @@ export default class WeatherStation extends WeatherStationEventBase {
      * - {@link MalformedDataError} if the data received from the console is malformed
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public getDefaultLOOP = async (): Promise<
+    public getDefaultLOOP = async (timeout?: number): Promise<
         [LOOP1 | LOOP2, undefined] | [null, VantError]
     > => {
         try {
-            await this.checkConsoleConnection();
+            await this.checkConsoleConnection(timeout);
         } catch (err: any) {
             return [null, err];
         }
 
         try {
-            const data = await this.writeAndWaitForBuffer("LOOP 1\n", 100);
+            const data = await this.writeAndWaitForBuffer("LOOP 1\n", 100, timeout);
             // Check ack
             this.validateAcknowledgementByte(data);
             this.registerSuccessfullConsoleCommunication();
@@ -612,17 +543,17 @@ export default class WeatherStation extends WeatherStationEventBase {
      * - {@link MalformedDataError} if the data received from the console is malformed
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public getBasicRealtimeData = async (): Promise<
+    public getBasicRealtimeData = async (timeout?: number): Promise<
         [BasicRealtimeData, VantError | undefined]
     > => {
         const result = new BasicRealtimeData();
         try {
-            await this.checkConsoleConnection();
+            await this.checkConsoleConnection(timeout);
         } catch (err: any) {
             return [result, err];
         }
 
-        const [loop, err] = await this.getDefaultLOOP();
+        const [loop, err] = await this.getDefaultLOOP(timeout);
 
         if (err) {
             return [result, err];
@@ -637,7 +568,7 @@ export default class WeatherStation extends WeatherStationEventBase {
      * @hidden
      */
     protected isPortOpen() {
-        return this.port.isOpen;
+        return this.port.connectionState === "connected";
     }
 
     /**
@@ -651,10 +582,11 @@ export default class WeatherStation extends WeatherStationEventBase {
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
     public setBackgroundLight = async (
-        state: boolean
+        state: boolean,
+        timeout?: number
     ): Promise<[boolean, VantError | undefined]> => {
         try {
-            await this.checkConsoleConnection();
+            await this.checkConsoleConnection(timeout);
         } catch (err: any) {
             return [false, err];
         }
@@ -662,7 +594,8 @@ export default class WeatherStation extends WeatherStationEventBase {
         try {
             const data = await this.writeAndWaitForBuffer(
                 `LAMPS ${state ? 1 : 0}\n`,
-                6
+                6,
+                timeout
             );
             const successfull = data.toString("ascii") === "\n\rOK\n\r";
             if(successfull) this.registerSuccessfullConsoleCommunication();
@@ -692,7 +625,7 @@ export default class WeatherStation extends WeatherStationEventBase {
      * - {@link MalformedDataError} if the data received from the console is malformed
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public getWeatherstationType = async (): Promise<
+    public getWeatherstationType = async (timeout?: number): Promise<
         | [
               (
                   | "Wizard III"
@@ -709,7 +642,7 @@ export default class WeatherStation extends WeatherStationEventBase {
           ]
         | [null, VantError]
     > => {
-        const [typeID, err] = await this.getWeatherstationTypeID();
+        const [typeID, err] = await this.getWeatherstationTypeID(timeout);
 
         switch (typeID) {
             case 0:
@@ -736,13 +669,12 @@ export default class WeatherStation extends WeatherStationEventBase {
     };
 
     /**
-     * Returns whether the interface is active. 
-     * If the interface is _active_ is tries to stay connected to the console.
-     * After calling `connect()` the interface is active. After calling `disconnect()` it is inactive.
-     * @returns whether the interface is active
+     * Returns whether the interface tries to hold the connection to the weather station. 
+     * After calling `connect()` this will return true. After calling `disconnect()` it will return false.
+     * @returns whether the interface tries to hold the connection
      */
-    public isActive(): boolean{
-        return this.active;
+    public isWantingToBeConnected(): boolean{
+        return this.wantsToBeConnected;
     }
 
     /**
@@ -764,11 +696,11 @@ export default class WeatherStation extends WeatherStationEventBase {
      * - {@link MalformedDataError} if the data received from the console is malformed
      * - {@link SerialPortError} if the serialport connection unexpectedly closes (or similar)
      */
-    public getWeatherstationTypeID = async (): Promise<
+    public getWeatherstationTypeID = async (timeout?: number): Promise<
         [0 | 1 | 2 | 3 | 4 | 5 | 6 | 16 | 17, undefined] | [null, VantError]
     > => {
         try {
-            await this.checkConsoleConnection();
+            await this.checkConsoleConnection(timeout);
         } catch (err: any) {
             return [null, err];
         }
@@ -781,7 +713,7 @@ export default class WeatherStation extends WeatherStationEventBase {
                 .write(Type.UINT8, 0x4d)
                 .write(Type.STRING(1, "ascii"), "\n");
 
-            const data = await this.writeAndWaitForBuffer(easy.buffer, 2);
+            const data = await this.writeAndWaitForBuffer(easy.buffer, 2, timeout);
 
             this.validateAcknowledgementByte(data);
             this.registerSuccessfullConsoleCommunication();

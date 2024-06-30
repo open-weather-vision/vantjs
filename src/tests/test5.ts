@@ -2,7 +2,7 @@ import { WeatherStationAdvanced } from "../weather-station";
 
 async function main() {
     const device = await WeatherStationAdvanced.connect({
-        path: "/dev/ttyUSB0",
+        path: "COM7",
         rainCollectorSize: "0.2mm",
     });
 

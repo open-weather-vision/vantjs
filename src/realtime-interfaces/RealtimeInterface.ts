@@ -12,6 +12,7 @@ import {
 } from "./settings";
 import { RealtimeInterfaceEvents } from "./events";
 import { BaudRate } from "vant-environment/structures";
+import { sleep } from "vant-environment/utils";
 
 /**
  * Base class for the {@link SmallRealtimeDataContainer} and the {@link BigRealtimeDataContainer}.
@@ -215,14 +216,7 @@ export default abstract class RealtimeInterface<
      */
     private currentUpdateInterval: NodeJS.Timeout | null = null;
 
-    /**
-     * Whether the realtime interface is active.
-     */
-    public isActive() {
-        return this.currentUpdateInterval !== null;
-    }
-
-    private independentInterface: boolean;
+    private updateCycleState: "running" | "stopped" = "stopped";
 
     /**
      * Creates a new instance and merges the passed settings with the default settings.
@@ -234,7 +228,6 @@ export default abstract class RealtimeInterface<
         independentInterface: boolean
     ) {
         super();
-        this.independentInterface = independentInterface;
         this.device = device;
         this.device.on("connect", () => this.emit("device-connect"));
         this.device.on("disconnect", () => this.emit("device-disconnect"));
@@ -242,7 +235,8 @@ export default abstract class RealtimeInterface<
             cloneDeep(RealtimeInterface.defaultSettings),
             settings
         );
-        this.startUpdateCycle();
+        this.updateCycleState = "running";
+        this.nextUpdate();
         this.emit("start");
     }
 
@@ -252,25 +246,21 @@ export default abstract class RealtimeInterface<
      * If the interface has been created using a {@link WeatherStation} object the connection to the device is not closed.
      */
     public destroy = async () => {
-        if (this.currentUpdateInterval) {
-            clearInterval(this.currentUpdateInterval);
-            this.currentUpdateInterval = null;
-        }
-
-        if(!this.independentInterface) await this.device.disconnect();
+        this.updateCycleState = "stopped";
+        await this.device.disconnect();
         this.emit("destroy");
     };
 
     /**
      * Waits for the next update on the realtime interface. If an error occurrs while updating
-     * an error is returned. This can be used to handle errors. See {@link RealtimeInterfaceEvents}.
+     * an error is returned (not thrown!). This can be used to handle errors optionally. See {@link RealtimeInterfaceEvents}.
      *
      * @example
      * ```ts
      * const err = await container.waitForUpdate();
      * ```
      */
-    public waitForUpdate = (): Promise<void> => {
+    public waitForUpdate = (): Promise<void | any> => {
         return new Promise<any>((resolve, reject) => {
             this.once("update", (err: any) => {
                 if (err) {
@@ -294,30 +284,21 @@ export default abstract class RealtimeInterface<
     };
 
     /**
-     * Starts the update cycle (using the passed interface).
-     * @param device the interface to the device
+     * Triggers the next update (recursively).
      * @hidden
      */
-    protected startUpdateCycle = () => {
-        const update = async () => {
-            try {
-                try {
-                    await this.updateData();
-                } catch (err) {
-                    throw err;
-                }
-
-                this.emit("update");
-                this.emit("valid-update");
-            } catch (err) {
-                this.emit("update", err);
-            }
-        };
-        update();
-        this.currentUpdateInterval = setInterval(
-            update,
-            this.settings.updateInterval * 1000
-        );
+    protected nextUpdate = async() => {
+        try {
+            await this.updateData();
+            this.emit("update");
+            this.emit("valid-update");
+        } catch (err) {
+            this.emit("update", err);
+        }
+        await sleep(this.settings.updateInterval * 1000);
+        if(this.updateCycleState === "running"){
+            this.nextUpdate();
+        }
     };
 
     /**

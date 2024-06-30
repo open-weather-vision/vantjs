@@ -3,7 +3,7 @@ import BasicRealtimeInterface from "../realtime-interfaces/BasicRealtimeInterfac
 
 async function main() {
     const weatherData = await BasicRealtimeInterface.connect({
-        path: "/dev/ttyUSB0",
+        path: "COM7",
         rainCollectorSize: "0.2mm",
         updateInterval: 1,
         units: {
@@ -12,16 +12,12 @@ async function main() {
     });
 
     while (true) {
-        try {
-            await weatherData.waitForUpdate();
-        } catch (err) {
-        } finally {
-            console.log(
-                weatherData.time.toLocaleString() +
-                    ": " +
-                    weatherData.windAvg10m
-            );
-        }
+        await weatherData.waitForUpdate();
+        console.log(
+            weatherData.time.toLocaleString() +
+                ": " +
+                weatherData.windAvg10m
+        );
     }
 
     await weatherData.destroy();

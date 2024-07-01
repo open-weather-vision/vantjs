@@ -58,6 +58,33 @@ When creating a weather station instance, specify:
 
 The most importing thing to specify is the serial port's path. This defines the channel used to communicate with the weather station. The baud rate is also very important. Make sure it matches your console's settings!
 
+If you don't know the serial path, you can use the helper function `waitForNewSerialConnection()`. This function repeatedly checks all available serial devices and resolves a path if a new device is available.
+
+```ts
+import { WeatherStation } from "vantjs/weather-station";
+import { waitForNewSerialConnection } from "vantjs/utils";
+// or
+const { WeatherStation } = require("vantjs/weather-station");
+const { waitForNewSerialConnection } = require("vantjs/utils");
+
+async function main() {
+    console.log("Waiting for new serial connection...");
+    const path = await waitForNewSerialConnection();
+    // plug in your station at this moment
+    console.log("Station detected!");
+
+    const device = await WeatherStation.connect({
+        path,
+        rainCollectorSize: "0.2mm",
+    });
+    console.log("Connected :D");
+
+    // access data from your weather station
+}
+
+main();
+```
+
 #### 2. Getting the realtime data
 
 After creating the station you are ready to retrieve data from your weather station. Let's start simple by getting some `BasicRealtimeData`.

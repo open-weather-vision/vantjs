@@ -2,11 +2,7 @@ import { PortInfo } from "@serialport/bindings-interface";
 import { SerialPort } from "serialport";
 
 function extractPaths(list: PortInfo[]) {
-    const paths = [];
-    for (const entry of list) {
-        paths.push(entry.path);
-    }
-    return paths;
+    return list.map((entry) => entry.path);
 }
 
 function getNewPath(oldPaths: string[], newPaths: string[]) {
@@ -18,31 +14,31 @@ function getNewPath(oldPaths: string[], newPaths: string[]) {
 }
 
 /**
- * This methods waits for a new serial connection until a timeout occurs.
+ * This methods waits for a new serial connection (until a timeout occurs).
  * @param timeout time to wait in seconds
  * @returns the serial path of the connected device
  */
 export default function waitForNewSerialConnection(
-    timeout: number
+    timeout?: number
 ): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        let waitingTime = 0;
-        function checkPorts(oldPaths: string[]) {
-            setTimeout(async () => {
-                waitingTime += 50;
+        function checkPortsRepeatedly(oldPaths: string[]) {
+            const interval = setInterval(async () => {
                 const newPaths = extractPaths(await SerialPort.list());
-                if (newPaths.length > oldPaths.length) {
-                    const path = getNewPath(oldPaths, newPaths);
-                    if (!path) reject("Unknown error!");
-                    else resolve(path);
-                }
-                if (waitingTime < timeout * 1000) {
-                    checkPorts(oldPaths);
-                } else {
-                    reject("Timeout!");
+                const path = getNewPath(oldPaths, newPaths);
+                if (path) {
+                    clearInterval(interval);
+                    resolve(path);
                 }
             }, 50);
+
+            if(timeout) {
+                setTimeout(() => {
+                    clearInterval(interval);
+                    reject("Timeout!");
+                }, timeout) 
+            }
         }
-        SerialPort.list().then((ports) => checkPorts(extractPaths(ports)));
+        SerialPort.list().then((ports) => checkPortsRepeatedly(extractPaths(ports)));
     });
 }

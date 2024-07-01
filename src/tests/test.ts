@@ -6,9 +6,9 @@ import serialPortList from "../util/serialPortList";
 
 async function main() {
     try {
-        console.log(await serialPortList())
+        const path = await waitForNewSerialConnection();
         const device = await WeatherStationAdvanced.connect({
-            path: "COM7",
+            path,
             rainCollectorSize: "0.2mm",
             units: {
                 soilMoisture: "cb",

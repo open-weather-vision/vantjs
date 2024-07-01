@@ -13,7 +13,7 @@ vantjs is a platform-independent javascript and typescript interface to the Davi
 -   Getting **hourly, daily, monthly** and **yearly highs and lows** (read more [here](https://harrydehix.github.io/vantjs/classes/structures.HighsAndLows.html))
 
 ```ts
-const highsAndLows = await device.getHighsAndLows();
+const highsAndLows = await station.getHighsAndLows();
 
 console.log(
     `Todays minimum temperature was ${highsAndLows.tempOut.day.low} °F!`
@@ -26,10 +26,10 @@ console.log(
 // Output: The maximum rain rate in the current hour was 0.2 in/h!
 ```
 
--   Getting **realtime weather data** (read more [here](https://harrydehix.github.io/vantjs/classes/structures.RichRealtimeData.html))
+-   Getting **realtime weather data** (read more [here](https://harrydehix.github.io/vantjs/classes/structures.DetailedRealtimeData.html))
 
 ```ts
-const realtime = await device.getRichRealtimeData();
+const realtime = await station.getDetailedRealtimeData();
 
 console.log(`Currently it's ${realtime.tempOut} °F!`);
 // Output: Currently it's 45.2 °F!
@@ -43,7 +43,7 @@ console.log(
 -   **Converting** the weather data automatically to the **desired units**
 
 ```ts
-const device = await VantPro2Interface.create({
+const station = await WeatherStation.connect({
     units: {
         temperature: "°C",
         wind: "km/h",
@@ -53,12 +53,18 @@ const device = await VantPro2Interface.create({
     ....
 });
 
-const realtime = await device.getRichRealtimeData();
+const realtime = await station.getDetailedRealtimeData();
 console.log(`It's ${realtime.tempIn} °C`);
 // Output: It's 23.1233 °C
 ```
 
+-   **Stable connection** management: On disconnect vantjs repeatedly tries to reconnect in the background, your application won't crash!
+
+
 -   and more (read the [docs](https://harrydehix.github.io/vantjs/index.html)!)
+
+
+
 
 # Installation
 
@@ -78,12 +84,3 @@ Read the full documentation [here](https://harrydehix.github.io/vantjs/).
 # Community
 
 This project is updated on demand. If you have discovered a bug or want to suggest a feature🚀, please create an issue [here](https://github.com/harrydehix/vantjs/issues/new/choose).
-
-# Beyond vantjs
-
-_vantjs_ is only a small part of the **Vantage Environment**.
-
-While _vantjs_ provides the direct serial connection to the weather station, the [vant-api](https://github.com/harrydehix/vant-api) provides a convenient interface for this data in the form of a RESTful API for any kind of application. In the background it manages a mongodb database. The [vant-api](https://github.com/harrydehix/vant-api) package also includes a _recorder_ that utilizes _vantjs_ to repeatedly send weather data to the running REST API. Finally [vant-gui](https://github.com/harrydehix/vant-gui) utilizes the api to beautifully visualize your weather data in a react application.
-These programs together form a robust platform that allows you to use your weather data pretty much anywhere.
-
-⚠️ The **Vantage Environment** is still in active development. Once it is finished multiple _guides_ will guide you through the process of setting up your very own vantage environment.

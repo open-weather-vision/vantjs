@@ -1,26 +1,30 @@
 import "source-map-support/register";
-import BasicRealtimeInterface from "../realtime-interfaces/BasicRealtimeInterface";
+import BasicRealtimeDataContainer from "../realtime-containers/BasicRealtimeDataContainer";
+import { WeatherStation } from "../weather-station";
 
 async function main() {
-    const weatherData = await BasicRealtimeInterface.connect({
+    const station = await WeatherStation.connect({
         path: "COM7",
         rainCollectorSize: "0.2mm",
-        updateInterval: 1,
         units: {
             wind: "km/h",
         },
     });
 
+    const realtime = station.createBasicRealtimeDataContainer({
+        updateInterval: 1,
+    });
+
     while (true) {
-        await weatherData.waitForUpdate();
+        await realtime.waitForUpdate();
         console.log(
-            weatherData.time.toLocaleString() +
+            realtime.time.toLocaleString() +
                 ": " +
-                weatherData.windAvg10m
+                realtime.windAvg10m
         );
     }
 
-    await weatherData.destroy();
+    await realtime.pause();
 }
 
 main();

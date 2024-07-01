@@ -1,8 +1,9 @@
 import { UnitSettings } from "vant-environment/units";
 import { BaudRate, RainCollectorSize } from "vant-environment/structures";
+import WeatherStation from "../WeatherStation";
 
 /**
- * Settings for the {@link VantInterface}. {@link MinimumVantInterfaceSettings} describes the minimum required settings to be configured when creating a {@link VantInterface}.
+ * Settings for the {@link WeatherStation}. {@link MinimumWeatherStationSettings} describes the minimum required settings to be configured when creating a {@link WeatherStation}.
  */
 export interface WeatherStationSettings {
     /**

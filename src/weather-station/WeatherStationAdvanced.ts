@@ -5,19 +5,27 @@ import {
     VantError,
     ClosedConnectionError,
     SerialPortError,
+    FailedToWakeUpError
 } from "../errors";
 import { MinimumWeatherStationSettings } from "./settings";
 import { parseLOOP1, parseLOOP2 } from "../parsers";
 import flatMerge from "../util/flatMerge";
 import WeatherStation from "./WeatherStation";
+import { MinimumRealtimeDataContainerSettings } from "../realtime-containers/settings/MinimumRealtimeDataContainerSettings";
+import DetailedRealtimeDataContainer from "../realtime-containers/DetailedRealtimeDataContainer";
 
 /**
  * More feature rich interface to any _Vantage Pro 2_ or _Vantage Vue_ weather station with firmware dated after April 24, 2002 (v1.90 or above).
- * Is built on top of the {@link VantageWeatherStation}.
+ * Is built on top of the {@link WeatherStation}.
  *
- * Offers station dependent features like {@link VantageWeatherStationAdvanced.getDetailedRealtimeData}, {@link VantageWeatherStationAdvanced.getLOOP1}, {@link VantageWeatherStationAdvanced.getLOOP2}, {@link VantageWeatherStationAdvanced.isSupportingLOOP2Packages} and {@link VantageWeatherStationAdvanced.getFirmwareVersion}.
+ * Offers station dependent features like {@link WeatherStationAdvanced.getDetailedRealtimeData}, {@link WeatherStationAdvanced.getLOOP1}, {@link WeatherStationAdvanced.getLOOP2}, {@link WeatherStationAdvanced.isSupportingLOOP2Packages} and {@link WeatherStationAdvanced.getFirmwareVersion}.
  */
 export default class WeatherStationAdvanced extends WeatherStation {
+    /**
+     * A singleton for the detailed realtime data container.
+     */
+    protected detailedRealtimeContainer: DetailedRealtimeDataContainer | null = null;
+
     /**
      * Creates an interface to your vantage pro 2 weather station using the passed settings. The device should be connected
      * serially.
@@ -27,7 +35,7 @@ export default class WeatherStationAdvanced extends WeatherStation {
      * const device = await VantProInterface.connect({ path: "COM3", rainCollectorSize: "0.2mm" });
      *
      *
-     * const [data, err] = await device.getSimpleRealtimeData();
+     * const [data, err] = await device.getBasicRealtimeData();
      * console.log(`It's ${data.tempOut}°F outside!`);
      *
      * await device.disconnect();
@@ -227,5 +235,50 @@ export default class WeatherStationAdvanced extends WeatherStation {
         flatMerge(result, loop2);
 
         return [result, undefined];
+    }
+
+    /**
+     * Creates a detailed realtime data container. If there already is a detailed realtime container this function returns the existing one
+     * and ignores the passed settings.
+     * 
+     * This detailed realtime data container repeatedly calls `.getDetailedRealtimeData()` (and `.getHighsAndLows()`) in the background
+     * to update it's properties. On every (valid) update the `(valid-)update` is emitted.
+     * 
+     * You can listen to them using standard event listeners: 
+     * ```ts
+     * realtime.on("update", (err?) => console.log(`It's ${realtime.tempOut}°F outside!`)) 
+     * ```
+     * or wait for them asynchroniously:
+     * ```ts
+     * await realtime.waitForUpdate();
+     * console.log(`It's ${realtime.tempOut}°F outside!`);
+     * ```
+     * 
+     * @example
+     * ```ts
+     * const realtime = WeatherStation.connectDetailedRealtimeDataContainer({
+     *      updateInterval: 1,
+     * });
+     * await realtime.waitForUpdate();
+     * 
+     * console.log(`It's ${realtime.tempOut}°F outside!`);
+     * realtime.pause();
+     * ```
+     * @param settings your desired settings
+     * @returns the new or existing realtime data container
+     */
+    public createDetailedRealtimeDataContainer(settings: MinimumRealtimeDataContainerSettings){
+        if(this.detailedRealtimeContainer === null){
+            this.detailedRealtimeContainer = new DetailedRealtimeDataContainer(settings, this);
+        }
+        return this.detailedRealtimeContainer;
+    }
+
+    /**
+     * Gets the detailed realtime data container that has been created before using `.createDetailedRealtimeDataContainer()`.
+     * @returns the existing detailed realtime data container
+     */
+    public getDetailedRealtimeDataContainer(){
+        return this.detailedRealtimeContainer;
     }
 }

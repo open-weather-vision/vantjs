@@ -3,7 +3,7 @@ import { WeatherStationEvents } from "./events";
 
 export default class WeatherStationEventBase extends TypedEmitter<WeatherStationEvents> {
     /**
-     *  By default, a maximum of 10 listeners can be registered for any single event. This limit can be changed for individual VantInterface instances using the {@link setMaxListeners} method.
+     *  By default, a maximum of 10 listeners can be registered for any single event. This limit can be changed for individual WeatherStation instances using the {@link setMaxListeners} method.
      *
      *  To change the default for all EventEmitter instances, this property can be used. If this value is not a positive number, a RangeError is thrown.
      */
@@ -50,16 +50,16 @@ export default class WeatherStationEventBase extends TypedEmitter<WeatherStation
     }
 
     /**
-     * Returns an array listing the events for which the VantInterface has registered listeners.
-     * @returns an array listing the events for which the VantInterface has registered listeners
+     * Returns an array listing the events for which the WeatherStation has registered listeners.
+     * @returns an array listing the events for which the WeatherStation has registered listeners
      */
     public eventNames<U extends keyof WeatherStationEvents>(): U[] {
         return super.eventNames();
     }
 
     /**
-     * Returns the current max listener value for the VantInterface which is either set by {@link setMaxListeners} or defaults to {@link defaultMaxListeners}.
-     * @returns the current max listener value for the current VantInterface instance
+     * Returns the current max listener value for the WeatherStation which is either set by {@link setMaxListeners} or defaults to {@link defaultMaxListeners}.
+     * @returns the current max listener value for the current WeatherStation instance
      */
     public getMaxListeners(): number {
         return super.getMaxListeners();
@@ -125,11 +125,11 @@ export default class WeatherStationEventBase extends TypedEmitter<WeatherStation
     }
 
     /**
-     * By default, a maximum of 10 listeners can be registered for any single event. This limit can be changed for individual VantInterface instances using this method.
+     * By default, a maximum of 10 listeners can be registered for any single event. This limit can be changed for individual WeatherStation instances using this method.
      *
      * To change the default for all EventEmitter instances, change {@link defaultMaxListeners}.
      *
-     * @param maxListeners new limit for the amount of listeners for any single event on this VantInterface instance
+     * @param maxListeners new limit for the amount of listeners for any single event on this WeatherStation instance
      * @returns this (for chaining calls)
      */
     public setMaxListeners(maxListeners: number): this {

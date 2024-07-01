@@ -1,5 +1,7 @@
+import WeatherStation from "../WeatherStation";
+
 /**
- * Describes the events fired by the {@link VantInterface}.
+ * Describes the events fired by the {@link WeatherStation}.
  */
 export interface WeatherStationEvents {
     /** Fires when the connection to the vantage console closes. */

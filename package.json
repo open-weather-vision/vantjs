@@ -8,9 +8,9 @@
         "./weather-station": "./dist/weather-station/index.js",
         "./weather-station/settings": "./dist/weather-station/settings/index.js",
         "./weather-station/events": "./dist/weather-station/events/index.js",
-        "./realtime-interfaces": "./dist/realtime-interfaces/index.js",
-        "./realtime-interfaces/settings": "./dist/realtime-interfaces/settings/index.js",
-        "./realtime-interfaces/events": "./dist/realtime-interfaces/events/index.js",
+        "./realtime-containers": "./dist/realtime-containers/index.js",
+        "./realtime-containers/settings": "./dist/realtime-containers/settings/index.js",
+        "./realtime-containers/events": "./dist/realtime-containers/events/index.js",
         "./structures": "./dist/structures/index.js",
         "./structures/subtypes": "./dist/structures/subtypes/index.js",
         "./units": "./dist/units/index.js",
@@ -30,14 +30,14 @@
             "weather-station/events": [
                 "dist/weather-station/events"
             ],
-            "realtime-interfaces": [
-                "dist/realtime-interfaces"
+            "realtime-containers": [
+                "dist/realtime-containers"
             ],
-            "realtime-interfaces/settings/": [
-                "dist/realtime-interfaces/settings"
+            "realtime-containers/settings/": [
+                "dist/realtime-containers/settings"
             ],
-            "realtime-interfaces/events": [
-                "dist/realtime-interfaces/events"
+            "realtime-containers/events": [
+                "dist/realtime-containers/events"
             ],
             "structures": [
                 "dist/structures"

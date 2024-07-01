@@ -1,43 +1,39 @@
 import "source-map-support/register";
-import DetailedRealtimeInterface from "../realtime-interfaces/DetailedRealtimeInterface";
+import DetailedRealtimeDataContainer from "../realtime-containers/DetailedRealtimeDataContainer";
+import { WeatherStationAdvanced } from "../weather-station";
 
 async function main() {
-    const realtime = await DetailedRealtimeInterface.connect({
+    const station = await WeatherStationAdvanced.connect({
         path: "COM7",
         rainCollectorSize: "0.2mm",
-        updateInterval: 1,
         units: {
             temperature: "°C",
         },
         defaultTimeout: 250,
     });
 
-    realtime.on("device-connect", () => {
-        console.log("Connected device!");
-    });
-
-    realtime.on("device-disconnect", () => {
-        console.log("Disconnected device!");
+    const realtime = station.createDetailedRealtimeDataContainer({
+        updateInterval: 1,
     });
 
     realtime.on("start", () => {
         console.log("Container started!");
     });
 
-    realtime.on("destroy", () => {
-        console.log("Container destroyed!");
+    realtime.on("pause", () => {
+        console.log("Container paused!");
     });
 
     let i = 0;
     while (i < 12) {
         await realtime.waitForUpdate();
         console.log(
-            realtime.tempIn + realtime.settings.units.temperature
+            realtime.tempIn + station.settings.units.temperature
         );
         i++;
     }
 
-    await realtime.destroy();
+    await realtime.pause();
 }
 
 main();

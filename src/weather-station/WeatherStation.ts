@@ -34,16 +34,19 @@ import { MinimumWeatherStationSettings, WeatherStationSettings } from "./setting
 import WeatherStationEventBase from "./WeatherStationEventBase";
 import { time } from "console";
 import BetterSerialPort from "../util/BetterSerialPort";
+import BasicRealtimeDataContainer from "../realtime-containers/BasicRealtimeDataContainer";
+import { MinimumRealtimeDataContainerSettings } from "../realtime-containers/settings/MinimumRealtimeDataContainerSettings";
+import WeatherStationAdvanced from "./WeatherStationAdvanced";
 
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). Provides useful methods to access realtime weather data from your weather station's
  * console. The device must be connected serially.
- * To interact with your weather station create an instance of this class using {@link VantageWeatherStation.create}.
+ * To interact with your weather station create an instance of this class using {@link WeatherStation.connect}.
  *
  * The WeatherStation is an [EventEmitter](https://nodejs.org/api/events.html#class-eventemitter). The events fired by the interface are described {@link WeatherStationEvents here}.
  *
  * This interface is limited to station independent features.
- * Use {@link VantPro2Interface}, {@link VantProInterface} and {@link VantVueInterface} for station dependent features.
+ * Use {@link WeatherStationAdvanced} for station dependent features.
  */
 export default class WeatherStation extends WeatherStationEventBase {
     /**
@@ -51,6 +54,11 @@ export default class WeatherStation extends WeatherStationEventBase {
      * @hidden
      */
     protected readonly port: BetterSerialPort;
+
+    /**
+     * A singleton for the basic realtime data container.
+     */
+    protected basicRealtimeContainer: BasicRealtimeDataContainer | null = null;
 
     /** 
      * Whether _vantjs_ tries to stay connected to the console.
@@ -389,6 +397,7 @@ export default class WeatherStation extends WeatherStationEventBase {
         }
     };
 
+
     /**
      * Gets the console's firmware date code in the `"Month dd yyyy"` format (e.g. `"Sep 12 2017"`).
      * @returns the console's firmware date code
@@ -534,7 +543,7 @@ export default class WeatherStation extends WeatherStationEventBase {
     };
 
     /**
-     * Gets a handful of useful realtime weather data (see {@link SimpleRealtimeData}). This includes temperature (in and out), pressure,
+     * Gets a handful of useful realtime weather data (see {@link BasicRealtimeData}). This includes temperature (in and out), pressure,
      * humidity, wind speed, rain, ...
      * @returns a handful of useful realtime weather data (a simple realtime record)
      *
@@ -561,6 +570,52 @@ export default class WeatherStation extends WeatherStationEventBase {
             return [flatMerge(result, loop), err];
         }
     };
+
+
+    /**
+     * Creates a basic realtime data container. If there already is a basic realtime container this function returns the existing one
+     * and ignores the passed settings.
+     * 
+     * This basic realtime data container repeatedly calls `.getBasicRealtimeData()` (and `.getHighsAndLows()`) in the background
+     * to update it's properties. On every (valid) update the `(valid-)update` is emitted.
+     * 
+     * You can listen to them using standard event listeners: 
+     * ```ts
+     * realtime.on("update", (err?) => console.log(`It's ${realtime.tempOut}°F outside!`)) 
+     * ```
+     * or wait for them asynchroniously:
+     * ```ts
+     * await realtime.waitForUpdate();
+     * console.log(`It's ${realtime.tempOut}°F outside!`);
+     * ```
+     * 
+     * @example
+     * ```ts
+     * const realtime = WeatherStation.connectBasicRealtimeDataContainer({
+     *      updateInterval: 1,
+     * });
+     * await realtime.waitForUpdate();
+     * 
+     * console.log(`It's ${realtime.tempOut}°F outside!`);
+     * realtime.pause();
+     * ```
+     * @param settings your desired settings
+     * @returns the new or existing realtime data container
+     */
+    public createBasicRealtimeDataContainer(settings: MinimumRealtimeDataContainerSettings){
+        if(this.basicRealtimeContainer === null){
+            this.basicRealtimeContainer = new BasicRealtimeDataContainer(settings, this);
+        }
+        return this.basicRealtimeContainer;
+    }
+
+    /**
+     * Gets the basic realtime data container that has been created before using `.createBasicRealtimeDataContainer()`.
+     * @returns the existing basic realtime data container
+     */
+    public getBasicRealtimeDataContainer(){
+        return this.basicRealtimeContainer;
+    }
 
     /**
      * Returns whether the serial port connection is currently open.

@@ -71,7 +71,7 @@ async function main() {
     console.log("Waiting for new serial connection...");
     const path = await waitForNewSerialConnection();
     // plug in your station at this moment
-    console.log("Station detected!");
+    console.log(`Station detected on port ${path}!`);
 
     const device = await WeatherStation.connect({
         path,

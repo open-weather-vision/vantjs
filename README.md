@@ -10,7 +10,7 @@ vantjs is a platform-independent javascript and typescript interface to the Davi
 
 # Features
 
--   Getting **hourly, daily, monthly** and **yearly highs and lows** (read more [here](https://harrydehix.github.io/vantjs/classes/structures.HighsAndLows.html))
+-   Getting **hourly, daily, monthly** and **yearly highs and lows** (read more [here](https://open-weather-vision.github.io/vantjs/classes/structures.HighsAndLows.html))
 
 ```ts
 const highsAndLows = await station.getHighsAndLows();
@@ -57,6 +57,7 @@ const realtime = await station.getDetailedRealtimeData();
 console.log(`It's ${realtime.tempIn} °C`);
 // Output: It's 23.1233 °C
 ```
+
 
 -   **Stable connection** management: On disconnect vantjs repeatedly tries to reconnect in the background, your application won't crash!
 

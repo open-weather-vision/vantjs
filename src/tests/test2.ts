@@ -1,50 +1,55 @@
 import "source-map-support/register";
-import BigRealtimeDataContainer from "../realtime-data-containers/BigRealtimeDataContainer";
-import {
-    DeviceModel,
-    OnContainerCreate,
-} from "../realtime-data-containers/settings";
+import DetailedRealtimeDataContainer from "../realtime-containers/DetailedRealtimeDataContainer";
+import { WeatherStationAdvanced } from "../weather-station";
 
 async function main() {
-    const weatherData = await BigRealtimeDataContainer.create({
-        path: "COM4",
-        model: DeviceModel.VantagePro2,
+    const station = await WeatherStationAdvanced.connect({
+        path: "COM7",
         rainCollectorSize: "0.2mm",
-        updateInterval: 3,
         units: {
             temperature: "°C",
         },
-        onCreate: OnContainerCreate.DoNothing,
+        defaultTimeout: 250,
     });
 
-    weatherData.on("device-open", () => {
-        console.log("Connected device!");
+    station.on("connect", () => {
+        console.log("connected!");
     });
 
-    weatherData.on("device-close", () => {
-        console.log("Disconnected device!");
+    const realtime = station.createDetailedRealtimeDataContainer({
+        updateInterval: 1,
     });
 
-    weatherData.on("start", () => {
+    realtime.on("start", () => {
         console.log("Container started!");
     });
 
-    weatherData.on("stop", () => {
-        console.log("Container stopped!");
-    });
+    realtime.on("update", (err) => {
+        if(err){
+            console.error(err);
+        }else{
+            console.log("nice update")
+        }
+    })
 
-    weatherData.start();
+    realtime.on("pause", () => {
+        console.log("Container paused!");
+    });
 
     let i = 0;
     while (i < 12) {
-        await weatherData.waitForUpdate();
-        console.log(
-            weatherData.tempIn + weatherData.settings.units.temperature
-        );
+        const err = await realtime.waitForUpdate();
+        if(!err){
+            console.log(
+                realtime.tempIn + station.settings.units.temperature
+            );
+        }else{
+            console.log(null);
+        }
         i++;
     }
 
-    await weatherData.stop();
+    await realtime.pause();
 }
 
 main();

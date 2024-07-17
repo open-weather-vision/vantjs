@@ -27,19 +27,18 @@ Now let's create a new javascript/typescript file and start coding!
 
 #### 1. Creating the interface
 
-To connect to your weather station you have to create a `VantInterface`.
-In _vantjs_ interfaces are the most straightforward way to directly access various kinds of
-realtime weather data from your weather station.
+To connect to your weather station you have to create a `WeatherStation` instance.
+This instance is like a direct communication channel to your vantage console.
 
-This can be done using the `VantInterface.create()` method. As nearly all methods of vantjs, this method is returning a `Promise`. It is therefore recommended to use an asynchronous wrapper method, as this makes the code more readable.
+To create an instance use the `WeatherStation.connect(...)` method. As nearly all methods of vantjs, this method is returning a `Promise`. It is therefore recommended to use an asynchronous wrapper method, as this makes the code more readable.
 
 ```ts
-import { VantInterface } from "vantjs/interfaces";
+import { WeatherStation } from "vantjs/weather-station";
 // or
-const { VantInterface } = require("vantjs/interfaces");
+const { WeatherStation } = require("vantjs/weather-station");
 
 async function main() {
-    const device = await VantInterface.create({
+    const device = await WeatherStation.connect({
         path: "COM4",
         rainCollectorSize: "0.2mm",
     });
@@ -50,37 +49,63 @@ async function main() {
 main();
 ```
 
-When creating an interface, specify:
+When creating a weather station instance, specify:
 
 -   **required** `path`: Path to serial port. Defines the channel used to communicate with the weather station.
 -   **required** `rainCollectorSize`: Your weather station's rain collector size. Possible sizes are `"0.1in"`, `"0.2mm"` and `"0.1mm"`.
--   _optional_ `baudRate`: The used baud rate (learn more [here](https://open-weather-vision.github.io/vantjs/interfaces/interfaces_settings.MinimumVantInterfaceSettings.html#baudRate))
+-   _optional_ `baudRate`: The used baud rate (learn more [here](https://open-weather-vision.github.io/vantjs/interfaces/interfaces_settings.MinimumWeatherStationSettings.html#baudRate))
 -   _optional_ `units`: Your desired unit settings (learn more [here](https://open-weather-vision.github.io/vantjs/modules/units.html#UnitSettings))
--   _optional_ `onCreate`: The action automatically to perform on creating the interface (learn more [here](https://open-weather-vision.github.io/vantjs/enums/interfaces_settings.OnInterfaceCreate.html))
 
-The most importing thing to specify is the serial port's path. This defines the channel used to communicate with the weather station.
+The most importing thing to specify is the serial port's path. This defines the channel used to communicate with the weather station. The baud rate is also very important. Make sure it matches your console's settings!
+
+If you don't know the serial path, you can use the helper function `waitForNewSerialConnection()`. This function repeatedly checks all available serial devices and resolves a path if a new device is available.
+
+```ts
+import { WeatherStation } from "vantjs/weather-station";
+import { waitForNewSerialConnection } from "vantjs/utils";
+// or
+const { WeatherStation } = require("vantjs/weather-station");
+const { waitForNewSerialConnection } = require("vantjs/utils");
+
+async function main() {
+    console.log("Waiting for new serial connection...");
+    const path = await waitForNewSerialConnection();
+    // plug in your station at this moment
+    console.log(`Station detected on port ${path}!`);
+
+    const device = await WeatherStation.connect({
+        path,
+        rainCollectorSize: "0.2mm",
+    });
+    console.log("Connected :D");
+
+    // access data from your weather station
+}
+
+main();
+```
 
 #### 2. Getting the realtime data
 
-After creating the interface you are ready to retrieve data from your weather station. Let's start simple by getting some `SimpleRealtimeData`.
+After creating the station you are ready to retrieve data from your weather station. Let's start simple by getting some `BasicRealtimeData`.
 
 Inside the asyncronous wrapper function (below creating the interface) write the following:
 
 ```ts
-const simpleRealtimeData = await device.getSimpleRealtimeData();
+const [BasicRealtimeData] = await station.getBasicRealtimeData();
 
-console.log("Outside it's " + simpleRealtimeData.tempOut + " °F");
-console.log("The wind speed is " + simpleRealtimeData.wind + " mph");
-console.log("The wind direction is " + simpleRealtimeData.windDir);
+console.log("Outside it's " + BasicRealtimeData.tempOut + " °F");
+console.log("The wind speed is " + BasicRealtimeData.wind + " mph");
+console.log("The wind direction is " + BasicRealtimeData.windDir);
 console.log(
-    "The current rain rate is " + simpleRealtimeData.rainRate + " in/h"
+    "The current rain rate is " + BasicRealtimeData.rainRate + " in/h"
 );
-console.log("The current pressure " + simpleRealtimeData.press + " inHg");
-console.log("(measured at " + simpleRealtimeData.time.toLocaleString() + ")");
+console.log("The current pressure " + BasicRealtimeData.press + " inHg");
+console.log("(measured at " + BasicRealtimeData.time.toLocaleString() + ")");
 ```
 
-The returned `SimpleRealtimeData` object contains basic realtime information about temperature,
-pressure, humidity, wind speed / direction, rain (rate), et, uv and solar radiation. It is documented in detail [here](https://open-weather-vision.github.io/vantjs/classes/structures.SimpleRealtimeData.html). The default units are listed [here](https://open-weather-vision.github.io/vantjs/modules/units.html).
+The returned `BasicRealtimeData` object contains basic realtime information about temperature,
+pressure, humidity, wind speed / direction, rain (rate), et, uv and solar radiation. It is documented in detail [here](https://open-weather-vision.github.io/vantjs/classes/structures.BasicRealtimeData.html). The default units are listed [here](https://open-weather-vision.github.io/vantjs/modules/units.html).
 
 #### 3. Closing the serial connection
 
@@ -88,7 +113,7 @@ After getting the data from your weather station you should close the connection
 Not doing so will prevent the program from exiting.
 
 ```ts
-await device.close();
+await station.disconnect();
 ```
 
 #### 4. Run the code!
@@ -106,15 +131,16 @@ The current pressure 30.115 inHg
 
 Wow, you just accessed some realtime weather data in a few simple steps!
 
-#### Beyond simple realtime data
+#### Beyond basic realtime data
 
-_vantjs_ provides much more than just accessing some simple realtime data.
+_vantjs_ provides much more than just accessing some basic realtime data.
 
 For example:
 
 -   getting daily, monthly and yearly highs and lows
--   getting more - station dependent - realtime weather data
+-   getting more - station dependent - realtime weather data (use `WeatherStationAdvanced` instead of `WeatherStation`)
 -   repeatedly accessing realtime weather data in a steady interval using realtime data containers
+-   toggling the console's background light
 -   and much more...
 
 To learn more about these topics read its [official documentation](https://open-weather-vision.github.io/vantjs/).

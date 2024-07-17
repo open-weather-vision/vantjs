@@ -1,1 +1,0 @@
-export { VantInterfaceEvents } from "./VantInterfaceEvents";

@@ -1,34 +1,30 @@
 import "source-map-support/register";
-import { DeviceModel } from "../realtime-data-containers/settings";
-import { OnContainerCreate } from "../realtime-data-containers/settings/OnContainerCreate";
-import SmallRealtimeDataContainer from "../realtime-data-containers/SmallRealtimeDataContainer";
+import BasicRealtimeDataContainer from "../realtime-containers/BasicRealtimeDataContainer";
+import { WeatherStation } from "../weather-station";
 
 async function main() {
-    const weatherData = await SmallRealtimeDataContainer.create({
-        path: "COM4",
-        model: DeviceModel.VantagePro2,
+    const station = await WeatherStation.connect({
+        path: "COM7",
         rainCollectorSize: "0.2mm",
-        updateInterval: 3,
-        onCreate: OnContainerCreate.Start,
         units: {
             wind: "km/h",
         },
     });
 
+    const realtime = station.createBasicRealtimeDataContainer({
+        updateInterval: 1,
+    });
+
     while (true) {
-        try {
-            await weatherData.waitForUpdate();
-        } catch (err) {
-        } finally {
-            console.log(
-                weatherData.time.toLocaleString() +
-                    ": " +
-                    weatherData.windAvg10m
-            );
-        }
+        await realtime.waitForUpdate();
+        console.log(
+            realtime.time.toLocaleString() +
+                ": " +
+                realtime.windAvg10m
+        );
     }
 
-    await weatherData.stop();
+    await realtime.pause();
 }
 
 main();

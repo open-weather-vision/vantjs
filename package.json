@@ -1,6 +1,6 @@
 {
     "name": "vantjs",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "description": "platform independent javascript/typescript interface to Davis Vantage Pro, Pro 2 and Vue",
     "exports": {
         ".": "./dist/index.js",

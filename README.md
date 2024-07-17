@@ -26,7 +26,7 @@ console.log(
 // Output: The maximum rain rate in the current hour was 0.2 in/h!
 ```
 
--   Getting **realtime weather data** (read more [here](https://harrydehix.github.io/vantjs/classes/structures.DetailedRealtimeData.html))
+-   Getting **realtime weather data** (read more [here](https://open-weather-vision.github.io/vantjs/classes/structures.DetailedRealtimeData.html))
 
 ```ts
 const realtime = await station.getDetailedRealtimeData();
@@ -62,7 +62,7 @@ console.log(`It's ${realtime.tempIn} °C`);
 -   **Stable connection** management: On disconnect vantjs repeatedly tries to reconnect in the background, your application won't crash!
 
 
--   and more (read the [docs](https://harrydehix.github.io/vantjs/index.html)!)
+-   and more (read the [docs](https://open-weather-vision.github.io/vantjs/index.html)!)
 
 
 

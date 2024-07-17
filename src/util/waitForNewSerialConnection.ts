@@ -28,7 +28,11 @@ export default function waitForNewSerialConnection(
                 const path = getNewPath(oldPaths, newPaths);
                 if (path) {
                     clearInterval(interval);
-                    resolve(path);
+                    setTimeout(() => {
+                        resolve(path);
+                    }, 200);
+                }else{
+                    oldPaths = newPaths;
                 }
             }, 50);
 

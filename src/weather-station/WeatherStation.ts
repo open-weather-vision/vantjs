@@ -107,6 +107,13 @@ export default class WeatherStation extends WeatherStationEventBase {
     public readonly settings: WeatherStationSettings;
 
     /**
+     * Whether the interface is currently connected to the weather station.
+     */
+    public get connected() {
+        return this._connected;
+    }
+
+    /**
      * Creates a connection to your vantage console (Vue, Pro, Pro 2) using the passed settings (see {@link MinimumWeatherStationSettings}). The device should be connected
      * serially. Throws an error if connecting fails.
      *
@@ -183,6 +190,13 @@ export default class WeatherStation extends WeatherStationEventBase {
             this.emit("disconnect");
             if(this.wantsToBeConnected) this.startReconnecting();
         });
+
+        this.on("connect", () => {
+            this._connected = true;
+        });
+        this.on("disconnect", () => {
+            this._connected = false;
+        })
     }
 
     /**
@@ -311,6 +325,7 @@ export default class WeatherStation extends WeatherStationEventBase {
         return new Promise<void>((resolve, reject) => {
             if(typeof timeout === "number"){
                 setTimeout(() => {
+                    this.removeListener("connect", resolve);
                     reject(new TimeoutError(timeout));
                 }, timeout);
             }
@@ -321,9 +336,7 @@ export default class WeatherStation extends WeatherStationEventBase {
                     resolve();
                 }
             }else{
-                this.once("connect", () => {
-                    resolve();
-                });
+                this.once("connect", resolve);
             }
         })
     }
@@ -410,7 +423,11 @@ export default class WeatherStation extends WeatherStationEventBase {
     public getFirmwareDateCode = async (timeout?: number): Promise<
         [string, undefined] | [null, VantError]
     > => {
-        await this.checkConsoleConnection(timeout);
+        try{
+            await this.checkConsoleConnection(timeout);
+        }catch(err){
+            return [null, err as VantError];
+        }
 
         let data: Buffer;
         try{

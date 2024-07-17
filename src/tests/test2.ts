@@ -12,6 +12,10 @@ async function main() {
         defaultTimeout: 250,
     });
 
+    station.on("connect", () => {
+        console.log("connected!");
+    });
+
     const realtime = station.createDetailedRealtimeDataContainer({
         updateInterval: 1,
     });
@@ -20,16 +24,28 @@ async function main() {
         console.log("Container started!");
     });
 
+    realtime.on("update", (err) => {
+        if(err){
+            console.error(err);
+        }else{
+            console.log("nice update")
+        }
+    })
+
     realtime.on("pause", () => {
         console.log("Container paused!");
     });
 
     let i = 0;
     while (i < 12) {
-        await realtime.waitForUpdate();
-        console.log(
-            realtime.tempIn + station.settings.units.temperature
-        );
+        const err = await realtime.waitForUpdate();
+        if(!err){
+            console.log(
+                realtime.tempIn + station.settings.units.temperature
+            );
+        }else{
+            console.log(null);
+        }
         i++;
     }
 

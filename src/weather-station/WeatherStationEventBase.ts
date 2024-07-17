@@ -10,6 +10,12 @@ export default class WeatherStationEventBase extends TypedEmitter<WeatherStation
     public static defaultMaxListeners: number;
 
     /**
+     * Whether the weather station is connected currently. Only used internally.
+     * @hidden
+     */
+    protected _connected: boolean = false;
+
+    /**
      * Adds an event listener. Possible events are described {@link WeatherStationEvents here}.
      * @param eventName The event to listen for
      * @param listener The listener to add
@@ -19,6 +25,8 @@ export default class WeatherStationEventBase extends TypedEmitter<WeatherStation
         eventName: U,
         listener: WeatherStationEvents[U]
     ): this {
+        if(eventName === "connect" && this._connected) listener(eventName, listener);
+        else if(eventName === "disconnect" && !this._connected) listener(eventName, listener);
         return super.addListener(eventName, listener);
     }
 
@@ -108,6 +116,8 @@ export default class WeatherStationEventBase extends TypedEmitter<WeatherStation
         eventName: U,
         listener: WeatherStationEvents[U]
     ): this {
+        if(eventName === "connect" && this._connected) listener(eventName, listener);
+        else if(eventName === "disconnect" && !this._connected) listener(eventName, listener);
         return super.on(eventName, listener);
     }
 
@@ -121,6 +131,14 @@ export default class WeatherStationEventBase extends TypedEmitter<WeatherStation
         eventName: U,
         listener: WeatherStationEvents[U]
     ): this {
+        if(eventName === "connect" && this._connected) {
+            listener(eventName, listener);
+            return this;
+        }
+        else if(eventName === "disconnect" && !this._connected) {
+            listener(eventName, listener);
+            return this;
+        }
         return super.once(eventName, listener);
     }
 

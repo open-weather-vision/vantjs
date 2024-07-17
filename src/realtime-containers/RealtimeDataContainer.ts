@@ -6,8 +6,8 @@ import {
     WeatherStation, WeatherStationAdvanced
 } from "../weather-station";
 import {
-    RealtimeInterfaceSettings,
-    MinimumRealtimeInterfaceSettings,
+    RealtimeDataContainerSettings,
+    MinimumRealtimeDataContainerSettings,
 } from "./settings";
 import { RealtimeInterfaceEvents } from "./events";
 import { sleep } from "vant-environment/utils";
@@ -35,6 +35,8 @@ export default abstract class RealtimeDataContainer<
         eventName: U,
         listener: RealtimeInterfaceEvents[U]
     ): this {
+        if(eventName === "start" && this.updateCycleState === "running") listener(eventName, listener);
+        else if(eventName === "pause" && this.updateCycleState === "paused") listener(eventName, listener);
         return super.addListener(eventName, listener);
     }
 
@@ -124,6 +126,8 @@ export default abstract class RealtimeDataContainer<
         eventName: U,
         listener: RealtimeInterfaceEvents[U]
     ): this {
+        if(eventName === "start" && this.updateCycleState === "running") listener(eventName, listener);
+        else if(eventName === "pause" && this.updateCycleState === "paused") listener(eventName, listener);
         return super.on(eventName, listener);
     }
 
@@ -137,6 +141,14 @@ export default abstract class RealtimeDataContainer<
         eventName: U,
         listener: RealtimeInterfaceEvents[U]
     ): this {
+        if(eventName === "start" && this.updateCycleState === "running"){
+            listener(eventName, listener);
+            return this;
+        }
+        else if(eventName === "pause" && this.updateCycleState === "paused"){
+            listener(eventName, listener);
+            return this;
+        }
         return super.once(eventName, listener);
     }
 
@@ -164,6 +176,8 @@ export default abstract class RealtimeDataContainer<
         eventName: U,
         listener: RealtimeInterfaceEvents[U]
     ): this {
+        if(eventName === "start" && this.updateCycleState === "running") listener(eventName, listener);
+        else if(eventName === "pause" && this.updateCycleState === "paused") listener(eventName, listener);
         return super.prependListener(eventName, listener);
     }
 
@@ -178,6 +192,14 @@ export default abstract class RealtimeDataContainer<
         eventName: U,
         listener: RealtimeInterfaceEvents[U]
     ): this {
+        if(eventName === "start" && this.updateCycleState === "running"){
+            listener(eventName, listener);
+            return this;
+        }
+        else if(eventName === "pause" && this.updateCycleState === "paused"){
+            listener(eventName, listener);
+            return this;
+        }
         return super.prependOnceListener(eventName, listener);
     }
 
@@ -195,14 +217,14 @@ export default abstract class RealtimeDataContainer<
     /**
      * The default realtime interface settings.
      */
-    private static defaultSettings: RealtimeInterfaceSettings = merge(WeatherStation.defaultSettings, {
+    private static defaultSettings: RealtimeDataContainerSettings = {
         updateInterval: 60
-    });
+    };
 
     /**
      * The realtime interface's settings. Immutable.
      */
-    public readonly settings: RealtimeInterfaceSettings;
+    public readonly settings: RealtimeDataContainerSettings;
 
     /**
      * The currently internally used interface
@@ -221,7 +243,7 @@ export default abstract class RealtimeDataContainer<
      * @param settings the realtime interface's settings
      */
     protected constructor(
-        settings: MinimumRealtimeInterfaceSettings,
+        settings: MinimumRealtimeDataContainerSettings,
         weatherStation: Station
     ) {
         super();
@@ -231,8 +253,8 @@ export default abstract class RealtimeDataContainer<
             settings
         );
         this.updateCycleState = "running";
-        this.nextUpdate();
         this.emit("start");
+        this.nextUpdate();
     }
 
     /**

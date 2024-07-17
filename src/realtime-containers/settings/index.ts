@@ -1,2 +1,2 @@
-export { MinimumRealtimeDataContainerSettings as MinimumRealtimeInterfaceSettings } from "./MinimumRealtimeDataContainerSettings";
-export { RealtimeDataContainerSettings as RealtimeInterfaceSettings } from "./RealtimeDataContainerSettings";
+export { MinimumRealtimeDataContainerSettings } from "./MinimumRealtimeDataContainerSettings";
+export { RealtimeDataContainerSettings } from "./RealtimeDataContainerSettings";

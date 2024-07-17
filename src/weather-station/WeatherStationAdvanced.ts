@@ -13,6 +13,7 @@ import flatMerge from "../util/flatMerge";
 import WeatherStation from "./WeatherStation";
 import { MinimumRealtimeDataContainerSettings } from "../realtime-containers/settings/MinimumRealtimeDataContainerSettings";
 import DetailedRealtimeDataContainer from "../realtime-containers/DetailedRealtimeDataContainer";
+import { sleep } from "vant-environment/utils";
 
 /**
  * More feature rich interface to any _Vantage Pro 2_ or _Vantage Vue_ weather station with firmware dated after April 24, 2002 (v1.90 or above).
@@ -27,20 +28,21 @@ export default class WeatherStationAdvanced extends WeatherStation {
     protected detailedRealtimeContainer: DetailedRealtimeDataContainer | null = null;
 
     /**
-     * Creates an interface to your vantage pro 2 weather station using the passed settings. The device should be connected
+     * Creates an interface to your vantage weather station using the passed settings. The device should be connected
      * serially.
      *
      * @example
      * ```typescript
-     * const device = await VantProInterface.connect({ path: "COM3", rainCollectorSize: "0.2mm" });
+     * const station = await WeatherStationAdvanced.connect({ path: "COM3", rainCollectorSize: "0.2mm" });
      *
      *
-     * const [data, err] = await device.getBasicRealtimeData();
+     * const [data, err] = await station.getBasicRealtimeData();
      * console.log(`It's ${data.tempOut}°F outside!`);
      *
-     * await device.disconnect();
+     * await station.disconnect();
      * ```
      * @param settings the settings
+     * @param onConnect 
      *
      * @link _Following errors are possible_:
      * - {@link ClosedConnectionError} if the connection to the weather station's console is already closed

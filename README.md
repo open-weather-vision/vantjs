@@ -80,8 +80,8 @@ Read a guide about realtime data containers [here](/guides/2-realtime-data-conta
 
 # Documentation
 
-Read the full documentation [here](https://harrydehix.github.io/vantjs/).
+Read the full documentation [here](https://open-weather-vision.github.io/vantjs/).
 
 # Community
 
-This project is updated on demand. If you have discovered a bug or want to suggest a feature🚀, please create an issue [here](https://github.com/harrydehix/vantjs/issues/new/choose).
+This project is updated on demand. If you have discovered a bug or want to suggest a feature🚀, please create an issue [here](https://github.com/open-weather-vision/vantjs/issues/new/choose).

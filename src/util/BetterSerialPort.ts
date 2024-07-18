@@ -1,6 +1,5 @@
 import { SerialPort, SerialPortOpenOptions } from "serialport";
-import { ClosedConnectionError, SerialPortError, VantError } from "../errors";
-import TimeoutError from "../errors/TimeoutError";
+import { ClosedConnectionError, SerialPortError } from "../errors/index.js";
 import { TypedEmitter } from "tiny-typed-emitter";
 
 export interface SerialPortEvents{

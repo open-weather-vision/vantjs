@@ -1,5 +1,5 @@
 import { TypedEmitter } from "tiny-typed-emitter";
-import { WeatherStationEvents } from "./events";
+import { WeatherStationEvents } from "./events/index.js";
 
 export default class WeatherStationEventBase extends TypedEmitter<WeatherStationEvents> {
     /**

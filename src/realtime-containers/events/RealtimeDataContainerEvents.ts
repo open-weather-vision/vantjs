@@ -1,5 +1,5 @@
-import BasicRealtimeDataContainer from "../BasicRealtimeDataContainer";
-import DetailedRealtimeDataContainer from "../DetailedRealtimeDataContainer";
+import BasicRealtimeDataContainer from "../BasicRealtimeDataContainer.js";
+import DetailedRealtimeDataContainer from "../DetailedRealtimeDataContainer.js";
 
 /**
  * Describes the events fired by the {@link BasicRealtimeDataContainer} and the {@link DetailedRealtimeDataContainer}.

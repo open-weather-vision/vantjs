@@ -1,4 +1,4 @@
-import { WeatherStationAdvanced } from "../weather-station";
+import { WeatherStationAdvanced } from "../weather-station/index.js";
 
 async function main() {
     const device = await WeatherStationAdvanced.connect({
@@ -20,6 +20,7 @@ async function main() {
     console.log(
         "(measured at " + BasicRealtimeData.time.toLocaleString() + ")"
     );
+    // await device.setBackgroundLight(true);
 
     await device.disconnect();
 }

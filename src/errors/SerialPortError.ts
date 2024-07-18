@@ -1,4 +1,4 @@
-import VantError from "./VantError";
+import VantError from "./VantError.js";
 
 /**
  * An error thrown by the underlying [serialport package](https://serialport.io/docs/).

@@ -1,6 +1,6 @@
 {
     "name": "vantjs",
-    "version": "2.0.2",
+    "version": "2.1.0",
     "description": "platform independent javascript/typescript interface to Davis Vantage Pro, Pro 2 and Vue",
     "exports": {
         ".": "./dist/index.js",
@@ -54,7 +54,7 @@
         }
     },
     "types": "dist/index.d.ts",
-    "type": "commonjs",
+    "type": "module",
     "scripts": {
         "build": "npx tsc",
         "watch": "npx tsc --watch",

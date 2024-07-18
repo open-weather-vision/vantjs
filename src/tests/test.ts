@@ -1,8 +1,8 @@
-import WeatherStationAdvanced from "../weather-station/WeatherStationAdvanced";
-import { waitForNewSerialConnection } from "../util";
-import inspect from "./inspect";
+import WeatherStationAdvanced from "../weather-station/WeatherStationAdvanced.js";
+import { waitForNewSerialConnection } from "../util/index.js";
+import inspect from "./inspect.js";
 import { sleep } from "vant-environment/utils";
-import serialPortList from "../util/serialPortList";
+import serialPortList from "../util/serialPortList.js";
 
 async function main() {
     try {

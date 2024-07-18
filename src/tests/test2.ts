@@ -1,6 +1,6 @@
-import "source-map-support/register";
-import DetailedRealtimeDataContainer from "../realtime-containers/DetailedRealtimeDataContainer";
-import { WeatherStationAdvanced } from "../weather-station";
+import DetailedRealtimeDataContainer from "../realtime-containers/DetailedRealtimeDataContainer.js";
+import { WeatherStationAdvanced } from "../weather-station/index.js";
+import VantError from "../errors/VantError.js";
 
 async function main() {
     const station = await WeatherStationAdvanced.connect({
@@ -24,7 +24,7 @@ async function main() {
         console.log("Container started!");
     });
 
-    realtime.on("update", (err) => {
+    realtime.on("update", (err: VantError) => {
         if(err){
             console.error(err);
         }else{

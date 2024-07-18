@@ -1,6 +1,5 @@
-import "source-map-support/register";
-import BasicRealtimeDataContainer from "../realtime-containers/BasicRealtimeDataContainer";
-import { WeatherStation } from "../weather-station";
+import BasicRealtimeDataContainer from "../realtime-containers/BasicRealtimeDataContainer.js";
+import { WeatherStation } from "../weather-station/index.js";
 
 async function main() {
     const station = await WeatherStation.connect({

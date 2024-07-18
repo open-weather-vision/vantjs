@@ -1,4 +1,4 @@
-import VantError from "./VantError";
+import VantError from "./VantError.js";
 
 /**
  * Indicates that vantjs failed to wake up the console.

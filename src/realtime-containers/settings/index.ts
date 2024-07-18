@@ -1,2 +1,2 @@
-export { MinimumRealtimeDataContainerSettings } from "./MinimumRealtimeDataContainerSettings";
-export { RealtimeDataContainerSettings } from "./RealtimeDataContainerSettings";
+export { MinimumRealtimeDataContainerSettings } from "./MinimumRealtimeDataContainerSettings.js";
+export { RealtimeDataContainerSettings } from "./RealtimeDataContainerSettings.js";

@@ -1,4 +1,4 @@
-import VantError from "./VantError";
+import VantError from "./VantError.js";
 
 /**
  * Indicates that the connected weather station didn't respond or responded too slowly.

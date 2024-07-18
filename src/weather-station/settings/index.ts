@@ -1,2 +1,2 @@
-export { MinimumWeatherStationSettings	 } from "./MinimumWeatherStationSettings";
-export { WeatherStationSettings } from "./WeatherStationSettings";
+export { MinimumWeatherStationSettings	 } from "./MinimumWeatherStationSettings.js";
+export { WeatherStationSettings } from "./WeatherStationSettings.js";

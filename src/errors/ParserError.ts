@@ -1,4 +1,4 @@
-import VantError from "./VantError";
+import VantError from "./VantError.js";
 
 /**
  * Indicates that the data received from the console was different then expected and therefore couldn't be parsed.

@@ -1,2 +1,2 @@
-export { default as getSerialPortList } from "./serialPortList";
-export { default as waitForNewSerialConnection } from "./waitForNewSerialConnection";
+export { default as getSerialPortList } from "./serialPortList.js";
+export { default as waitForNewSerialConnection } from "./waitForNewSerialConnection.js";

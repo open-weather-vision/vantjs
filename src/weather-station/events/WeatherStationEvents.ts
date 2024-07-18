@@ -1,4 +1,4 @@
-import WeatherStation from "../WeatherStation";
+import WeatherStation from "../WeatherStation.js";
 
 /**
  * Describes the events fired by the {@link WeatherStation}.

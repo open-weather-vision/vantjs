@@ -6,13 +6,13 @@ import {
     ClosedConnectionError,
     SerialPortError,
     FailedToWakeUpError
-} from "../errors";
-import { MinimumWeatherStationSettings } from "./settings";
-import { parseLOOP1, parseLOOP2 } from "../parsers";
-import flatMerge from "../util/flatMerge";
-import WeatherStation from "./WeatherStation";
-import { MinimumRealtimeDataContainerSettings } from "../realtime-containers/settings/MinimumRealtimeDataContainerSettings";
-import DetailedRealtimeDataContainer from "../realtime-containers/DetailedRealtimeDataContainer";
+} from "../errors/index.js";
+import { MinimumWeatherStationSettings } from "./settings/index.js";
+import { parseLOOP1, parseLOOP2 } from "../parsers/index.js";
+import flatMerge from "../util/flatMerge.js";
+import WeatherStation from "./WeatherStation.js";
+import { MinimumRealtimeDataContainerSettings } from "../realtime-containers/settings/MinimumRealtimeDataContainerSettings.js";
+import DetailedRealtimeDataContainer from "../realtime-containers/DetailedRealtimeDataContainer.js";
 import { sleep } from "vant-environment/utils";
 
 /**

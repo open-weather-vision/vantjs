@@ -1,6 +1,6 @@
 import { BaudRate, RainCollectorSize } from "vant-environment/structures";
 import { UnitSettings } from "vant-environment/units";
-import { MinimumWeatherStationSettings } from "../../weather-station/settings";
+import { MinimumWeatherStationSettings } from "../../weather-station/settings/index.js";
 
 /**
  * The minimum required settings for any realtime data container.

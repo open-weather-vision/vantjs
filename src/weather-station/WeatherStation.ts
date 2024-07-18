@@ -18,8 +18,8 @@ import {
     MalformedDataError,
     ClosedConnectionError,
     VantError,
-} from "../errors";
-import flatMerge from "../util/flatMerge";
+} from "../errors/index.js";
+import flatMerge from "../util/flatMerge.js";
 import {
     parseHighsAndLows,
     parseLOOP1,
@@ -27,16 +27,16 @@ import {
     createRainClicksToInchTransformer,
     createUnitTransformers,
     UnitTransformers,
-} from "../parsers";
+} from "../parsers/index.js";
 import { EasyBuffer, Type } from "@harrydehix/easy-buffer";
-import TimeoutError from "../errors/TimeoutError";
-import { MinimumWeatherStationSettings, WeatherStationSettings } from "./settings";
-import WeatherStationEventBase from "./WeatherStationEventBase";
+import TimeoutError from "../errors/TimeoutError.js";
+import { MinimumWeatherStationSettings, WeatherStationSettings } from "./settings/index.js";
+import WeatherStationEventBase from "./WeatherStationEventBase.js";
 import { time } from "console";
-import BetterSerialPort from "../util/BetterSerialPort";
-import BasicRealtimeDataContainer from "../realtime-containers/BasicRealtimeDataContainer";
-import { MinimumRealtimeDataContainerSettings } from "../realtime-containers/settings/MinimumRealtimeDataContainerSettings";
-import WeatherStationAdvanced from "./WeatherStationAdvanced";
+import BetterSerialPort from "../util/BetterSerialPort.js";
+import BasicRealtimeDataContainer from "../realtime-containers/BasicRealtimeDataContainer.js";
+import { MinimumRealtimeDataContainerSettings } from "../realtime-containers/settings/MinimumRealtimeDataContainerSettings.js";
+import WeatherStationAdvanced from "./WeatherStationAdvanced.js";
 
 /**
  * Interface to _any vantage weather station_ (Vue, Pro, Pro 2). Provides useful methods to access realtime weather data from your weather station's

@@ -1,1 +1,1 @@
-export { WeatherStationEvents } from "./WeatherStationEvents";
+export { WeatherStationEvents } from "./WeatherStationEvents.js";

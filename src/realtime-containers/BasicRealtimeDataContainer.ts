@@ -1,9 +1,9 @@
 import merge from "lodash.merge";
 import { HighsAndLows, BasicRealtimeData } from "vant-environment/structures";
-import RealtimeDataContainer from "./RealtimeDataContainer";
-import { MinimumRealtimeDataContainerSettings } from "./settings/MinimumRealtimeDataContainerSettings";
-import WeatherStation from "../weather-station/WeatherStation";
-import WeatherStationAdvanced from "../weather-station/WeatherStationAdvanced";
+import RealtimeDataContainer from "./RealtimeDataContainer.js";
+import { MinimumRealtimeDataContainerSettings } from "./settings/MinimumRealtimeDataContainerSettings.js";
+import WeatherStation from "../weather-station/WeatherStation.js";
+import WeatherStationAdvanced from "../weather-station/WeatherStationAdvanced.js";
 
 /**
  * The smaller version of the realtime data container providing {@link HighsAndLows} and {@link BasicRealtimeData}.

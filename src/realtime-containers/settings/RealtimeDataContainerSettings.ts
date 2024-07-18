@@ -1,4 +1,4 @@
-import { WeatherStationSettings } from "../../weather-station/settings";
+import { WeatherStationSettings } from "../../weather-station/settings/index.js";
 
 /**
  * Settings for the {@link BasicRealtimeDataContainer} and the {@link DetailedRealtimeDataContainer}.

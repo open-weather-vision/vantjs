@@ -1,3 +1,4 @@
+// @ts-ignore
 import { PortInfo } from "@serialport/bindings-interface";
 import { SerialPort } from "serialport";
 

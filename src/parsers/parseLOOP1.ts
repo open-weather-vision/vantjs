@@ -1,8 +1,8 @@
 import merge from "lodash.merge";
 import { LOOP1, LOOPPackageType } from "vant-environment/structures";
-import nullables from "./reusables/nullables";
-import transformers from "./reusables/transformers";
-import { UnitTransformers } from "./units/createUnitTransformers";
+import nullables from "./reusables/nullables.js";
+import transformers from "./reusables/transformers.js";
+import { UnitTransformers } from "./units/createUnitTransformers.js";
 import { EasyBuffer, Type } from "@harrydehix/easy-buffer";
 
 /**

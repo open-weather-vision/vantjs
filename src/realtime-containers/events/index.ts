@@ -1,1 +1,1 @@
-export { RealtimeDataContainerEvents as RealtimeInterfaceEvents } from "./RealtimeDataContainerEvents";
+export { RealtimeDataContainerEvents as RealtimeInterfaceEvents } from "./RealtimeDataContainerEvents.js";

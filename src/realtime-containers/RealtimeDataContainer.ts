@@ -4,12 +4,12 @@ import { TypedEmitter } from "tiny-typed-emitter";
 
 import {
     WeatherStation, WeatherStationAdvanced
-} from "../weather-station";
+} from "../weather-station/index.js";
 import {
     RealtimeDataContainerSettings,
     MinimumRealtimeDataContainerSettings,
-} from "./settings";
-import { RealtimeInterfaceEvents } from "./events";
+} from "./settings/index.js";
+import { RealtimeInterfaceEvents } from "./events/index.js";
 import { sleep } from "vant-environment/utils";
 
 /**

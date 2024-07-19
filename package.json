@@ -1,59 +1,57 @@
 {
     "name": "vantjs",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "description": "platform independent javascript/typescript interface to Davis Vantage Pro, Pro 2 and Vue",
     "exports": {
-        ".": "./dist/index.js",
-        "./errors": "./dist/errors/index.js",
-        "./weather-station": "./dist/weather-station/index.js",
-        "./weather-station/settings": "./dist/weather-station/settings/index.js",
-        "./weather-station/events": "./dist/weather-station/events/index.js",
-        "./realtime-containers": "./dist/realtime-containers/index.js",
-        "./realtime-containers/settings": "./dist/realtime-containers/settings/index.js",
-        "./realtime-containers/events": "./dist/realtime-containers/events/index.js",
-        "./structures": "./dist/structures/index.js",
-        "./structures/subtypes": "./dist/structures/subtypes/index.js",
-        "./units": "./dist/units/index.js",
-        "./util": "./dist/util/index.js"
-    },
-    "typesVersions": {
-        "*": {
-            "errors": [
-                "dist/errors"
-            ],
-            "weather-station": [
-                "dist/weather-station"
-            ],
-            "weather-station/settings": [
-                "dist/weather-station/settings"
-            ],
-            "weather-station/events": [
-                "dist/weather-station/events"
-            ],
-            "realtime-containers": [
-                "dist/realtime-containers"
-            ],
-            "realtime-containers/settings/": [
-                "dist/realtime-containers/settings"
-            ],
-            "realtime-containers/events": [
-                "dist/realtime-containers/events"
-            ],
-            "structures": [
-                "dist/structures"
-            ],
-            "structures/subtypes": [
-                "dist/structures/subtypes"
-            ],
-            "units": [
-                "dist/units"
-            ],
-            "util": [
-                "dist/util"
-            ]
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./errors": {
+            "types": "./dist/errors/index.d.ts",
+            "import": "./dist/errors/index.js"
+        },
+        "./weather-station": {
+            "types": "./dist/weather-station/index.d.ts",
+            "import": "./dist/weather-station/index.js"
+        },
+        "./weather-station/settings": {
+            "types": "./dist/weather-station/settings/index.d.ts",
+            "import": "./dist/weather-station/settings/index.js"
+        },
+        "./weather-station/events": {
+            "types": "./dist/weather-station/events/index.d.ts",
+            "import": "./dist/weather-station/events/index.js"
+        },
+        "./realtime-containers": {
+            "types": "./dist/realtime-containers/index.d.ts",
+            "import": "./dist/realtime-containers/index.js"
+        },
+        "./realtime-containers/settings": {
+            "types": "./dist/realtime-containers/settings/index.d.ts",
+            "import": "./dist/realtime-containers/settings/index.js"
+        },
+        "./realtime-containers/events": {
+            "types": "./dist/realtime-containers/events/index.d.ts",
+            "import": "./dist/realtime-containers/events/index.js"
+        },
+        "./structures": {
+            "types": "./dist/structures/index.d.ts",
+            "import": "./dist/structures/index.js"
+        },
+        "./structures/subtypes": {
+            "types": "./dist/structures/subtypes/index.d.ts",
+            "import": "./dist/structures/subtypes/index.js"
+        },
+        "./units": {
+            "types": "./dist/units/index.d.ts",
+            "import": "./dist/units/index.js"
+        },
+        "./util": {
+            "types": "./dist/util/index.d.ts",
+            "import": "./dist/util/index.js"
         }
     },
-    "types": "dist/index.d.ts",
     "type": "module",
     "scripts": {
         "build": "npx tsc",
